@@ -1,0 +1,137 @@
+{
+  "curl": {
+    "video": "media/curl.mp4",
+    "poster": "media/curl.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/92/8bfb917c-3d0d-49b9-8073-5d7e01c1b894.MOV",
+    "sourceExercise": 92,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "hammer": {
+    "video": "media/hammer.mp4",
+    "poster": "media/hammer.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/272/df069052-2173-4f24-855f-a0eebe729f24.MOV",
+    "sourceExercise": 272,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "lateral": {
+    "video": "media/lateral.mp4",
+    "poster": "media/lateral.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/348/de69928a-8a35-4096-821c-1f46de5e0e03.MOV",
+    "sourceExercise": 348,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "press": {
+    "video": "media/press.mp4",
+    "poster": "media/press.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/567/64f33c19-1d96-4b7c-af17-6c6a4941c614.MOV",
+    "sourceExercise": 567,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "bench": {
+    "video": "media/bench.mp4",
+    "poster": "media/bench.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/75/080c799b-8afd-4130-8d72-9cef0cd79f54.MOV",
+    "sourceExercise": 75,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "triceps": {
+    "video": "media/triceps.mp4",
+    "poster": "media/triceps.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/211/85f6eb25-a76c-409e-9af9-497794ac0dfb.MOV",
+    "sourceExercise": 211,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "cablerow": {
+    "video": "media/cablerow.mp4",
+    "poster": "media/cablerow.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/512/fff4c294-93f0-4926-b3a2-bf59ad4afaa5.MOV",
+    "sourceExercise": 512,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "legpress": {
+    "video": "media/legpress.mp4",
+    "poster": "media/legpress.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/371/6aae16b4-01b9-4eb4-935c-3250f84d2c59.MOV",
+    "sourceExercise": 371,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "legcurl": {
+    "video": "media/legcurl.mp4",
+    "poster": "media/legcurl.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/365/becaf013-5044-40d0-bae9-7ed60c973737.MOV",
+    "sourceExercise": 365,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "calfmachine": {
+    "video": "media/calfmachine.mp4",
+    "poster": "media/calfmachine.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/622/461171e5-2b16-407d-bf27-27aeef43f105.MOV",
+    "sourceExercise": 622,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "tricepscable": {
+    "video": "media/tricepscable.mp4",
+    "poster": "media/tricepscable.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/659/1f2eb3b6-3185-429f-8330-26dc88f39aff.MOV",
+    "sourceExercise": 659,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "shouldermachine": {
+    "video": "media/shouldermachine.mp4",
+    "poster": "media/shouldermachine.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/543/dbfd396b-1aab-4a64-a50b-2c31ff0a2cf7.MOV",
+    "sourceExercise": 543,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "facepull": {
+    "video": "media/facepull.mp4",
+    "poster": "media/facepull.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/222/eea93fcc-6a3c-4783-8f70-0234c791a001.MOV",
+    "sourceExercise": 222,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "rdl": {
+    "video": "media/rdl.mp4",
+    "poster": "media/rdl.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/507/307e7276-a14d-4ea0-b579-f5b0dbc6f5af.MOV",
+    "sourceExercise": 507,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  },
+  "barbellbench": {
+    "video": "media/barbellbench.mp4",
+    "poster": "media/barbellbench.jpg",
+    "author": "Goulart",
+    "source": "https://wger.de/media/exercise-video/73/2bdb390c-312c-4497-a722-5eed2c823e5a.MOV",
+    "sourceExercise": 73,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Transcodificação H.264, redimensionamento e remoção da faixa de áudio. Miniatura extraída do vídeo."
+  }
+}
