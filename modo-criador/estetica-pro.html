@@ -10,7 +10,7 @@ function apply(x,y,dx=0,dy=0){const rad=Number(document.getElementById('radius')
 for(let yy=top;yy<=bottom;yy++)for(let xx=left;xx<=right;xx++){const vx=xx-x,vy=yy-y,d=Math.hypot(vx,vy);if(d>=rad)continue;const t=1-d/rad,weight=t*t*(3-2*t);let sx=xx,sy=yy;
 if(tool==='expand'||tool==='shrink'){const factor=tool==='expand'?1-amount*.35*weight:1+amount*.35*weight;sx=x+vx*factor;sy=y+vy*factor}else if(tool==='push'){sx=xx-dx*weight*amount*2;sy=yy-dy*weight*amount*2}
 else {let rr=0,gg=0,bb=0,n=0;for(let ky=-2;ky<=2;ky++)for(let kx=-2;kx<=2;kx++){const px=Math.max(0,Math.min(w-1,xx+kx)),py=Math.max(0,Math.min(h-1,yy+ky)),i=(py*w+px)*4;rr+=src.data[i];gg+=src.data[i+1];bb+=src.data[i+2];n++}const j=(yy*w+xx)*4,blend=amount*weight;out.data[j]=src.data[j]*(1-blend)+rr/n*blend;out.data[j+1]=src.data[j+1]*(1-blend)+gg/n*blend;out.data[j+2]=src.data[j+2]*(1-blend)+bb/n*blend;continue}
-const ix=Math.max(0,Math.min(w-1,Math.round(sx))),iy=Math.max(0,Math.min(h-1,Math.round(sy))),i=(iy*w+ix)*4,j=(yy*w+xx)*4;out.data[j]=src.data[i];out.data[j+1]=src.data[i+1];out.data[j+2]=src.data[i+2];out.data[j+3]=src.data[i+3]}}
+const ix=Math.max(0,Math.min(w-1,Math.round(sx))),iy=Math.max(0,Math.min(h-1,Math.round(sy))),i=(iy*w+ix)*4,j=(yy*w+xx)*4;out.data[j]=src.data[i];out.data[j+1]=src.data[i+1];out.data[j+2]=src.data[i+2];out.data[j+3]=src.data[i+3]}
 ctx.putImageData(out,0,0)}
 c.addEventListener('pointerdown',e=>{if(!base||before)return;drag=true;last=point(e);checkpoint();strokeSaved=true;c.setPointerCapture(e.pointerId);apply(last.x,last.y)});
 c.addEventListener('pointermove',e=>{if(!drag||!last)return;const p=point(e);if(Math.hypot(p.x-last.x,p.y-last.y)<4)return;apply(p.x,p.y,p.x-last.x,p.y-last.y);last=p});
