@@ -441,7 +441,7 @@ function render() {
   // dbs
   const gpS = (S.proj[GP] || {}).status, sbS = (S.proj[SBM] || {}).status;
   const dbHtml = [];
-  if (d) dbHtml.push(dbCard("db-gp", "Gestão de Poços", gpS, [["Tamanho", d.db.size_mb + " MB"], ["Conexões", d.db.connections], ["Usuários", d.auth.total],
+  if (d) dbHtml.push(dbCard("db-gp", "Gestão", gpS, [["Tamanho", d.db.size_mb + " MB"], ["Conexões", d.db.connections], ["Usuários", d.auth.total],
     ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. FitCore", d.pending.fitcore]]));
   const sv = S.sbmSvc;
   if (sv) dbHtml.push(dbCard("db-sbm", "SondaBM", sv.ok ? "ACTIVE_HEALTHY" : "FORA DO AR", [["Status", sv.ok ? "Online" : "Fora"], ["Resposta", (sv.latency ?? "—") + " ms"], ["Uptime 24 h", (sv.uptime ?? "—") + "%"]]));
@@ -565,7 +565,7 @@ function openPanel(id, silent) {
         ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. FitCore", d.pending.fitcore], ["Pend. Sonolog", d.pending.sonolog], ["Poços", d.db.records]]
       : S.sbmSvc ? [["Status", S.sbmSvc.ok ? "Online" : "Fora do ar"], ["Resposta", (S.sbmSvc.latency ?? "—") + " ms"], ["Uptime 24 h", (S.sbmSvc.uptime ?? "—") + "%"], ["Verificado", S.sbmSvc.checked_at ? fmtT(S.sbmSvc.checked_at) : "—"]] : [];
     const kids = d.apps.filter(a => PARENT[a.id] === id).map(a => a.name);
-    html = `<h3><span class="dot" style="--c:${COLORS.db}"></span>Supabase · ${gp ? "Gestão de Poços" : "SondaBM"}</h3>
+    html = `<h3><span class="dot" style="--c:${COLORS.db}"></span>Supabase · ${gp ? "Gestão" : "SondaBM"}</h3>
       <div class="url">${esc(p.status || "ATIVO")} · ${esc(p.region || "sa-east-1")}</div>
       <div class="pgrid">${m.map(([l, v]) => `<div><small>${l}</small><b>${esc(v)}</b></div>`).join("")}</div>
       <div class="sub">Apps ligados a este banco: ${esc(kids.join(", ") || "—")}</div>
@@ -573,7 +573,7 @@ function openPanel(id, silent) {
   } else {
     const a = d.apps.find(x => x.id === id); if (!a) return;
     const st = statusOf(a), c = COLORS[st];
-    const par = PARENT[a.id] === "db-gp" ? "Supabase Gestão de Poços" : PARENT[a.id] === "db-sbm" ? "Supabase SondaBM" : "Hospedagem própria";
+    const par = PARENT[a.id] === "db-gp" ? "Supabase Gestão" : PARENT[a.id] === "db-sbm" ? "Supabase SondaBM" : "Hospedagem própria";
     html = `<h3><span class="dot" style="--c:${c}"></span>${esc(a.name)}</h3>
       <div class="url">${esc(a.url)}</div>
       <div class="pgrid">
