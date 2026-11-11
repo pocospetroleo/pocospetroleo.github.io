@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1a33"/>
+      <stop offset="1" stop-color="#030712"/>
+    </linearGradient>
+    <linearGradient id="hex" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.45" r="0.55">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.35" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="210" fill="url(#halo)" opacity=".5"/>
+
+  <!-- hexágono externo (rede) -->
+  <polygon points="256,62 424,159 424,353 256,450 88,353 88,159"
+           fill="none" stroke="url(#hex)" stroke-width="14" stroke-linejoin="round" filter="url(#glow)"/>
+
+  <!-- links do núcleo até os nós -->
+  <g stroke="#22d3ee" stroke-width="6" stroke-linecap="round" opacity=".75">
+    <line x1="256" y1="256" x2="256" y2="62"/>
+    <line x1="256" y1="256" x2="424" y2="159"/>
+    <line x1="256" y1="256" x2="424" y2="353"/>
+    <line x1="256" y1="256" x2="256" y2="450"/>
+    <line x1="256" y1="256" x2="88" y2="353"/>
+    <line x1="256" y1="256" x2="88" y2="159"/>
+  </g>
+
+  <!-- órbitas 3D -->
+  <g fill="none" stroke-width="7" filter="url(#glow)">
+    <ellipse cx="256" cy="256" rx="150" ry="52" stroke="#a78bfa" transform="rotate(-28 256 256)"/>
+    <ellipse cx="256" cy="256" rx="150" ry="52" stroke="#22d3ee" opacity=".8" transform="rotate(32 256 256)"/>
+  </g>
+
+  <!-- nós (apps) -->
+  <g filter="url(#glow)">
+    <circle cx="256" cy="62"  r="22" fill="#34d399"/>
+    <circle cx="424" cy="159" r="22" fill="#22d3ee"/>
+    <circle cx="424" cy="353" r="22" fill="#a78bfa"/>
+    <circle cx="256" cy="450" r="22" fill="#34d399"/>
+    <circle cx="88"  cy="353" r="22" fill="#22d3ee"/>
+    <circle cx="88"  cy="159" r="22" fill="#a78bfa"/>
+  </g>
+  <g fill="#030712">
+    <circle cx="256" cy="62"  r="8"/><circle cx="424" cy="159" r="8"/><circle cx="424" cy="353" r="8"/>
+    <circle cx="256" cy="450" r="8"/><circle cx="88"  cy="353" r="8"/><circle cx="88"  cy="159" r="8"/>
+  </g>
+
+  <!-- núcleo -->
+  <circle cx="256" cy="256" r="74" fill="#030712" stroke="url(#hex)" stroke-width="8"/>
+  <circle cx="256" cy="256" r="50" fill="url(#core)" filter="url(#glow)"/>
+  <circle cx="240" cy="238" r="12" fill="#ffffff" opacity=".85"/>
+</svg>

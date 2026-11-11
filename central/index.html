@@ -8,8 +8,9 @@
 <meta name="application-name" content="Central de Comandos">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="512x512" href="icon.png">
 <meta name="theme-color" content="#040812">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,9 +33,7 @@ body{min-height:100vh;background:
 .mono{font-family:"JetBrains Mono",monospace}
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 16px;
   background:rgba(4,8,18,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;
-  background:conic-gradient(from 180deg,var(--cyan),var(--violet),var(--cyan));box-shadow:0 0 18px rgba(34,211,238,.45)}
-.logo span{width:26px;height:26px;border-radius:8px;background:var(--bg);display:grid;place-items:center;font:900 11px Orbitron;color:var(--cyan)}
+.logo{width:38px;height:38px;border-radius:11px;flex:none;display:block;box-shadow:0 0 18px rgba(34,211,238,.4)}
 .ttl{flex:1;min-width:0}
 .ttl h1{font:700 15px Orbitron;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ttl p{font-size:11px;color:var(--mut);margin-top:2px}
@@ -140,7 +139,7 @@ main{max-width:1400px;margin:0 auto;padding:14px 14px 40px}
 .gate{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:radial-gradient(900px 500px at 50% 0%,rgba(34,211,238,.14),transparent 60%),rgba(4,8,18,.97)}
 .gate.hide{display:none}
 .gbox{width:100%;max-width:380px;padding:26px 22px;border-radius:20px;background:rgba(10,20,38,.9);border:1px solid rgba(34,211,238,.3);box-shadow:0 0 60px -15px rgba(34,211,238,.5)}
-.gbox .logo{width:54px;height:54px;border-radius:16px;margin:0 auto 14px}.gbox .logo span{width:42px;height:42px;font-size:15px;border-radius:12px}
+.gbox .logo{width:88px;height:88px;border-radius:24px;margin:0 auto 16px;box-shadow:0 0 40px -6px rgba(34,211,238,.6)}
 .gbox h2{font:700 17px Orbitron;letter-spacing:.12em;text-align:center}
 .gbox p{font-size:12.5px;color:var(--mut);text-align:center;margin:6px 0 18px;line-height:1.5}
 .gbox label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 6px;font-weight:600}
@@ -154,7 +153,7 @@ footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-he
 </head>
 <body>
 <header>
-  <div class="logo"><span>GP</span></div>
+  <img class="logo" src="logo.svg" alt="Central de Comandos">
   <div class="ttl"><h1>CENTRAL DE COMANDOS</h1><p id="sub">Conectando aos sistemas…</p></div>
   <div class="clock" id="clock">--:--:--</div>
   <div class="live" id="live"><i></i><span id="liveTxt">INICIANDO</span></div>
@@ -239,7 +238,7 @@ footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-he
 </main>
 
 <div class="gate" id="gate"><form class="gbox" id="gForm">
-  <div class="logo"><span>GP</span></div>
+  <img class="logo" src="logo.svg" alt="Central de Comandos">
   <h2>CENTRAL DE COMANDOS</h2>
   <p>Acesso restrito ao administrador.<br>Entre com a mesma conta dos seus aplicativos.</p>
   <label for="gEmail">E-mail</label><input id="gEmail" type="email" autocomplete="username" required>
