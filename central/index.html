@@ -267,8 +267,8 @@ const SQL_SVC = "select public.gpcc_services_status() as d";
 const AI = {"ia-claude":{name:"Claude", full:"Claude (Anthropic)", color:"#e8835f", site:"https://claude.ai", pos:[-4.5, 8.5, -5]},
             "ia-chatgpt":{name:"ChatGPT", full:"ChatGPT (OpenAI)", color:"#10a37f", site:"https://chatgpt.com", pos:[4.5, 8.5, -5]}};
 const PARENT = {"gestao-pocos-operacional":"db-gp","bdo-operacional":"db-gp","sonolog":"db-gp","calculos-petroleo":"db-gp",
-  "treino":"db-gp","modo-criador":"db-gp","central":"db-gp","sondabm":"db-sbm"};
-const HOME_NAMES = {"gestao-pocos":"Gestão de Poços","fitcore":"FitCore 3D","sonolog":"Sonolog","calculations":"Cálculos","*":"Admin (todos)"};
+  "treino":"db-gp","modo-criador":"db-gp","central":"db-gp","sondabm":"db-gp"};
+const HOME_NAMES = {"gestao-pocos":"Gestão de Poços","fitcore":"FitCore 3D","sonolog":"Sonolog","calculations":"Cálculos","sondabm":"BM Sonda","*":"Admin (todos)"};
 const COLORS = {ok:"#34d399",slow:"#fbbf24",down:"#f43f5e",none:"#64748b",db:"#a78bfa",core:"#22d3ee"};
 
 /* ============ STATE ============ */
@@ -442,9 +442,8 @@ function render() {
   const gpS = (S.proj[GP] || {}).status, sbS = (S.proj[SBM] || {}).status;
   const dbHtml = [];
   if (d) dbHtml.push(dbCard("db-gp", "Gestão", gpS, [["Tamanho", d.db.size_mb + " MB"], ["Conexões", d.db.connections], ["Usuários", d.auth.total],
-    ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. FitCore", d.pending.fitcore]]));
+    ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. BM Sonda", d.pending.bm ?? 0]]));
   const sv = S.sbmSvc;
-  if (sv) dbHtml.push(dbCard("db-sbm", "SondaBM", sv.ok ? "ACTIVE_HEALTHY" : "FORA DO AR", [["Status", sv.ok ? "Online" : "Fora"], ["Resposta", (sv.latency ?? "—") + " ms"], ["Uptime 24 h", (sv.uptime ?? "—") + "%"]]));
   $("#dbs").innerHTML = dbHtml.join("") || `<div class="sub">Aguardando dados…</div>`;
   document.querySelectorAll(".db[data-id]").forEach(el => el.onclick = () => openPanel(el.dataset.id));
 
@@ -663,7 +662,7 @@ function initScene() {
   addNode("core", core, coreWire, new THREE.Vector3(0, 1, 0), "core", 3.2);
 
   // DB nodes
-  [["db-gp", "Supabase · Gestão de Poços", -1], ["db-sbm", "Supabase · SondaBM", 1]].forEach(([id, , side]) => {
+  [["db-gp", "Supabase · Gestão", 0]].forEach(([id, , side]) => {
     const g = new THREE.Group();
     for (let k = 0; k < 3; k++) {
       const disk = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, .38, 32), new THREE.MeshBasicMaterial({color:0x4c1d95, transparent:true, opacity:.9}));
@@ -671,7 +670,7 @@ function initScene() {
       disk.position.y = edge.position.y = k * .48 - .48; g.add(disk, edge);
     }
     g.add(sprite("rgba(167,139,250,.8)", 4.5, .7));
-    const pos = new THREE.Vector3(side * 6.2, -.5, side * 1.5);
+    const pos = new THREE.Vector3(0, -1.6, 6.8);
     g.position.copy(pos); scene.add(g);
     addNode(id, g, g.children[1], pos, "db", 1.6);
   });
@@ -727,7 +726,6 @@ function updateScene() {
   const apps = S.gp.apps;
   if (!built) {
     addLink("db-gp", "core", NODES["db-gp"].pos, NODES.core.pos);
-    addLink("db-sbm", "core", NODES["db-sbm"].pos, NODES.core.pos);
     apps.forEach((a, i) => makeApp(a, i, apps.length)); built = true;
   }
   apps.forEach(a => {
@@ -770,7 +768,6 @@ function updateScene() {
   });
   const gpOk = !S.proj[GP] || S.proj[GP].status === "ACTIVE_HEALTHY" || S.proj[GP].status === "?";
   NODES["db-gp"].label.innerHTML = `Supabase · Gestão<span class="ms">${S.gp.db.connections} con</span>`;
-  NODES["db-sbm"].label.innerHTML = `Supabase · SondaBM<span class="ms">${S.sbmSvc ? (S.sbmSvc.ok ? S.sbmSvc.latency + "ms" : "OFF") : "—"}</span>`;
   LINKS.filter(l => l.to === "core" && l.from.startsWith("db")).forEach(l => { l.speed = .35; l.line.material.color = new THREE.Color(gpOk ? 0xa78bfa : 0xfbbf24); l.line.material.opacity = .45;
     l.packets.forEach(p => { p.s.material.map = tex("rgba(167,139,250,1)"); p.s.material.needsUpdate = true; }); });
 }
@@ -797,7 +794,7 @@ function animate() {
   core.children[2].rotation.y -= dt * .25;
   core.children.forEach(c => { if (c.userData.spin) { c.rotation.z += dt * c.userData.spin; c.rotation.x += dt * c.userData.spin * .3; } });
   const pulse = 1 + Math.sin(T * 2.2) * .06; core.children[0].scale.setScalar(pulse);
-  ["db-gp", "db-sbm"].forEach(id => { const n = NODES[id]; n.group.rotation.y += dt * .6; n.group.position.y = n.pos.y + Math.sin(T * 1.3 + (id === "db-gp" ? 0 : 2)) * .18; });
+  ["db-gp"].forEach(id => { const n = NODES[id]; n.group.rotation.y += dt * .6; n.group.position.y = n.pos.y + Math.sin(T * 1.3 + (id === "db-gp" ? 0 : 2)) * .18; });
   Object.entries(NODES).forEach(([id, n]) => {
     if (n.kind !== "app") return;
     n.shell.rotation.y += dt * .9; n.shell.rotation.x += dt * .3; n.body.rotation.y -= dt * 1.2;
