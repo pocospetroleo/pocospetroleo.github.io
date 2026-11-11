@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-11T11:31:55.244652+00:00",
+  "generated_at": "2026-11-11T11:45:47.231559+00:00",
   "results": [
     {
       "name": "sondabm",
@@ -53,7 +53,7 @@
       "repository_status": "accessible",
       "site_status": "reachable",
       "findings": [],
-      "last_push": "2026-11-11T11:31:44Z",
+      "last_push": "2026-11-11T11:41:39Z",
       "site_http": 200,
       "assets_checked": 0
     },
@@ -95,6 +95,11 @@
   "history": [
     {
       "checked_at": "2026-11-11T11:31:55.244652+00:00",
+      "sites_checked": 8,
+      "sites_reachable": 8
+    },
+    {
+      "checked_at": "2026-11-11T11:45:47.231559+00:00",
       "sites_checked": 8,
       "sites_reachable": 8
     }
