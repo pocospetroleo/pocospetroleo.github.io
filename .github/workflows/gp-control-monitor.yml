@@ -1,5 +1,9 @@
 name: GP Control Center - monitoramento diario
 on:
+  push:
+    paths:
+      - 'gp-control-center/check.py'
+      - '.github/workflows/gp-control-monitor.yml'
   schedule:
     - cron: '0 11 * * *'
   workflow_dispatch:
