@@ -2,7 +2,7 @@
 import concurrent.futures, datetime, json, pathlib, urllib.error, urllib.parse, urllib.request
 from html.parser import HTMLParser
 NAMES=['sondabm','gestao-pocos','gestao-pocos-operacional','bdo-operacional','sonolog','pocospetroleo.github.io','calculos-petroleo']
-URLS={n:f'https://pocospetroleo.github.io/{n}/' for n in ['sondabm','gestao-pocos-operacional','bdo-operacional','calculos-petroleo']}
+URLS={n:f'https://pocospetroleo.github.io/{n}/' for n in ['sondabm','gestao-pocos-operacional','bdo-operacional','calculos-petroleo','sonolog']}
 URLS['pocospetroleo.github.io']='https://pocospetroleo.github.io/'
 EXTRA=[('Treino em 3D','https://pocospetroleo.github.io/fitcore-3d/'),('Modo Criador','https://pocospetroleo.github.io/modo-criador/'),('Mapa dos Poços','https://mapa-dos-pocos.xn--lucaspetrleo-8hb.com.br')]
 def request(url):
