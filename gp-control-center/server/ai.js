@@ -1,6 +1,8 @@
+const claudeModel = env => env('GPCC_CLAUDE_MODEL') || env('NASMIDIAS_CLAUDE_MODEL') || 'claude-sonnet-5-5';
+const claudeHeaders = env => ({'x-api-key':env('ANTHROPIC_API_KEY'),'anthropic-version':'2023-06-01',...(env('GPCC_CLAUDE_WORKSPACE_ID')?{'anthropic-workspace-id':env('GPCC_CLAUDE_WORKSPACE_ID')}:{})});
 export function integrationConfig(env) {
   const openai = Boolean(env('OPENAI_API_KEY'));
-  const claude = Boolean(env('ANTHROPIC_API_KEY') && (env('GPCC_CLAUDE_MODEL') || env('NASMIDIAS_CLAUDE_MODEL')));
+  const claude = Boolean(env('ANTHROPIC_API_KEY'));
   return { openai, claude, ai: openai || claude };
 }
 
@@ -47,11 +49,11 @@ export async function analyzeWithAI(env, prompt) {
     return JSON.parse(text);
   }
   const key = env('ANTHROPIC_API_KEY');
-  const model = env('GPCC_CLAUDE_MODEL') || env('NASMIDIAS_CLAUDE_MODEL');
+  const model = claudeModel(env);
   if (!key || !model) throw Error('Configure OPENAI_API_KEY ou a integração Claude no servidor.');
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
-    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json'},
+    headers:{...claudeHeaders(env),'content-type':'application/json'},
     body:JSON.stringify({model,max_tokens:4000,messages:[{role:'user',content:prompt}]}),
     signal:AbortSignal.timeout(60000)
   });
@@ -62,4 +64,18 @@ export async function analyzeWithAI(env, prompt) {
   const data = await response.json();
   const text = data.content.filter(item => item.type === 'text').map(item => item.text).join('');
   return JSON.parse(text.replace(/^\`\`\`(?:json)?\s*/, '').replace(/\s*\`\`\`$/, ''));
+}
+
+export async function testClaude(env) {
+  if (!env('ANTHROPIC_API_KEY')) return {connected:false,status:'missing_key',message:'Cadastre ANTHROPIC_API_KEY nos segredos do servidor.'};
+  const model = claudeModel(env);
+  const response = await fetch('https://api.anthropic.com/v1/models/' + encodeURIComponent(model), {
+    headers: claudeHeaders(env), signal: AbortSignal.timeout(15000)
+  });
+  await response.body?.cancel();
+  return {
+    connected: response.ok, model, http: response.status,
+    status: response.ok ? 'connected' : 'provider_error',
+    message: response.ok ? 'Claude autenticado com sucesso. Modelo ' + model + '.' : 'Claude retornou HTTP ' + response.status + '. Confira chave, workspace e modelo.'
+  };
 }
