@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-11-11T11:31:55.244652+00:00",
+  "results": [
+    {
+      "name": "sondabm",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "reachable",
+      "findings": [],
+      "last_push": "2026-11-11T10:47:25Z",
+      "site_http": 200,
+      "assets_checked": 0
+    },
+    {
+      "name": "gestao-pocos",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "not_configured",
+      "findings": [],
+      "last_push": "2026-11-02T23:54:38Z"
+    },
+    {
+      "name": "gestao-pocos-operacional",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "reachable",
+      "findings": [],
+      "last_push": "2026-11-11T10:47:27Z",
+      "site_http": 200,
+      "assets_checked": 42
+    },
+    {
+      "name": "bdo-operacional",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "reachable",
+      "findings": [],
+      "last_push": "2026-11-11T10:47:24Z",
+      "site_http": 200,
+      "assets_checked": 6
+    },
+    {
+      "name": "sonolog",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "not_configured",
+      "findings": [],
+      "last_push": "2026-11-11T10:47:29Z"
+    },
+    {
+      "name": "pocospetroleo.github.io",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "reachable",
+      "findings": [],
+      "last_push": "2026-11-11T11:31:44Z",
+      "site_http": 200,
+      "assets_checked": 0
+    },
+    {
+      "name": "calculos-petroleo",
+      "repository_http": 200,
+      "repository_status": "accessible",
+      "site_status": "reachable",
+      "findings": [],
+      "last_push": "2026-11-11T10:47:31Z",
+      "site_http": 200,
+      "assets_checked": 3
+    },
+    {
+      "name": "Treino em 3D",
+      "repository_http": null,
+      "site_http": 200,
+      "site_status": "reachable",
+      "findings": [],
+      "assets_checked": 16
+    },
+    {
+      "name": "Modo Criador",
+      "repository_http": null,
+      "site_http": 200,
+      "site_status": "reachable",
+      "findings": [],
+      "assets_checked": 3
+    },
+    {
+      "name": "Mapa dos Poços",
+      "repository_http": null,
+      "site_http": 200,
+      "site_status": "reachable",
+      "findings": [],
+      "assets_checked": 0
+    }
+  ],
+  "history": [
+    {
+      "checked_at": "2026-11-11T11:31:55.244652+00:00",
+      "sites_checked": 8,
+      "sites_reachable": 8
+    }
+  ],
+  "scope": "Disponibilidade HTTP e arquivos JS/CSS locais. Login, cálculos e fluxos internos não testados."
+}
