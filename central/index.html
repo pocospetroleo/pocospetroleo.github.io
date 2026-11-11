@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Central de Comandos · Poços Petróleo</title>
+<meta name="theme-color" content="#040812">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#040812; --bg2:#081120; --panel:rgba(12,22,40,.72); --line:rgba(56,189,248,.18);
+  --cyan:#22d3ee; --blue:#3b82f6; --green:#34d399; --amber:#fbbf24; --red:#f43f5e; --violet:#a78bfa; --gray:#64748b;
+  --txt:#e2e8f0; --mut:#8aa0bd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:
+  radial-gradient(1200px 600px at 50% -10%,rgba(34,211,238,.10),transparent 60%),
+  radial-gradient(900px 500px at 100% 40%,rgba(167,139,250,.07),transparent 60%),var(--bg)}
+.mono{font-family:"JetBrains Mono",monospace}
+header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:rgba(4,8,18,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;
+  background:conic-gradient(from 180deg,var(--cyan),var(--violet),var(--cyan));box-shadow:0 0 18px rgba(34,211,238,.45)}
+.logo span{width:26px;height:26px;border-radius:8px;background:var(--bg);display:grid;place-items:center;font:900 11px Orbitron;color:var(--cyan)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font:700 15px Orbitron;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl p{font-size:11px;color:var(--mut);margin-top:2px}
+.live{display:flex;align-items:center;gap:7px;font:600 11px "JetBrains Mono";padding:6px 10px;border-radius:99px;
+  border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:var(--green);white-space:nowrap}
+.live i{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pulse 1.6s infinite}
+.live.demo{color:var(--amber);border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.08)}
+.live.err{color:var(--red);border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.08)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.7)}70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.clock{font:600 13px "JetBrains Mono";color:var(--cyan);display:none}
+@media(min-width:720px){.clock{display:block}}
+main{max-width:1400px;margin:0 auto;padding:14px 14px 40px}
+.banner{display:none;margin-bottom:12px;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.45;
+  border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07);color:#fde68a}
+.banner.show{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.red{border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.08);color:#fecdd3}
+.btn{appearance:none;border:1px solid rgba(34,211,238,.45);background:rgba(34,211,238,.1);color:var(--cyan);
+  font:600 12px Inter;padding:8px 13px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover{background:rgba(34,211,238,.2)} .btn:disabled{opacity:.5;cursor:wait}
+.btn.solid{background:linear-gradient(135deg,#0891b2,#6366f1);border-color:transparent;color:#fff}
+.kpis{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.kpis::-webkit-scrollbar{display:none}
+.kpi{flex:1 0 140px;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:auto -20% -60% auto;width:90px;height:90px;border-radius:50%;background:var(--glow,rgba(34,211,238,.18));filter:blur(24px)}
+.kpi b{display:block;font:600 22px "JetBrains Mono";margin-top:4px;letter-spacing:-.02em}
+.kpi small{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.kpi em{display:block;font-style:normal;font-size:11px;color:var(--mut);margin-top:3px}
+.stage{position:relative;height:58vh;min-height:380px;max-height:720px;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(ellipse at center,#0a1730 0%,#040812 70%);margin-bottom:12px}
+#three{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-140%);white-space:nowrap;font:600 10.5px Inter;padding:3px 8px;border-radius:7px;
+  background:rgba(4,8,18,.78);border:1px solid var(--c,var(--line));color:#e2e8f0;box-shadow:0 0 12px -2px var(--c);transition:opacity .2s}
+.lbl .ms{font:500 9.5px "JetBrains Mono";color:var(--c);margin-left:5px}
+.lbl.core{font:700 11px Orbitron;letter-spacing:.14em;--c:var(--cyan)}
+.lbl.db{--c:var(--violet)}
+.hud{position:absolute;left:12px;top:12px;font:500 10.5px "JetBrains Mono";color:var(--mut);line-height:1.7;pointer-events:none}
+.hud b{color:var(--cyan);font-weight:600}
+.legend{position:absolute;left:12px;bottom:12px;display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--mut);pointer-events:none}
+.legend span{display:flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:50%}
+.stagebtns{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.stagebtns .btn{padding:7px 10px;background:rgba(4,8,18,.7)}
+.scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 0,rgba(34,211,238,.06) 50%,transparent 100%);
+  height:30%;animation:scan 6s linear infinite;opacity:.6}
+@keyframes scan{from{transform:translateY(-100%)}to{transform:translateY(400%)}}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:2fr 1fr}.grid.g3{grid-template-columns:1fr 1fr 1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.card h2{font:700 11px Orbitron;letter-spacing:.14em;color:var(--cyan);margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.card .sub{font-size:11px;color:var(--mut);margin-bottom:10px}
+.chartbox{position:relative;height:220px}
+.chartbox.sm{height:200px}
+.apps{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.app{padding:12px;border-radius:14px;background:rgba(8,17,32,.8);border:1px solid var(--line);cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
+.app:hover{transform:translateY(-2px);border-color:var(--c)}
+.app .top{display:flex;align-items:center;gap:9px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);flex:none}
+.app .nm{font-weight:600;font-size:13.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app .st{font:600 10px "JetBrains Mono";color:var(--c);text-transform:uppercase}
+.app .row{display:flex;justify-content:space-between;margin-top:9px;font-size:11px;color:var(--mut)}
+.app .row b{font:600 12px "JetBrains Mono";color:var(--txt)}
+.app canvas{width:100%;height:34px;margin-top:8px;display:block}
+.log{height:300px;overflow:auto;font:400 11.5px/1.65 "JetBrains Mono";background:rgba(2,6,14,.7);border-radius:10px;padding:10px 12px;border:1px solid rgba(56,189,248,.1)}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .t{color:#4b6587}.log .ok{color:var(--green)}.log .bad{color:var(--red)}.log .inf{color:var(--cyan)}.log .wrn{color:var(--amber)}
+.dbs{display:grid;gap:10px}
+.db{padding:12px;border-radius:12px;background:rgba(8,17,32,.8);border:1px solid rgba(167,139,250,.25);cursor:pointer}
+.db .h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.db .h .dot{--c:var(--violet)}
+.db .m{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:9px}
+.db .m div{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.db .m b{display:block;font:600 14px "JetBrains Mono";color:var(--txt);text-transform:none;letter-spacing:0;margin-top:2px}
+.section{margin-top:12px}
+/* panel */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;z-index:50;background:rgba(8,15,30,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(34,211,238,.3);
+  box-shadow:0 0 50px -10px rgba(34,211,238,.4);transition:transform .3s cubic-bezier(.2,.8,.2,1);overflow:auto;
+  left:0;right:0;bottom:0;max-height:82vh;border-radius:20px 20px 0 0;transform:translateY(105%);padding:16px 16px 28px}
+.panel.on{transform:none}
+@media(min-width:900px){.panel{left:auto;top:0;bottom:0;width:420px;max-height:none;border-radius:0;transform:translateX(105%)}.panel.on{transform:none}}
+.panel .grab{width:44px;height:4px;border-radius:9px;background:#334155;margin:0 auto 12px}
+@media(min-width:900px){.panel .grab{display:none}}
+.panel h3{font:700 16px Orbitron;letter-spacing:.06em;display:flex;align-items:center;gap:10px}
+.panel .url{font:500 11px "JetBrains Mono";color:var(--mut);margin:6px 0 14px;word-break:break-all}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pgrid div{padding:10px;border-radius:10px;background:rgba(2,6,14,.6);border:1px solid rgba(56,189,248,.12)}
+.pgrid small{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.pgrid b{display:block;font:600 16px "JetBrains Mono";margin-top:3px}
+.close{position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--mut);font-size:18px;cursor:pointer}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.err{font:500 11px "JetBrains Mono";color:#fda4af;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);padding:8px 10px;border-radius:8px;margin-top:8px;word-break:break-word}
+.chat{height:240px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;background:rgba(2,6,14,.6);border:1px solid rgba(56,189,248,.1)}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.u{align-self:flex-end;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.3)}
+.msg.c{align-self:flex-start;background:rgba(232,131,95,.1);border:1px solid rgba(232,131,95,.3)}
+.msg.c::before{content:"CLAUDE";display:block;font:700 9px Orbitron;letter-spacing:.14em;color:#e8835f;margin-bottom:3px}
+.ask{display:flex;gap:8px;margin-top:8px}
+.ask input{flex:1;min-width:0;background:rgba(2,6,14,.7);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font:14px Inter;outline:none}
+.ask input:focus{border-color:var(--cyan)}
+.ai .h .dot{--c:var(--ac)} .ai{border-color:color-mix(in srgb,var(--ac) 40%,transparent)}
+.gate{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:radial-gradient(900px 500px at 50% 0%,rgba(34,211,238,.14),transparent 60%),rgba(4,8,18,.97)}
+.gate.hide{display:none}
+.gbox{width:100%;max-width:380px;padding:26px 22px;border-radius:20px;background:rgba(10,20,38,.9);border:1px solid rgba(34,211,238,.3);box-shadow:0 0 60px -15px rgba(34,211,238,.5)}
+.gbox .logo{width:54px;height:54px;border-radius:16px;margin:0 auto 14px}.gbox .logo span{width:42px;height:42px;font-size:15px;border-radius:12px}
+.gbox h2{font:700 17px Orbitron;letter-spacing:.12em;text-align:center}
+.gbox p{font-size:12.5px;color:var(--mut);text-align:center;margin:6px 0 18px;line-height:1.5}
+.gbox label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 6px;font-weight:600}
+.gbox input{width:100%;background:rgba(2,6,14,.8);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 13px;font:15px Inter;outline:none}
+.gbox input:focus{border-color:var(--cyan)}
+.gbox .btn{width:100%;justify-content:center;margin-top:18px;padding:13px;font-size:14px}
+.gmsg{min-height:18px;margin-top:12px;font-size:12.5px;text-align:center;color:#fda4af}
+.out{appearance:none;background:transparent;border:1px solid var(--line);color:var(--mut);border-radius:9px;padding:6px 9px;font:600 11px Inter;cursor:pointer}
+footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span>GP</span></div>
+  <div class="ttl"><h1>CENTRAL DE COMANDOS</h1><p id="sub">Conectando aos sistemas…</p></div>
+  <div class="clock" id="clock">--:--:--</div>
+  <div class="live" id="live"><i></i><span id="liveTxt">INICIANDO</span></div>
+  <button class="out" id="outBtn" title="Sair">Sair</button>
+</header>
+
+<main>
+  <div class="banner" id="banner"></div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="stage">
+    <canvas id="three"></canvas>
+    <div id="labels"></div>
+    <div class="scan"></div>
+    <div class="hud" id="hud"></div>
+    <div class="stagebtns">
+      <button class="btn" id="rotBtn" title="Girar">⟳ Girar</button>
+      <button class="btn solid" id="scanBtn">⚡ Verificar agora</button>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--green)"></i>Online</span>
+      <span><i style="background:var(--amber)"></i>Lento</span>
+      <span><i style="background:var(--red)"></i>Fora do ar</span>
+      <span><i style="background:var(--violet)"></i>Banco Supabase</span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>TRÁFEGO AO VIVO</h2>
+      <div class="sub">Latência média de todos os apps e disponibilidade · últimas 24 h, blocos de 5 min</div>
+      <div class="chartbox"><canvas id="chSeries"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>PULSO DA CONEXÃO</h2>
+      <div class="sub">Tempo de ida e volta até o Supabase a cada atualização</div>
+      <div class="chartbox"><canvas id="chPulse"></canvas></div>
+    </div>
+  </section>
+
+  <section class="grid section">
+    <div class="card">
+      <h2>LATÊNCIA POR APLICATIVO</h2>
+      <div class="sub">Última verificação de cada app (ms)</div>
+      <div class="chartbox"><canvas id="chBars"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>USUÁRIOS POR APP</h2>
+      <div class="sub">Contas cadastradas em cada aplicativo</div>
+      <div class="chartbox sm"><canvas id="chUsers"></canvas></div>
+    </div>
+  </section>
+
+  <section class="card section">
+    <h2>APLICATIVOS CONECTADOS</h2>
+    <div class="sub">Toque num app para abrir o painel de detalhes</div>
+    <div class="apps" id="apps"></div>
+  </section>
+
+  <section class="grid section">
+    <div class="card">
+      <h2>LOG DE EVENTOS</h2>
+      <div class="sub">Quedas, retornos e varreduras em tempo real</div>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="card">
+      <h2>BANCOS DE DADOS</h2>
+      <div class="sub">Projetos Supabase que alimentam os apps</div>
+      <div class="dbs" id="dbs"></div>
+      <h2 style="margin-top:16px">INTELIGÊNCIAS ARTIFICIAIS</h2>
+      <div class="sub">Status oficial do Claude e do ChatGPT, verificado a cada minuto</div>
+      <div class="dbs" id="ais"></div>
+    </div>
+  </section>
+
+  <footer>
+    O Supabase testa cada aplicativo automaticamente a cada minuto, 24 h por dia.<br>
+    Esta Central lê os resultados a cada 20 s, direto do banco, com o seu login de administrador.<br>
+    © 2026 Poços Petróleo
+  </footer>
+</main>
+
+<div class="gate" id="gate"><form class="gbox" id="gForm">
+  <div class="logo"><span>GP</span></div>
+  <h2>CENTRAL DE COMANDOS</h2>
+  <p>Acesso restrito ao administrador.<br>Entre com a mesma conta dos seus aplicativos.</p>
+  <label for="gEmail">E-mail</label><input id="gEmail" type="email" autocomplete="username" required>
+  <label for="gPass">Senha</label><input id="gPass" type="password" autocomplete="current-password" required>
+  <button class="btn solid" id="gBtn">Entrar</button>
+  <div class="gmsg" id="gMsg"></div>
+</form></div>
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel"><div class="grab"></div><button class="close" id="pClose">×</button><div id="pBody"></div></aside>
+
+<script>
+(() => {
+"use strict";
+/* ============ CONFIG ============ */
+const SB_URL = "https://wbuwtvbqihmmeqrhrxgj.supabase.co";
+const SB_KEY = "sb_publishable_HE7dafrj00YZS4MEsxf8Lg_Sx2X4Csv";
+const GP = "wbuwtvbqihmmeqrhrxgj";   // projeto Gestão de Poços
+const SBM = "xvnkejsnqzbmcmgpfflq";  // projeto SondaBM
+const REFRESH_MS = 20000;
+const SLOW_MS = 2000;
+const SQL_GP = "select public.gpcc_dashboard() as d";
+const SQL_SBM = "select jsonb_build_object('total',(select count(*) from auth.users),'login24h',(select count(*) from auth.users where last_sign_in_at > now()-interval '24 hours'),'pendentes',(select count(*) from public.usuarios where status ilike 'pend%')+(select count(*) from public.profiles where status ilike 'pend%'),'size_mb',round(pg_database_size(current_database())/1048576.0,1),'connections',(select count(*) from pg_stat_activity where datname=current_database()),'bdos',(select count(*) from public.bdos)) as d";
+const SQL_SCAN = "select public.gpcc_run_health_check() as n";
+const SQL_SVC = "select public.gpcc_services_status() as d";
+const AI = {"ia-claude":{name:"Claude", full:"Claude (Anthropic)", color:"#e8835f", site:"https://claude.ai", pos:[-4.5, 8.5, -5]},
+            "ia-chatgpt":{name:"ChatGPT", full:"ChatGPT (OpenAI)", color:"#10a37f", site:"https://chatgpt.com", pos:[4.5, 8.5, -5]}};
+const PARENT = {"gestao-pocos-operacional":"db-gp","bdo-operacional":"db-gp","sonolog":"db-gp","calculos-petroleo":"db-gp",
+  "treino":"db-gp","modo-criador":"db-gp","central":"db-gp","sondabm":"db-sbm"};
+const HOME_NAMES = {"gestao-pocos":"Gestão de Poços","fitcore":"FitCore 3D","sonolog":"Sonolog","calculations":"Cálculos","*":"Admin (todos)"};
+const COLORS = {ok:"#34d399",slow:"#fbbf24",down:"#f43f5e",none:"#64748b",db:"#a78bfa",core:"#22d3ee"};
+
+/* ============ STATE ============ */
+const S = { gp:null, sbm:null, proj:{}, pulse:[], mode:"boot", lastOk:null, logKeys:new Set(), prevOk:{}, err:null };
+let mcp = null;
+let claudeAI = null, claudeUsed = false, chatHist = [], asking = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtT = d => new Date(d).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+const fmtHM = d => new Date(d).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+const statusOf = a => a.ok == null ? "none" : !a.ok ? "down" : (a.latency||0) >= SLOW_MS ? "slow" : "ok";
+const statusTxt = {ok:"Online",slow:"Lento",down:"Fora do ar",none:"Sem dados"};
+
+/* ============ CLOCK ============ */
+setInterval(() => { $("#clock").textContent = new Date().toLocaleTimeString("pt-BR"); }, 1000);
+
+/* ============ LOG ============ */
+function log(cls, msg, t = Date.now(), key) {
+  if (key) { if (S.logKeys.has(key)) return; S.logKeys.add(key); }
+  const el = document.createElement("div");
+  el.innerHTML = `<span class="t">[${fmtT(t)}]</span> <span class="${cls}">${esc(msg)}</span>`;
+  const L = $("#log"); L.prepend(el);
+  while (L.children.length > 200) L.lastChild.remove();
+}
+
+/* ============ PARSE SUPABASE RESULT ============ */
+function rows(res) {
+  let p = res && res.payload;
+  if (p == null && res && Array.isArray(res.content)) { const t = res.content.find(c => c.type === "text"); p = t && t.text; }
+  if (Array.isArray(p)) return p;
+  if (typeof p === "string") { try { p = JSON.parse(p); } catch (e) {} }
+  if (Array.isArray(p)) return p;
+  let txt = (p && typeof p === "object" && typeof p.result === "string") ? p.result : (typeof p === "string" ? p : JSON.stringify(p));
+  const m = txt.match(/<untrusted-data-[^>]*>\s*([\s\S]*?)\s*<\/untrusted-data-/);
+  return JSON.parse(m ? m[1] : txt);
+}
+const sql = (project_id, query) => mcp.callTool(SERVER, "execute_sql", {project_id, query}, {cache:false});
+
+/* ============ BANNER / STATUS ============ */
+function setLive(kind, txt) { const l = $("#live"); l.className = "live " + kind; $("#liveTxt").textContent = txt; }
+function banner(html, red) { const b = $("#banner"); b.className = "banner show" + (red ? " red" : ""); b.innerHTML = html; }
+function noBanner() { $("#banner").className = "banner"; }
+function handleErr(e) {
+  const msg = (e && (e.message || e.error_description)) || "erro";
+  if (/acesso negado|42501|permission/i.test(msg + (e && e.code))) { log("bad", "Conta sem permissão de administrador"); signOut("Esta conta não é administradora da Central."); return; }
+  if (/JWT|jwt|token|401/.test(msg)) { log("wrn", "Sessão expirada"); signOut("Sua sessão expirou. Entre de novo."); return; }
+  banner(`Sem resposta do banco agora${S.lastOk ? "; mostrando os dados de " + fmtT(S.lastOk) : ""}. Nova tentativa em 20 s. <button class="btn solid" id="retryBtn">Tentar de novo</button><br><span class="mono" style="font-size:11px;opacity:.8">${esc(String(msg).slice(0, 200))}</span>`, true);
+  $("#retryBtn").onclick = () => refresh(true);
+  setLive("err", navigator.onLine === false ? "SEM INTERNET" : "INSTÁVEL");
+  log("bad", "Falha ao ler o banco: " + String(msg).slice(0, 120));
+}
+
+/* ============ REFRESH ============ */
+let busy = false, sb = null;
+async function refresh() {
+  if (!sb || busy) return; busy = true;
+  const t0 = performance.now();
+  try {
+    const { data, error } = await sb.rpc("gpcc_dashboard_live");
+    if (error) throw error;
+    const rt = Math.round(performance.now() - t0);
+    S.gp = data;
+    S.svc = (data.services || []).filter(s => s.id.startsWith("ia-"));
+    S.sbmSvc = (data.services || []).find(s => s.id === "db-sbm") || null;
+    S.pulse.push({t: Date.now(), ms: rt}); if (S.pulse.length > 40) S.pulse.shift();
+    S.lastOk = Date.now(); S.err = null; S.mode = "live";
+    try { localStorage.setItem("cc_last", JSON.stringify({t:S.lastOk, gp:S.gp, svc:S.svc, sbmSvc:S.sbmSvc})); } catch (e) {}
+    noBanner(); setLive("", "AO VIVO");
+    digestEvents(rt);
+    render();
+  } catch (e) { handleErr(e); }
+  finally { busy = false; }
+}
+async function scanNow() {
+  const b = $("#scanBtn"); b.disabled = true; b.textContent = "⚡ Varrendo…";
+  log("inf", "Varredura manual iniciada em todos os aplicativos");
+  scanFx();
+  try {
+    const { data, error } = await sb.rpc("gpcc_scan_now"); if (error) throw error;
+    log("inf", data ? `Varredura concluída: ${data} itens testados` : "Varredura feita há poucos segundos · usando o resultado mais recente");
+    await refresh();
+  } catch (e) { handleErr(e); }
+  b.disabled = false; b.textContent = "⚡ Verificar agora";
+}
+
+function digestEvents(rt) {
+  const d = S.gp; if (!d) return;
+  (d.events || []).slice().reverse().forEach(ev => {
+    const found = d.apps.find(a => a.id === ev.app) || (AI[ev.app] && {name: AI[ev.app].full});
+    if (!found) return;
+    const app = found.name;
+    log(ev.ok ? "ok" : "bad", ev.ok ? `${app} voltou ao ar (HTTP ${ev.status})` : `${app} caiu${ev.status ? " (HTTP " + ev.status + ")" : ""}${ev.error ? " · " + ev.error : ""}`, ev.t, "ev" + ev.app + ev.t);
+  });
+  const on = d.apps.filter(a => a.ok).length;
+  d.apps.forEach(a => {
+    const prev = S.prevOk[a.id];
+    if (prev != null && prev !== a.ok) log(a.ok ? "ok" : "bad", `${a.name}: ${a.ok ? "ONLINE" : "FORA DO AR"}`);
+    if (a.ok && a.latency >= SLOW_MS) log("wrn", `${a.name} lento: ${a.latency} ms`, Date.now(), "slow" + a.id + a.checked_at);
+    S.prevOk[a.id] = a.ok;
+  });
+  log(on === d.apps.length ? "inf" : "wrn", `Leitura ao vivo · ${on}/${d.apps.length} online · Supabase em ${rt} ms`);
+}
+
+/* ============ DEMO DATA ============ */
+function demoTick() {
+  const names = [["gestao-pocos-operacional","Gestão de Poços"],["bdo-operacional","BDO Operacional"],["sondabm","BM Sonda"],["sonolog","Sonolog"],
+    ["calculos-petroleo","Cálculos de Petróleo"],["mapa","Mapa dos Poços"],["conferencia","Gestão de Tempos Operacionais"],["portal","Aplicativos realizados"],
+    ["treino","Treino em 3D"],["modo-criador","Modo Criador"],["central","Central de Aplicativos"]];
+  const now = Date.now();
+  const prev = S.gp ? Object.fromEntries(S.gp.apps.map(a => [a.id, a])) : {};
+  const apps = names.map(([id, name], i) => {
+    const base = id === "mapa" || id === "conferencia" ? 1150 : 160 + i * 12;
+    const lat = Math.round(base * (0.8 + Math.random() * 0.5));
+    const spark = (prev[id] ? prev[id].spark.slice(-39) : Array.from({length:39}, () => Math.round(base*(0.8+Math.random()*0.5)))).concat(lat);
+    return {id, name, url:"#", ok:true, status:200, latency:lat, uptime:100, avg1h:base, fails:0, checked_at:new Date(now).toISOString(), spark};
+  });
+  const series = Array.from({length:288}, (_, i) => ({t:new Date(now - (287-i)*300000).toISOString(), lat:Math.round(330+60*Math.sin(i/14)+Math.random()*40), up:100}));
+  S.gp = {now:new Date(now).toISOString(), apps, series, events:[], checks24h:15840,
+    auth:{total:19,login24h:3,new7d:11}, homes:{"gestao-pocos":11,fitcore:3,sonolog:1,calculations:1,"*":3},
+    pending:{gestao:0,ferramentas:2,fitcore:0,sonolog:0}, db:{size_mb:15.8,connections:7,records:10}};
+  S.sbm = {total:1,login24h:0,pendentes:0,size_mb:12,connections:7,bdos:0};
+  S.svc = [{id:"ia-claude",ok:true,latency:Math.round(180+Math.random()*80),uptime:100,note:"none · All Systems Operational",checked_at:new Date(now).toISOString()},
+           {id:"ia-chatgpt",ok:true,latency:Math.round(200+Math.random()*90),uptime:100,note:"none · All Systems Operational",checked_at:new Date(now).toISOString()}];
+  S.proj = {[GP]:{status:"ACTIVE_HEALTHY",region:"sa-east-1"},[SBM]:{status:"ACTIVE_HEALTHY",region:"sa-east-1"}};
+  S.pulse.push({t:now, ms:Math.round(380+Math.random()*220)}); if (S.pulse.length > 40) S.pulse.shift();
+  render();
+}
+
+/* ============ RENDER ============ */
+function render() {
+  const d = S.gp;
+  const apps = d ? d.apps : [];
+  const on = apps.filter(a => a.ok).length;
+  const lat = apps.filter(a => a.latency != null);
+  const avgLat = lat.length ? Math.round(lat.reduce((s, a) => s + a.latency, 0) / lat.length) : null;
+  const upAvg = apps.length ? (apps.reduce((s, a) => s + (a.uptime ?? 0), 0) / apps.length) : null;
+  const pend = d ? Object.values(d.pending || {}).reduce((s, n) => s + n, 0) + ((S.sbm && S.sbm.pendentes) || 0) : null;
+  const users = d ? (d.auth.total + ((S.sbm && S.sbm.total) || 0)) : null;
+  const inc = d ? (d.events || []).filter(e => !e.ok).length : null;
+  const allOk = apps.length && on === apps.length;
+  $("#sub").textContent = d ? `${on}/${apps.length} sistemas online · atualizado ${fmtT(S.lastOk || Date.now())}` : "Conectando aos sistemas…";
+
+  const K = [
+    ["Apps online", d ? `${on}/${apps.length}` : "—", allOk ? "Todos operando" : (d ? `${apps.length-on} com problema` : ""), allOk ? "rgba(52,211,153,.25)" : "rgba(244,63,94,.3)", allOk ? COLORS.ok : COLORS.down],
+    ["Uptime 24 h", upAvg != null ? upAvg.toFixed(2) + "%" : "—", "média de todos os apps", "rgba(34,211,238,.2)"],
+    ["Latência média", avgLat != null ? avgLat + " ms" : "—", "última verificação", "rgba(59,130,246,.25)"],
+    ["Usuários", users ?? "—", d ? `${d.auth.login24h + ((S.sbm&&S.sbm.login24h)||0)} entraram em 24 h` : "", "rgba(167,139,250,.25)"],
+    ["Aguardando aprovação", pend ?? "—", pend ? "toque em Bancos de dados" : "nenhum pedido", pend ? "rgba(251,191,36,.3)" : "rgba(52,211,153,.2)", pend ? COLORS.slow : null],
+    ["Incidentes 24 h", inc ?? "—", inc ? "veja o log" : "nenhuma queda", inc ? "rgba(244,63,94,.3)" : "rgba(52,211,153,.2)", inc ? COLORS.down : null],
+    ["Verificações 24 h", d ? Number(d.checks24h).toLocaleString("pt-BR") : "—", "testes automáticos", "rgba(34,211,238,.2)"],
+  ];
+  $("#kpis").innerHTML = K.map(([l, v, e, g, c]) => `<div class="kpi" style="--glow:${g}"><small>${l}</small><b style="${c ? "color:" + c : ""}">${esc(v)}</b><em>${esc(e)}</em></div>`).join("");
+
+  $("#hud").innerHTML = d ? `NÓS <b>${apps.length + 3}</b> · LINKS <b>${apps.length + 2}</b><br>LAT <b>${avgLat ?? "-"} ms</b> · UP <b>${upAvg != null ? upAvg.toFixed(1) : "-"}%</b>` : "SINCRONIZANDO…";
+
+  // apps grid
+  $("#apps").innerHTML = apps.map(a => {
+    const st = statusOf(a), c = COLORS[st];
+    return `<div class="app" data-id="${esc(a.id)}" style="--c:${c}">
+      <div class="top"><span class="dot"></span><span class="nm">${esc(a.name)}</span><span class="st">${statusTxt[st]}</span></div>
+      <div class="row"><span>Latência <b>${a.latency ?? "—"} ms</b></span><span>Uptime <b>${a.uptime ?? "—"}%</b></span></div>
+      <canvas data-spark="${esc(a.id)}"></canvas></div>`;
+  }).join("");
+  document.querySelectorAll(".app").forEach(el => el.onclick = () => openPanel(el.dataset.id));
+  document.querySelectorAll("canvas[data-spark]").forEach(cv => {
+    const a = apps.find(x => x.id === cv.dataset.spark); spark(cv, a.spark || [], COLORS[statusOf(a)]);
+  });
+
+  // dbs
+  const gpS = (S.proj[GP] || {}).status, sbS = (S.proj[SBM] || {}).status;
+  const dbHtml = [];
+  if (d) dbHtml.push(dbCard("db-gp", "Gestão de Poços", gpS, [["Tamanho", d.db.size_mb + " MB"], ["Conexões", d.db.connections], ["Usuários", d.auth.total],
+    ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. FitCore", d.pending.fitcore]]));
+  const sv = S.sbmSvc;
+  if (sv) dbHtml.push(dbCard("db-sbm", "SondaBM", sv.ok ? "ACTIVE_HEALTHY" : "FORA DO AR", [["Status", sv.ok ? "Online" : "Fora"], ["Resposta", (sv.latency ?? "—") + " ms"], ["Uptime 24 h", (sv.uptime ?? "—") + "%"]]));
+  $("#dbs").innerHTML = dbHtml.join("") || `<div class="sub">Aguardando dados…</div>`;
+  document.querySelectorAll(".db[data-id]").forEach(el => el.onclick = () => openPanel(el.dataset.id));
+
+  $("#ais").innerHTML = Object.entries(AI).map(([id, ai]) => {
+    const s = svcOf(id), st = s ? (s.ok ? "ok" : "down") : "none";
+    const txt = s ? (s.ok ? "OPERANDO" : "INSTÁVEL") : (S.svcPending ? "AGUARDANDO ATIVAÇÃO" : "—");
+    return `<div class="db ai" data-ai="${id}" style="--ac:${ai.color}"><div class="h"><span class="dot"></span>${ai.full}
+      <span style="margin-left:auto;font:600 10px 'JetBrains Mono';color:${COLORS[st] === COLORS.none ? COLORS.slow : COLORS[st]}">${txt}</span></div>
+      <div class="m"><div>Resposta<b>${s && s.latency != null ? s.latency + " ms" : "—"}</b></div><div>Uptime 24 h<b>${s && s.uptime != null ? s.uptime + "%" : "—"}</b></div>
+      <div>Conexão<b style="font-size:11px">Monitorada</b></div></div></div>`;
+  }).join("");
+  document.querySelectorAll(".db[data-ai]").forEach(el => el.onclick = () => openPanel(el.dataset.ai));
+
+  updateCharts();
+  updateScene();
+  if (panelId) openPanel(panelId, true);
+}
+function dbCard(id, name, status, m) {
+  const ok = !status || status === "ACTIVE_HEALTHY";
+  return `<div class="db" data-id="${id}"><div class="h"><span class="dot"></span>${esc(name)}
+    <span style="margin-left:auto;font:600 10px 'JetBrains Mono';color:${ok ? COLORS.ok : COLORS.slow}">${status ? esc(status.replace("ACTIVE_HEALTHY","SAUDÁVEL")) : "ATIVO"}</span></div>
+    <div class="m">${m.map(([l, v]) => `<div>${l}<b>${esc(v)}</b></div>`).join("")}</div></div>`;
+}
+function spark(cv, data, color) {
+  const dpr = Math.min(devicePixelRatio || 1, 2), w = cv.clientWidth || 220, h = cv.clientHeight || 34;
+  cv.width = w * dpr; cv.height = h * dpr; const g = cv.getContext("2d"); g.scale(dpr, dpr);
+  if (!data.length) return;
+  const mx = Math.max(...data) * 1.1, mn = Math.min(...data) * 0.9, n = data.length;
+  const X = i => (i / Math.max(n - 1, 1)) * w, Y = v => h - ((v - mn) / Math.max(mx - mn, 1)) * (h - 4) - 2;
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, color + "55"); gr.addColorStop(1, color + "00");
+  g.beginPath(); data.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+  g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fillStyle = gr; g.fill();
+  g.beginPath(); data.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+  g.strokeStyle = color; g.lineWidth = 1.5; g.stroke();
+  g.beginPath(); g.arc(X(n - 1), Y(data[n - 1]), 2.5, 0, 7); g.fillStyle = color; g.fill();
+}
+
+/* ============ CHARTS ============ */
+let CH = {};
+function initCharts() {
+  if (!window.Chart) return;
+  Chart.defaults.color = "#8aa0bd"; Chart.defaults.font.family = "Inter"; Chart.defaults.font.size = 10.5;
+  Chart.defaults.borderColor = "rgba(56,189,248,.08)";
+  const tip = {backgroundColor:"rgba(4,8,18,.95)",borderColor:"rgba(34,211,238,.4)",borderWidth:1,titleFont:{family:"JetBrains Mono"},bodyFont:{family:"JetBrains Mono"},padding:8};
+  const grad = (ctx, c) => { const g = ctx.createLinearGradient(0, 0, 0, 220); g.addColorStop(0, c + "66"); g.addColorStop(1, c + "00"); return g; };
+  CH.series = new Chart($("#chSeries"), {type:"line", data:{labels:[], datasets:[
+      {label:"Latência (ms)", data:[], borderColor:"#22d3ee", backgroundColor:c => grad(c.chart.ctx, "#22d3ee"), fill:true, tension:.35, pointRadius:0, borderWidth:2, yAxisID:"y"},
+      {label:"Disponibilidade (%)", data:[], borderColor:"#34d399", borderDash:[4,4], pointRadius:0, borderWidth:1.5, tension:.3, yAxisID:"y1"}]},
+    options:{responsive:true, maintainAspectRatio:false, animation:{duration:600}, interaction:{mode:"index",intersect:false},
+      plugins:{legend:{labels:{boxWidth:10,usePointStyle:true}}, tooltip:tip},
+      scales:{x:{ticks:{maxTicksLimit:7,maxRotation:0}, grid:{display:false}}, y:{beginAtZero:true, title:{display:true,text:"ms"}},
+        y1:{position:"right", min:0, max:100, grid:{display:false}, ticks:{callback:v => v + "%"}}}}});
+  CH.pulse = new Chart($("#chPulse"), {type:"line", data:{labels:[], datasets:[
+      {label:"Ida e volta (ms)", data:[], borderColor:"#a78bfa", backgroundColor:c => grad(c.chart.ctx, "#a78bfa"), fill:true, tension:.4, pointRadius:2, pointBackgroundColor:"#a78bfa", borderWidth:2}]},
+    options:{responsive:true, maintainAspectRatio:false, animation:{duration:500}, plugins:{legend:{display:false}, tooltip:tip},
+      scales:{x:{ticks:{maxTicksLimit:5,maxRotation:0}, grid:{display:false}}, y:{beginAtZero:true}}}});
+  CH.bars = new Chart($("#chBars"), {type:"bar", data:{labels:[], datasets:[{label:"ms", data:[], backgroundColor:[], borderRadius:5, barThickness:12}]},
+    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false, animation:{duration:600}, plugins:{legend:{display:false}, tooltip:tip},
+      scales:{x:{beginAtZero:true, grid:{color:"rgba(56,189,248,.06)"}}, y:{grid:{display:false}, ticks:{font:{size:10}}}},
+      onClick:(e, el) => { if (el[0] && S.gp) openPanel(S.gp.apps.slice().sort((a,b)=>(b.latency||0)-(a.latency||0))[el[0].index].id); }}});
+  CH.users = new Chart($("#chUsers"), {type:"doughnut", data:{labels:[], datasets:[{data:[], backgroundColor:["#22d3ee","#a78bfa","#34d399","#fbbf24","#3b82f6","#f472b6"], borderColor:"#081120", borderWidth:3}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:"64%", plugins:{legend:{position:"right", labels:{boxWidth:10,usePointStyle:true}}, tooltip:tip}}});
+}
+function updateCharts() {
+  if (!CH.series || !S.gp) return;
+  const d = S.gp;
+  CH.series.data.labels = d.series.map(p => fmtHM(p.t));
+  CH.series.data.datasets[0].data = d.series.map(p => p.lat);
+  CH.series.data.datasets[1].data = d.series.map(p => p.up);
+  CH.series.update();
+  CH.pulse.data.labels = S.pulse.map(p => fmtT(p.t));
+  CH.pulse.data.datasets[0].data = S.pulse.map(p => p.ms);
+  CH.pulse.update();
+  const sorted = d.apps.slice().sort((a, b) => (b.latency || 0) - (a.latency || 0));
+  CH.bars.data.labels = sorted.map(a => a.name.length > 22 ? a.name.slice(0, 21) + "…" : a.name);
+  CH.bars.data.datasets[0].data = sorted.map(a => a.latency || 0);
+  CH.bars.data.datasets[0].backgroundColor = sorted.map(a => COLORS[statusOf(a)]);
+  CH.bars.update();
+  const h = Object.assign({}, d.homes || {});
+  if (S.sbm) h["sondabm"] = S.sbm.total;
+  const ent = Object.entries(h).sort((a, b) => b[1] - a[1]);
+  CH.users.data.labels = ent.map(([k]) => k === "sondabm" ? "BM Sonda" : (HOME_NAMES[k] || k));
+  CH.users.data.datasets[0].data = ent.map(([, v]) => v);
+  CH.users.update();
+}
+
+/* ============ PANEL ============ */
+let panelId = null, panelChart = null;
+function openPanel(id, silent) {
+  panelId = id;
+  const d = S.gp; if (!d) return;
+  let html = "";
+  if (AI[id]) {
+    const ai = AI[id], s = svcOf(id), st = s ? (s.ok ? "ok" : "down") : "none";
+    html = `<h3><span class="dot" style="--c:${ai.color}"></span>${ai.full}</h3>
+      <div class="url">${esc(ai.site)}</div>
+      <div class="pgrid">
+        <div><small>Serviço</small><b style="color:${s ? COLORS[st] : COLORS.slow};font-size:13px">${s ? (s.ok ? "Operando" : "Instável") : "Aguardando ativação"}</b></div>
+        <div><small>Resposta</small><b>${s && s.latency != null ? s.latency + " ms" : "—"}</b></div>
+        <div><small>Uptime 24 h</small><b>${s && s.uptime != null ? s.uptime + "%" : "—"}</b></div>
+        <div><small>Verificado</small><b>${s && s.checked_at ? fmtT(s.checked_at) : "—"}</b></div>
+      </div>
+      ${s && s.note ? `<div class="sub">Status oficial: ${esc(s.note)}</div>` : ""}
+      <div class="sub" style="margin-top:8px">${id === "ia-claude"
+        ? "Status oficial verificado pelo robô da Central a cada minuto."
+        : "Status oficial verificado pelo robô da Central a cada minuto."}</div>
+      <div class="acts"><a class="btn solid" href="${ai.site}" target="_blank" rel="noopener">Abrir ${ai.name} ↗</a></div>`;
+  } else if (id === "core") {
+    const on = d.apps.filter(a => a.ok).length;
+    html = `<h3><span class="dot" style="--c:${COLORS.core}"></span>Central de Comandos</h3>
+      <div class="url">Núcleo que verifica e conecta todos os aplicativos</div>
+      <div class="pgrid"><div><small>Apps online</small><b>${on}/${d.apps.length}</b></div><div><small>Verificações 24 h</small><b>${Number(d.checks24h).toLocaleString("pt-BR")}</b></div>
+      <div><small>Robô automático</small><b style="font-size:13px">${d.cron ? esc(d.cron.status) + " · " + fmtT(d.cron.end) : "a cada 1 min"}</b></div><div><small>Última leitura</small><b>${S.lastOk ? fmtT(S.lastOk) : "—"}</b></div></div>
+      <div class="acts"><button class="btn solid" data-act="scan">⚡ Verificar todos agora</button></div>`;
+  } else if (id === "db-gp" || id === "db-sbm") {
+    const gp = id === "db-gp", p = S.proj[gp ? GP : SBM] || {};
+    const m = gp ? [["Tamanho", d.db.size_mb + " MB"], ["Conexões", d.db.connections], ["Usuários", d.auth.total], ["Novos 7 dias", d.auth.new7d], ["Login 24 h", d.auth.login24h],
+        ["Pend. Gestão", d.pending.gestao], ["Pend. BDO/Ferr.", d.pending.ferramentas], ["Pend. FitCore", d.pending.fitcore], ["Pend. Sonolog", d.pending.sonolog], ["Poços", d.db.records]]
+      : S.sbmSvc ? [["Status", S.sbmSvc.ok ? "Online" : "Fora do ar"], ["Resposta", (S.sbmSvc.latency ?? "—") + " ms"], ["Uptime 24 h", (S.sbmSvc.uptime ?? "—") + "%"], ["Verificado", S.sbmSvc.checked_at ? fmtT(S.sbmSvc.checked_at) : "—"]] : [];
+    const kids = d.apps.filter(a => PARENT[a.id] === id).map(a => a.name);
+    html = `<h3><span class="dot" style="--c:${COLORS.db}"></span>Supabase · ${gp ? "Gestão de Poços" : "SondaBM"}</h3>
+      <div class="url">${esc(p.status || "ATIVO")} · ${esc(p.region || "sa-east-1")}</div>
+      <div class="pgrid">${m.map(([l, v]) => `<div><small>${l}</small><b>${esc(v)}</b></div>`).join("")}</div>
+      <div class="sub">Apps ligados a este banco: ${esc(kids.join(", ") || "—")}</div>
+      <div class="acts"><a class="btn" href="https://supabase.com/dashboard/project/${gp ? GP : SBM}" target="_blank" rel="noopener">Abrir no Supabase ↗</a></div>`;
+  } else {
+    const a = d.apps.find(x => x.id === id); if (!a) return;
+    const st = statusOf(a), c = COLORS[st];
+    const par = PARENT[a.id] === "db-gp" ? "Supabase Gestão de Poços" : PARENT[a.id] === "db-sbm" ? "Supabase SondaBM" : "Hospedagem própria";
+    html = `<h3><span class="dot" style="--c:${c}"></span>${esc(a.name)}</h3>
+      <div class="url">${esc(a.url)}</div>
+      <div class="pgrid">
+        <div><small>Status</small><b style="color:${c}">${statusTxt[st]}</b></div><div><small>HTTP</small><b>${a.status ?? "—"}</b></div>
+        <div><small>Latência agora</small><b>${a.latency ?? "—"} ms</b></div><div><small>Média 1 h</small><b>${a.avg1h ?? "—"} ms</b></div>
+        <div><small>Uptime 24 h</small><b>${a.uptime ?? "—"}%</b></div><div><small>Falhas 24 h</small><b style="color:${a.fails ? COLORS.down : "inherit"}">${a.fails ?? 0}</b></div>
+        <div><small>Conectado a</small><b style="font-size:12px">${par}</b></div><div><small>Verificado</small><b>${a.checked_at ? fmtT(a.checked_at) : "—"}</b></div>
+      </div>
+      <div class="sub">Latência nas últimas verificações</div>
+      <div class="chartbox sm" style="height:150px"><canvas id="pChart"></canvas></div>
+      ${a.error ? `<div class="err">${esc(a.error)}</div>` : ""}
+      <div class="acts"><a class="btn solid" href="${esc(a.url)}" target="_blank" rel="noopener">Abrir aplicativo ↗</a><button class="btn" data-act="scan">⚡ Verificar agora</button></div>`;
+  }
+  $("#pBody").innerHTML = html;
+  $("#pBody").querySelectorAll('[data-act="scan"]').forEach(b => b.onclick = scanNow);
+  if (panelChart) { panelChart.destroy(); panelChart = null; }
+  const pc = $("#pChart");
+  if (pc && window.Chart) {
+    const a = d.apps.find(x => x.id === id), c = COLORS[statusOf(a)];
+    panelChart = new Chart(pc, {type:"line", data:{labels:a.spark.map((_, i) => i), datasets:[{data:a.spark, borderColor:c, backgroundColor:c + "22", fill:true, tension:.35, pointRadius:0, borderWidth:2}]},
+      options:{responsive:true, maintainAspectRatio:false, animation:silent ? false : {duration:500}, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{beginAtZero:true}}}});
+  }
+  if (!silent) { $("#panel").classList.add("on"); $("#scrim").classList.add("on"); focusNode(id); }
+}
+function closePanel() { panelId = null; $("#panel").classList.remove("on"); $("#scrim").classList.remove("on"); focusNode(null); }
+$("#pClose").onclick = closePanel; $("#scrim").onclick = closePanel;
+
+/* ============ 3D SCENE ============ */
+let R, scene, cam, ctrl, raycaster, pointer, clock3;
+const NODES = {};      // id -> {group, hit, glow, mat, label, pos, kind}
+const LINKS = [];      // {from,to,curve,line,packets:[]}
+let focusTarget = null, scanWave = null;
+
+function glowTex(color) {
+  const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d");
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.2, color); r.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+const texCache = {};
+const tex = c => texCache[c] || (texCache[c] = glowTex(c));
+function sprite(color, scale, op = 1) {
+  const m = new THREE.SpriteMaterial({map:tex(color), color:0xffffff, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false});
+  const s = new THREE.Sprite(m); s.scale.setScalar(scale); return s;
+}
+function initScene() {
+  if (!window.THREE) { $("#hud").textContent = "3D indisponível neste aparelho"; return; }
+  const cv = $("#three");
+  R = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
+  R.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x040812, 0.018);
+  cam = new THREE.PerspectiveCamera(52, 1, 0.1, 500);
+  const mobile = innerWidth < 720;
+  cam.position.set(0, mobile ? 17 : 13, mobile ? 30 : 24);
+  ctrl = new THREE.OrbitControls(cam, cv);
+  ctrl.enableDamping = true; ctrl.dampingFactor = .07; ctrl.enablePan = false; ctrl.autoRotate = true; ctrl.autoRotateSpeed = .55;
+  ctrl.minDistance = 10; ctrl.maxDistance = 55; ctrl.maxPolarAngle = Math.PI * .49;
+  raycaster = new THREE.Raycaster(); pointer = new THREE.Vector2(); clock3 = new THREE.Clock();
+
+  scene.add(new THREE.AmbientLight(0x6688aa, .6));
+  const pl = new THREE.PointLight(0x22d3ee, 2.2, 60); scene.add(pl);
+
+  // floor grid + radar rings
+  const grid = new THREE.GridHelper(80, 40, 0x0e7490, 0x0b2440); grid.position.y = -4.5; grid.material.transparent = true; grid.material.opacity = .35; scene.add(grid);
+  [6, 12.5, 19].forEach((r, i) => {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(r - .03, r + .03, 128), new THREE.MeshBasicMaterial({color:i === 1 ? 0x22d3ee : 0x1e3a5f, transparent:true, opacity:i === 1 ? .35 : .25, side:THREE.DoubleSide}));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = -4.45; scene.add(ring);
+  });
+  // stars
+  const sg = new THREE.BufferGeometry(), sp = [];
+  for (let i = 0; i < 1400; i++) { const r = 60 + Math.random() * 120, t = Math.random() * 6.28, p = Math.acos(2 * Math.random() - 1); sp.push(r * Math.sin(p) * Math.cos(t), r * Math.cos(p) * .6 + 10, r * Math.sin(p) * Math.sin(t)); }
+  sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
+  scene.add(new THREE.Points(sg, new THREE.PointsMaterial({color:0x7dd3fc, size:.35, transparent:true, opacity:.55})));
+
+  // CORE
+  const core = new THREE.Group();
+  const coreIn = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4, 2), new THREE.MeshBasicMaterial({color:0x0e7490}));
+  const coreWire = new THREE.Mesh(new THREE.IcosahedronGeometry(2.3, 1), new THREE.MeshBasicMaterial({color:0x22d3ee, wireframe:true, transparent:true, opacity:.55}));
+  const coreWire2 = new THREE.Mesh(new THREE.OctahedronGeometry(3.1, 0), new THREE.MeshBasicMaterial({color:0xa78bfa, wireframe:true, transparent:true, opacity:.25}));
+  core.add(coreIn, coreWire, coreWire2, sprite("rgba(34,211,238,.9)", 11, .85));
+  for (let i = 0; i < 3; i++) {
+    const t = new THREE.Mesh(new THREE.TorusGeometry(3.6 + i * .5, .025, 8, 120), new THREE.MeshBasicMaterial({color:i === 1 ? 0xa78bfa : 0x22d3ee, transparent:true, opacity:.5}));
+    t.rotation.set(Math.random() * 3, Math.random() * 3, 0); t.userData.spin = (i + 1) * .25 * (i % 2 ? -1 : 1); core.add(t);
+  }
+  core.position.y = 1; scene.add(core);
+  addNode("core", core, coreWire, new THREE.Vector3(0, 1, 0), "core", 3.2);
+
+  // DB nodes
+  [["db-gp", "Supabase · Gestão de Poços", -1], ["db-sbm", "Supabase · SondaBM", 1]].forEach(([id, , side]) => {
+    const g = new THREE.Group();
+    for (let k = 0; k < 3; k++) {
+      const disk = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, .38, 32), new THREE.MeshBasicMaterial({color:0x4c1d95, transparent:true, opacity:.9}));
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(.86, .86, .38, 32)), new THREE.LineBasicMaterial({color:0xa78bfa}));
+      disk.position.y = edge.position.y = k * .48 - .48; g.add(disk, edge);
+    }
+    g.add(sprite("rgba(167,139,250,.8)", 4.5, .7));
+    const pos = new THREE.Vector3(side * 6.2, -.5, side * 1.5);
+    g.position.copy(pos); scene.add(g);
+    addNode(id, g, g.children[1], pos, "db", 1.6);
+  });
+
+  window.addEventListener("resize", resize); resize();
+  let down = null;
+  cv.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; });
+  cv.addEventListener("pointerup", e => { if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) pick(e); down = null; });
+  $("#rotBtn").onclick = () => { ctrl.autoRotate = !ctrl.autoRotate; $("#rotBtn").textContent = ctrl.autoRotate ? "⟳ Girar" : "⏸ Parado"; };
+  animate();
+}
+function addNode(id, group, mat, pos, kind, hitR) {
+  const hit = new THREE.Mesh(new THREE.SphereGeometry(hitR, 12, 12), new THREE.MeshBasicMaterial({visible:false}));
+  hit.position.copy(pos); hit.userData.id = id; scene.add(hit);
+  const label = document.createElement("div"); label.className = "lbl " + (kind === "app" ? "" : kind);
+  label.innerHTML = kind === "core" ? "CENTRAL" : "";
+  $("#labels").appendChild(label);
+  NODES[id] = {group, hit, mat, pos, kind, label};
+}
+function makeApp(a, i, n) {
+  const ang = (i / n) * Math.PI * 2 + .3, r = 12.5;
+  const pos = new THREE.Vector3(Math.cos(ang) * r, Math.sin(i * 1.7) * 1.6 + .5, Math.sin(ang) * r);
+  const g = new THREE.Group();
+  const coreM = new THREE.MeshBasicMaterial({color:0x34d399});
+  const body = new THREE.Mesh(new THREE.OctahedronGeometry(.62, 0), coreM);
+  const shell = new THREE.Mesh(new THREE.OctahedronGeometry(1.05, 0), new THREE.MeshBasicMaterial({color:0x34d399, wireframe:true, transparent:true, opacity:.6}));
+  const halo = new THREE.Mesh(new THREE.RingGeometry(1.35, 1.45, 48), new THREE.MeshBasicMaterial({color:0x34d399, transparent:true, opacity:.5, side:THREE.DoubleSide}));
+  halo.rotation.x = -Math.PI / 2;
+  const glow = sprite("rgba(52,211,153,.9)", 4, .75);
+  // pillar to floor
+  const pil = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, pos.y + 4.5, 6), new THREE.MeshBasicMaterial({color:0x22d3ee, transparent:true, opacity:.25}));
+  pil.position.y = -(pos.y + 4.5) / 2;
+  g.add(body, shell, halo, glow, pil); g.position.copy(pos); scene.add(g);
+  addNode(a.id, g, coreM, pos, "app", 1.6);
+  Object.assign(NODES[a.id], {body, shell, halo, glow, phase:Math.random() * 6});
+  // link to parent
+  const parent = NODES[PARENT[a.id] || "core"];
+  addLink(a.id, PARENT[a.id] || "core", pos, parent.pos);
+}
+function addLink(from, to, a, b) {
+  const mid = a.clone().add(b).multiplyScalar(.5); mid.y += a.distanceTo(b) * .18;
+  const curve = new THREE.QuadraticBezierCurve3(a.clone(), mid, b.clone());
+  const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
+  const line = new THREE.Line(geo, new THREE.LineBasicMaterial({color:0x22d3ee, transparent:true, opacity:.35}));
+  scene.add(line);
+  const packets = [];
+  for (let k = 0; k < 3; k++) { const s = sprite("rgba(34,211,238,1)", .7, .95); scene.add(s); packets.push({s, t:k / 3, dir:k % 2 ? -1 : 1}); }
+  LINKS.push({from, to, curve, line, packets, speed:.25, color:"#22d3ee"});
+}
+let built = false;
+function updateScene() {
+  if (!scene || !S.gp) return;
+  const apps = S.gp.apps;
+  if (!built) {
+    addLink("db-gp", "core", NODES["db-gp"].pos, NODES.core.pos);
+    addLink("db-sbm", "core", NODES["db-sbm"].pos, NODES.core.pos);
+    apps.forEach((a, i) => makeApp(a, i, apps.length)); built = true;
+  }
+  apps.forEach(a => {
+    const N = NODES[a.id]; if (!N) return;
+    const st = statusOf(a), hex = COLORS[st], col = new THREE.Color(hex);
+    N.body.material.color = col; N.shell.material.color = col; N.halo.material.color = col;
+    N.glow.material.map = tex(hexToRgba(hex, .9)); N.glow.material.needsUpdate = true;
+    N.status = st;
+    N.label.style.setProperty("--c", hex);
+    N.label.innerHTML = `${esc(a.name)}<span class="ms">${st === "down" ? "OFF" : (a.latency ?? "—") + "ms"}</span>`;
+    const L = LINKS.find(l => l.from === a.id);
+    if (L) {
+      L.line.material.color = col; L.line.material.opacity = st === "down" ? .55 : .32;
+      L.speed = st === "down" ? 0 : Math.max(.08, Math.min(.6, 90 / Math.max(a.latency || 200, 60)));
+      L.packets.forEach(p => { p.s.material.map = tex(hexToRgba(hex, 1)); p.s.material.needsUpdate = true; });
+      L.down = st === "down";
+    }
+  });
+  if (!S.aiBuilt) {
+    Object.entries(AI).forEach(([id, ai]) => {
+      const pos = new THREE.Vector3(...ai.pos), g = new THREE.Group(), c = new THREE.Color(ai.color);
+      const body = new THREE.Mesh(new THREE.DodecahedronGeometry(.8, 0), new THREE.MeshBasicMaterial({color:c}));
+      const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(1.35, 0), new THREE.MeshBasicMaterial({color:c, wireframe:true, transparent:true, opacity:.6}));
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(1.7, .03, 8, 64), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:.6}));
+      const glow = sprite(hexToRgba(ai.color, .9), 5.5, .8);
+      g.add(body, shell, halo, glow); g.position.copy(pos); scene.add(g);
+      addNode(id, g, body.material, pos, "app", 2);
+      Object.assign(NODES[id], {body, shell, halo, glow, phase:Math.random() * 6, ai:true});
+      NODES[id].label.style.setProperty("--c", ai.color);
+      addLink(id, "core", pos, NODES.core.pos);
+      const L = LINKS[LINKS.length - 1]; L.line.material.color = c; L.line.material.opacity = .5; L.speed = .45;
+      L.packets.forEach(p => { p.s.material.map = tex(hexToRgba(ai.color, 1)); });
+    });
+    S.aiBuilt = true;
+  }
+  Object.entries(AI).forEach(([id, ai]) => {
+    const s = svcOf(id), N = NODES[id], L = LINKS.find(l => l.from === id);
+    N.status = s && !s.ok ? "down" : "ok"; if (L) L.down = N.status === "down";
+    N.label.innerHTML = `${ai.name}<span class="ms">${s ? (s.ok ? (s.latency ?? "") + "ms" : "INSTÁVEL") : "…"}</span>`;
+  });
+  const gpOk = !S.proj[GP] || S.proj[GP].status === "ACTIVE_HEALTHY" || S.proj[GP].status === "?";
+  NODES["db-gp"].label.innerHTML = `Supabase · Gestão<span class="ms">${S.gp.db.connections} con</span>`;
+  NODES["db-sbm"].label.innerHTML = `Supabase · SondaBM<span class="ms">${S.sbmSvc ? (S.sbmSvc.ok ? S.sbmSvc.latency + "ms" : "OFF") : "—"}</span>`;
+  LINKS.filter(l => l.to === "core" && l.from.startsWith("db")).forEach(l => { l.speed = .35; l.line.material.color = new THREE.Color(gpOk ? 0xa78bfa : 0xfbbf24); l.line.material.opacity = .45;
+    l.packets.forEach(p => { p.s.material.map = tex("rgba(167,139,250,1)"); p.s.material.needsUpdate = true; }); });
+}
+function hexToRgba(h, a) { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+function resize() {
+  if (!R) return; const cv = $("#three"), w = cv.clientWidth, h = cv.clientHeight;
+  R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+}
+function pick(e) {
+  const r = $("#three").getBoundingClientRect();
+  pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(pointer, cam);
+  const hit = raycaster.intersectObjects(Object.values(NODES).map(n => n.hit))[0];
+  if (hit) openPanel(hit.object.userData.id);
+}
+function focusNode(id) { focusTarget = id ? NODES[id] : null; if (ctrl) ctrl.autoRotate = !id && $("#rotBtn").textContent.includes("Girar"); }
+function scanFx() { scanWave = {t:0}; }
+let scanMesh = null;
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock3.getDelta(), .05), T = clock3.elapsedTime;
+  const core = NODES.core.group;
+  core.children[1].rotation.y += dt * .4; core.children[1].rotation.x += dt * .15;
+  core.children[2].rotation.y -= dt * .25;
+  core.children.forEach(c => { if (c.userData.spin) { c.rotation.z += dt * c.userData.spin; c.rotation.x += dt * c.userData.spin * .3; } });
+  const pulse = 1 + Math.sin(T * 2.2) * .06; core.children[0].scale.setScalar(pulse);
+  ["db-gp", "db-sbm"].forEach(id => { const n = NODES[id]; n.group.rotation.y += dt * .6; n.group.position.y = n.pos.y + Math.sin(T * 1.3 + (id === "db-gp" ? 0 : 2)) * .18; });
+  Object.entries(NODES).forEach(([id, n]) => {
+    if (n.kind !== "app") return;
+    n.shell.rotation.y += dt * .9; n.shell.rotation.x += dt * .3; n.body.rotation.y -= dt * 1.2;
+    n.group.position.y = n.pos.y + Math.sin(T * 1.4 + n.phase) * .22;
+    const down = n.status === "down";
+    const s = down ? 1 + Math.abs(Math.sin(T * 5)) * .5 : 1 + Math.sin(T * 2 + n.phase) * .08;
+    n.halo.scale.setScalar(s); n.halo.material.opacity = down ? .5 + Math.sin(T * 8) * .4 : .45;
+    n.glow.material.opacity = down ? .4 + Math.abs(Math.sin(T * 5)) * .6 : .7;
+  });
+  LINKS.forEach(L => {
+    L.packets.forEach(p => {
+      if (L.down) { p.s.visible = Math.sin(T * 8) > 0; L.curve.getPoint(.5, p.s.position); return; }
+      p.s.visible = true; p.t += dt * L.speed * p.dir; if (p.t > 1) p.t -= 1; if (p.t < 0) p.t += 1;
+      L.curve.getPoint(p.t, p.s.position);
+    });
+  });
+  // scan wave
+  if (scanWave) {
+    if (!scanMesh) { scanMesh = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 96), new THREE.MeshBasicMaterial({color:0x22d3ee, transparent:true, opacity:.8, side:THREE.DoubleSide, blending:THREE.AdditiveBlending})); scanMesh.rotation.x = -Math.PI / 2; scanMesh.position.y = -.5; scene.add(scanMesh); }
+    scanWave.t += dt; const k = scanWave.t / 1.6; scanMesh.visible = true; scanMesh.scale.setScalar(1 + k * 20); scanMesh.material.opacity = Math.max(0, .9 - k);
+    if (k >= 1) { scanWave = null; scanMesh.visible = false; }
+  }
+  if (focusTarget) { ctrl.target.lerp(focusTarget.group.position, .06); } else { ctrl.target.lerp(new THREE.Vector3(0, 0, 0), .05); }
+  ctrl.update(); R.render(scene, cam);
+  // labels
+  const cv = $("#three"), w = cv.clientWidth, h = cv.clientHeight, tmp = new THREE.Vector3();
+  Object.values(NODES).forEach(n => {
+    tmp.copy(n.group.position); tmp.y += n.kind === "core" ? 3.6 : n.kind === "db" ? 1.4 : 1.3; tmp.project(cam);
+    const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1 && n.label.innerHTML;
+    n.label.style.opacity = vis ? (n.kind === "app" && w < 520 && !focusTarget ? .85 : 1) : 0;
+    n.label.style.left = ((tmp.x + 1) / 2 * w) + "px"; n.label.style.top = ((1 - tmp.y) / 2 * h) + "px";
+  });
+}
+
+function svcOf(id) { return (S.svc || []).find(s => s.id === id); }
+
+/* ============ LOGIN ============ */
+function showGate(msg) { $("#gate").classList.remove("hide"); $("#gMsg").textContent = msg || ""; setLive("err", "BLOQUEADO"); }
+async function signOut(msg) {
+  try { await sb.auth.signOut(); } catch (e) {}
+  try { localStorage.removeItem("cc_last"); } catch (e) {}
+  S.gp = null; S.svc = null; S.sbmSvc = null; clearInterval(loop); loop = null;
+  showGate(msg);
+}
+async function enter() {
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { showGate(); return; }
+  const { data: adm, error } = await sb.rpc("gpcc_is_admin");
+  if (error || !adm) { signOut(error ? "Não foi possível validar o acesso." : "Esta conta não é administradora da Central."); return; }
+  $("#gate").classList.add("hide");
+  log("ok", "Administrador conectado: " + (data.session.user.email || ""));
+  try { const c = JSON.parse(localStorage.getItem("cc_last") || "null"); if (c && !S.gp) { S.gp = c.gp; S.svc = c.svc; S.sbmSvc = c.sbmSvc; S.lastOk = c.t; render(); } } catch (e) {}
+  setLive("", "CONECTANDO");
+  await refresh();
+  if (!loop) loop = setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
+}
+let loop = null;
+$("#gForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const b = $("#gBtn"); b.disabled = true; b.textContent = "Entrando…"; $("#gMsg").textContent = "";
+  const { error } = await sb.auth.signInWithPassword({ email: $("#gEmail").value.trim(), password: $("#gPass").value });
+  b.disabled = false; b.textContent = "Entrar";
+  if (error) { $("#gMsg").textContent = /invalid/i.test(error.message) ? "E-mail ou senha incorretos." : error.message; return; }
+  $("#gPass").value = "";
+  enter();
+});
+$("#outBtn").onclick = () => signOut("Você saiu da Central.");
+
+/* ============ BOOT ============ */
+$("#scanBtn").onclick = scanNow;
+initCharts();
+initScene();
+log("inf", "Central de Comandos iniciada");
+if (!window.supabase) { showGate("Sem internet para carregar o sistema. Recarregue a página."); }
+else {
+  sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, storageKey: "cc-auth" } });
+  sb.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_OUT") showGate(); });
+  enter();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && loop) refresh(); });
+  window.addEventListener("online", () => { log("inf", "Internet de volta"); refresh(); });
+  window.addEventListener("offline", () => { setLive("err", "SEM INTERNET"); log("wrn", "Aparelho sem internet"); });
+}
+})();
+</script>
+</body>
+</html>
