@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-11T11:48:12.354419+00:00",
+  "generated_at": "2026-11-11T11:51:33.778847+00:00",
   "results": [
     {
       "name": "sondabm",
@@ -34,10 +34,7 @@
       "repository_http": 200,
       "repository_status": "accessible",
       "site_status": "reachable",
-      "findings": [
-        "Arquivo indisponível: xlsx.js",
-        "Arquivo indisponível: gate.css?v=1"
-      ],
+      "findings": [],
       "last_push": "2026-11-11T10:47:24Z",
       "site_http": 200,
       "assets_checked": 6
@@ -58,7 +55,7 @@
       "repository_status": "accessible",
       "site_status": "reachable",
       "findings": [],
-      "last_push": "2026-11-11T11:47:57Z",
+      "last_push": "2026-11-11T11:51:16Z",
       "site_http": 200,
       "assets_checked": 0
     },
@@ -110,6 +107,11 @@
     },
     {
       "checked_at": "2026-11-11T11:48:12.354419+00:00",
+      "sites_checked": 9,
+      "sites_reachable": 9
+    },
+    {
+      "checked_at": "2026-11-11T11:51:33.778847+00:00",
       "sites_checked": 9,
       "sites_reachable": 9
     }
