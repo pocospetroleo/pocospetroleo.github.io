@@ -75,7 +75,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .appbar .ttl{flex:1;min-width:0;text-align:center}
 .appbar .ttl b{display:block;font:600 19px 'Cormorant Garamond',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .appbar .ttl span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold3);font-weight:600}
-.appbar .side{width:96px;display:flex}
+.appbar .side{width:100px;display:flex}
 .appbar .side.r{justify-content:flex-end}
 .icon{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .back{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 10px 0 4px;border:0;background:none;color:var(--navy);font-weight:600;font-size:16px;cursor:pointer;border-radius:12px}
@@ -270,7 +270,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r6";
+const VERSAO = "2026-11-12-r7";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -333,6 +333,7 @@ const ICONS = {
   select:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
   eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
   nav:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>',
+  swap:'<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
   home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'
 };
@@ -642,6 +643,20 @@ async function esqueciNoivos(){
     } catch(er){ $('[data-e]',s).textContent=er.message; }
     b.disabled=false; };
 }
+const btnPerfil = () => `<button class="btn line sm" id="perfil" aria-label="Trocar perfil" style="min-height:44px;padding:0 12px;gap:6px">${ic('swap')}<span>Perfil</span></button>`;
+function ligaPerfil(atual){
+  const b=$('#perfil'); if(!b) return;
+  b.onclick=()=>{
+    const op=(k,icon,tit,desc)=>`<button class="tile" data-p="${k}" style="width:100%;text-align:left;cursor:pointer;margin-bottom:10px;${atual===k?'border:2px solid var(--gold2)':''}">
+      <span class="ti">${ic(icon)}</span><div style="flex:1"><b>${tit}</b><span>${desc}</span></div>${atual===k?'<span class="pill ok">Atual</span>':''}</button>`;
+    const s=sheet('Trocar perfil', `<div style="padding-top:4px">
+      ${op('admin','heart','Noivos','Resumo, convidados, envio e ajustes')}
+      ${op('portaria','qr','Portaria','Ler QR Code e liberar entrada')}
+      <button class="btn danger full" data-sair style="margin-top:8px">${ic('logout')} Sair do aplicativo</button></div>`);
+    $$('[data-p]',s).forEach(x=>x.onclick=()=>{ s.fechar(); if(x.dataset.p!==atual) location.hash = x.dataset.p==='admin' ? '#admin' : '#portaria'; });
+    $('[data-sair]',s).onclick=async()=>{ s.fechar(); if(await confirmar({titulo:'Sair do aplicativo?', texto:'Será preciso digitar a senha novamente para entrar.', ok:'Sair', icone:'logout'})) { pararCam && pararCam(); store.del('cas_pin_admin'); store.del('cas_pin_portaria'); A.data=null; location.hash=''; } };
+  };
+}
 function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=null; location.hash=''; }
 
 /* =================== PORTARIA =================== */
@@ -655,7 +670,7 @@ async function entrarPortaria(sub){
 }
 function viewPortaria(sub){
   const scan = sub !== 'lista';
-  app.innerHTML = appbar({title:'Portaria', sub:P.noivos?'Modo noivos':'Recepção', back:P.noivos?'#admin':'', backLabel:P.noivos?'Painel':'Voltar', right:P.noivos?'':`<button class="iconbtn" id="sair" aria-label="Sair da portaria">${ic('logout')}</button>`}) + `<div class="page">
+  app.innerHTML = appbar({title:'Portaria', sub:P.noivos?'Modo noivos':'Recepção', back:P.noivos?'#admin':'', backLabel:P.noivos?'Painel':'Voltar', right:btnPerfil()}) + `<div class="page">
     <div class="stat hl section"><div class="row" style="justify-content:space-between;align-items:flex-end">
       <div><b id="pIn">–</b><span>pessoas já entraram</span></div><div style="text-align:right"><b id="pTot" style="color:#fff;opacity:.85">–</b><span>esperadas</span></div></div>
       <div class="prog"><i id="pBar" style="width:0"></i></div></div>
@@ -668,7 +683,7 @@ function viewPortaria(sub){
         <button class="chip" data-pf="todos" aria-pressed="${P.filtro==='todos'}">Todos</button><button class="chip" data-pf="fora" aria-pressed="${P.filtro==='fora'}">Aguardando</button><button class="chip" data-pf="dentro" aria-pressed="${P.filtro==='dentro'}">Já entraram</button></div>
       <div class="glist" id="res"></div>`}
   </div>`;
-  ligaVoltar();
+  ligaVoltar(); ligaPerfil('portaria');
   if ($('#sair')) $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair da portaria?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) { pararCam(); sair('portaria'); } };
   $$('[data-go]').forEach(b => b.onclick = () => { location.hash = b.dataset.go; });
   $$('[data-pf]').forEach(b => b.onclick = () => { P.filtro=b.dataset.pf; $$('[data-pf]').forEach(x=>x.setAttribute('aria-pressed', x===b)); renderPLista(); });
@@ -710,6 +725,7 @@ async function iniciarCam(){
   try { await loadScript('https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'); }
   catch(e){ box.innerHTML='<p style="color:#fff;padding:24px">Não foi possível carregar o leitor. Verifique a internet.</p>'; return; }
   if (!$('#reader')) return;
+  if (typeof Html5Qrcode==='undefined') { box.innerHTML='<p style="color:#fff;padding:24px">Leitor indisponível. Recarregue a página.</p>'; return; }
   box.innerHTML='';
   P.scanner = new Html5Qrcode('reader');
   try { await P.scanner.start({facingMode:'environment'}, {fps:12, qrbox:(w,h)=>{const s=Math.min(w,h)*.7; return {width:s,height:s};}}, txt=>lido(txt), ()=>{}); }
@@ -771,9 +787,8 @@ function viewAdmin(sub){
   const titulos={resumo:'Resumo',convidados:'Convidados',adicionar:'Adicionar convidados',enviar:'Enviar convites',ajustes:'Ajustes'};
   const back = sub==='resumo' ? '' : sub==='adicionar' ? '#admin/convidados' : '#admin';
   app.innerHTML = appbar({title:titulos[sub], sub:nomesCasal(c), back, backLabel: sub==='resumo'?'Início':'Voltar',
-    right:`<button class="iconbtn" id="sair" aria-label="Sair">${ic('logout')}</button>`}) + `<div class="page wide" id="body"></div>` + tabbar(sub);
-  ligaVoltar();
-  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair do perfil dos noivos?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) sair('admin'); };
+    right:btnPerfil()}) + `<div class="page wide" id="body"></div>` + tabbar(sub);
+  ligaVoltar(); ligaPerfil('admin');
   ({resumo:telaResumo, convidados:telaConvidados, adicionar:telaAdicionar, enviar:telaEnviar, ajustes:telaAjustes})[sub]();
   if (sub==='resumo' || sub==='convidados') {
     const t=setInterval(async()=>{ if(!document.querySelector('.overlay') && !A.sel && await carregar()) { if(sub==='resumo') renderResumo(); else renderLista(); } }, 8000);
