@@ -278,7 +278,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r10";
+const VERSAO = "2026-11-12-r11";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -321,7 +321,7 @@ const linkConvite = t => `${BASE}?c=${t}`;
 
 const SEM_EV = ['cas_convite','cas_criar','cas_dono_listar','cas_dono_status','cas_dono_excluir','cas_dono_senha'];
 async function rpc(fn, args = {}) {
-  if (EVC && fn.startsWith('cas_') && !SEM_EV.includes(fn) && !('p_ev' in args)) args = {...args, p_ev: EVC};
+  if (EVC && fn.startsWith('cas_') && !fn.startsWith('cas_dono_') && !SEM_EV.includes(fn) && !('p_ev' in args)) args = {...args, p_ev: EVC};
   const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json' }, body: JSON.stringify(args) });
   const t = await r.text(); let d = null; try { d = t ? JSON.parse(t) : null; } catch(e){}
   if (!r.ok) throw new Error(d?.message || 'Sem conexão com o servidor');
@@ -541,6 +541,48 @@ function viewCriar(){
     b.disabled=false; };
 }
 
+function msgCliente(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n\n${ev.titulo||''}\n\n👰 Organizador (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}\n\n🚪 Portaria (leitura do QR Code na entrada):\n${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}`; }
+function formEvento(senha, ev){
+  const novo = !ev; ev = ev || {status:'aprovado'};
+  const v = k => esc(ev[k]||'');
+  const s = sheet(novo?'Cadastrar evento':'Editar evento', `<div class="card">
+    <label class="f" for="e_ti" style="margin-top:0">Nome do evento</label><input class="in" id="e_ti" value="${v('titulo')}" placeholder="Casamento de Ana e Pedro · Aniversário de 15 anos da Júlia">
+    <div class="grid2"><div><label class="f" for="e_n1">Nome em destaque</label><input class="in" id="e_n1" value="${v('noivo1')}" placeholder="Ana"></div>
+      <div><label class="f" for="e_n2">2º nome (opcional)</label><input class="in" id="e_n2" value="${v('noivo2')}" placeholder="Pedro"></div></div>
+    <p class="hint">Aparecem em dourado no convite (noivos, aniversariante, empresa…).</p>
+    <label class="f" for="e_dt">Data e horário</label><input class="in" id="e_dt" value="${v('data')}" placeholder="Sábado, 20 de março de 2027 • 19h">
+    <label class="f" for="e_lc">Local</label><input class="in" id="e_lc" value="${v('local')}" placeholder="Nome do espaço, endereço">
+    <label class="f" for="e_ct">Cliente (nome e WhatsApp)</label><input class="in" id="e_ct" value="${v('contato')}" placeholder="Ana — (82) 99999-9999">
+    <div class="section-title">Acesso</div>
+    <label class="f" for="e_pa" style="margin-top:0">Senha do organizador</label>${campoSenha('e_pa','Mínimo 4 caracteres',`value="${v('pin_admin')}"`)}
+    <label class="f" for="e_pp">Senha da portaria</label>${campoSenha('e_pp','Diferente da senha do organizador',`value="${v('pin_portaria')}"`)}
+    <label class="f" for="e_st">Situação</label><select class="in" id="e_st" style="appearance:auto">
+      <option value="aprovado" ${ev.status==='aprovado'?'selected':''}>Liberado</option><option value="pendente" ${ev.status==='pendente'?'selected':''}>Aguardando</option><option value="bloqueado" ${ev.status==='bloqueado'?'selected':''}>Bloqueado</option></select>
+    ${novo?'':`<div class="small muted" style="margin-top:12px">Código: <b>${v('slug')}</b></div>
+      <div class="grid2" style="margin-top:10px"><button class="btn line sm" data-cpa>${ic('link')} Link organizador</button><button class="btn line sm" data-cpp>${ic('qr')} Link portaria</button></div>
+      <button class="btn line sm full" data-wa style="margin-top:10px">${ic('wa')} Enviar acesso ao cliente</button>`}
+    <button class="btn gold full" data-ok style="margin-top:18px">${ic('check')} ${novo?'Cadastrar evento':'Salvar alterações'}</button>
+    <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
+  ligaOlhos(s);
+  const dados = () => ({titulo:$('#e_ti',s).value, noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
+    contato:$('#e_ct',s).value, pin_admin:$('#e_pa',s).value.trim(), pin_portaria:$('#e_pp',s).value.trim(), status:$('#e_st',s).value});
+  if (!novo) { $('[data-cpa]',s).onclick=()=>copiar(linkEvento('#admin',ev.slug)); $('[data-cpp]',s).onclick=()=>copiar(linkEvento('#portaria',ev.slug));
+    $('[data-wa]',s).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgCliente({...ev,...dados()})),'_blank'); }
+  $('[data-ok]',s).onclick = async e => { const b=e.currentTarget, er=$('[data-e]',s); b.disabled=true; er.textContent='';
+    try { const d=dados();
+      const x = novo ? await rpc('cas_dono_criar',{p_senha:senha,p_dados:d}) : await rpc('cas_dono_editar',{p_senha:senha,p_id:ev.id,p_dados:d});
+      if (x.erro) { er.textContent=x.erro; return; }
+      s.fechar(); toast(novo?'Evento cadastrado':'Alterações salvas'); await viewDono();
+      if (novo) { const t={...d, slug:x.slug, titulo:d.titulo||[d.noivo1,d.noivo2].filter(Boolean).join(' e ')};
+        const s2 = sheet('Evento cadastrado', `<div class="card" style="text-align:center">${rings()}<h2 style="margin-top:12px">${esc(t.titulo)}</h2>
+          <div class="small muted" style="margin-top:6px">Código: <b>${esc(x.slug)}</b></div>
+          <button class="btn gold full" data-wa style="margin-top:16px">${ic('wa')} Enviar acesso ao cliente</button>
+          <button class="btn line full" data-cp style="margin-top:10px">${ic('link')} Copiar link do organizador</button></div>`);
+        $('[data-wa]',s2).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgCliente(t)),'_blank');
+        $('[data-cp]',s2).onclick=()=>copiar(linkEvento('#admin',x.slug)); }
+    } catch(x){ er.textContent=x.message; } finally { b.disabled=false; } };
+}
+
 /* =================== PAINEL DO DONO (aprovar / bloquear / excluir eventos) =================== */
 async function viewDono(){
   pintaFundo({fundo3d:false});
@@ -569,16 +611,18 @@ async function viewDono(){
       <div class="stat"><b>${L.length}</b><span>Eventos</span></div>
       <div class="stat"><b style="color:var(--gold3)">${pend}</b><span>Aguardando</span></div>
       <div class="stat"><b>${L.reduce((s,c)=>s+c.convites,0)}</b><span>Convites</span></div></div>
+    <button class="btn gold full" id="dNovo" style="margin-top:16px;min-height:56px">${ic('plus')} Cadastrar evento</button>
     <div class="glist" style="margin-top:16px">${L.map(c=>`<div class="card" style="margin-bottom:12px">
-      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><b style="font:600 21px 'Cormorant Garamond',serif">${esc([c.noivo1,c.noivo2].filter(Boolean).join(' & ')||c.titulo)}</b>
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><b style="font:600 21px 'Cormorant Garamond',serif">${esc(c.titulo||[c.noivo1,c.noivo2].filter(Boolean).join(' & '))}</b>
         <div class="small muted">${esc(c.data||'Sem data')} · código <b>${esc(c.slug)}</b></div>
         <div class="small muted">${c.convites} convites · ${c.pessoas} pessoas · criado em ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div></div>${pill(c.status)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
         ${c.status!=='aprovado'?`<button class="btn primary sm" data-st="aprovado" data-id="${c.id}">${ic('check')} Liberar</button>`:''}
         ${c.status!=='bloqueado'?`<button class="btn line sm" data-st="bloqueado" data-id="${c.id}">${ic('lock')} Bloquear</button>`:''}
         ${tel(c.contato)?`<a class="btn line sm" target="_blank" rel="noopener" href="https://wa.me/${tel(c.contato)}">${ic('wa')} WhatsApp</a>`:''}
+        <button class="btn line sm" data-ed="${c.id}">${ic('edit')} Editar</button>
         <a class="btn line sm" href="${linkEvento('',c.slug)}" target="_blank" rel="noopener">${ic('link')} Abrir</a>
-        ${c.id!==1?`<button class="btn danger sm" data-del="${c.id}" data-nm="${esc(c.slug)}">${ic('trash')} Excluir</button>`:''}
+        <button class="btn danger sm" data-del="${c.id}" data-nm="${esc(c.slug)}">${ic('trash')} Excluir</button>
       </div></div>`).join('') || '<div class="empty">Nenhum evento ainda</div>'}</div>
     <button class="btn line full" id="dSenha" style="margin-top:10px">${ic('lock')} Trocar senha do administrador</button>
   </div>`;
@@ -589,6 +633,8 @@ async function viewDono(){
   $$('[data-del]').forEach(b=>b.onclick=async()=>{
     if (!await confirmar({titulo:'Excluir o evento?', texto:`O evento "${b.dataset.nm}" e todos os convidados dele serão apagados. Não dá para desfazer.`, ok:'Excluir', perigo:true, digitar:'EXCLUIR'})) return;
     const x=await rpc('cas_dono_excluir',{p_senha:senha,p_id:+b.dataset.del}); if(x.erro) return toast(x.erro); toast('Evento excluído'); viewDono(); });
+  $('#dNovo').onclick=()=>formEvento(senha, null);
+  $$('[data-ed]').forEach(b=>b.onclick=async()=>{ const x=await rpc('cas_dono_obter',{p_senha:senha,p_id:+b.dataset.ed}); if(!x||x.erro) return toast(x?x.erro:'Evento não encontrado'); formEvento(senha, x); });
   $('#dSenha').onclick=()=>{ const s=sheet('Trocar senha', `<div class="card"><label class="f" for="dn" style="margin-top:0">Nova senha</label>${campoSenha('dn','Mínimo 10 caracteres')}
       <button class="btn gold full" data-ok style="margin-top:16px">Salvar</button><p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`); ligaOlhos(s);
     $('[data-ok]',s).onclick=async()=>{ const n=$('#dn',s).value; const x=await rpc('cas_dono_senha',{p_senha:senha,p_nova:n}); if(x.erro){ $('[data-e]',s).textContent=x.erro; return; } sessionStorage.setItem('cas_dono',n); s.fechar(); toast('Senha alterada'); }; };
