@@ -718,7 +718,7 @@ function renderLista(){
     ${A.sel?`<input type="checkbox" class="chk" data-ck="${g.id}" ${A.sel.has(g.id)?'checked':''} aria-label="Selecionar ${esc(g.nome)}">`:''}
     <span class="av ${g.entrou_em?'in':''}">${g.entrou_em?ic('check'):esc(iniciais(g.nome))}</span>
     <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas>1?g.pessoas+' pessoas':'1 pessoa'}${g.telefone?' • '+esc(g.telefone):''}</div>
-      <div style="margin-top:3px">${g.entrou_em?`<span class="pill ok">Entrou ${hora(g.entrou_em)}${g.entrada_manual?' (manual)':''}</span>`:'<span class="pill wait">Aguardando</span>'}</div></div>
+      <div style="margin-top:3px">${g.entrou_em?`<span class="pill ok">Entrou às ${horaCurta(g.entrou_em)}${g.entrada_manual?' (manual)':''}</span>`:'<span class="pill wait">Aguardando</span>'}</div></div>
     ${A.sel?'':`<div class="acts">
       <button class="iconbtn wa" data-a="wa" data-id="${g.id}" aria-label="Enviar convite de ${esc(g.nome)} pelo WhatsApp">${ic('wa')}</button>
       <button class="iconbtn" data-a="ed" data-id="${g.id}" aria-label="Editar ${esc(g.nome)}">${ic('edit')}</button>
