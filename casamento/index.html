@@ -2,415 +2,861 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Convite • Casamento</title>
-<meta name="theme-color" content="#f7f2ea">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Convite de Casamento</title>
+<meta name="theme-color" content="#FAF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
-:root{--bg:#f7f2ea;--card:#fffdf9;--ink:#2b2622;--muted:#8a8178;--gold:#b08d57;--gold2:#8c6d3d;--line:#e8dfd2;--ok:#1f8a4c;--bad:#c0392b;--warn:#d68910}
+:root{
+  --ivory:#FAF7F2; --paper:#FFFFFF; --navy:#1C2536; --navy2:#2E3B54;
+  --gold1:#F1DFB0; --gold2:#C9A464; --gold3:#8F6B34; --gold4:#6E5024;
+  --ink:#1F1B17; --muted:#625B53; --line:#E6DDCF; --soft:#F4EEE4;
+  --ok:#1E7A46; --okbg:#E4F3EA; --bad:#B3261E; --badbg:#FBE9E7; --warn:#A35F00;
+  --goldgrad:linear-gradient(135deg,#7E5D2B 0%,#C9A464 22%,#F6E7BE 45%,#C9A464 62%,#8F6B34 100%);
+  --shadow:0 1px 2px rgba(40,30,15,.06),0 6px 18px rgba(40,30,15,.08),0 18px 40px rgba(40,30,15,.06);
+  --r:18px; --safe-b:env(safe-area-inset-bottom,0px);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent}
-.serif{font-family:'Cormorant Garamond',Georgia,serif}
-.wrap{max-width:560px;margin:0 auto;padding:20px 16px 60px}
-.wide{max-width:960px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 2px 14px rgba(80,60,30,.06)}
-h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1}
-h2{font-size:15px;font-weight:600;margin-bottom:12px}
-.muted{color:var(--muted);font-size:14px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;padding:12px 16px;font:600 15px Inter;cursor:pointer;background:var(--ink);color:#fff;text-decoration:none}
-.btn.gold{background:var(--gold)}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.sm{padding:7px 10px;font-size:13px;border-radius:9px}
-.btn.wa{background:#25a35a}
-.btn.red{background:var(--bad)}
-.btn:disabled{opacity:.5}
-.full{width:100%}
-input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font:15px Inter;background:#fff;color:var(--ink)}
-textarea{min-height:120px;resize:vertical}
-label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px}
-.row{display:flex;gap:8px;align-items:center}
-.grid{display:grid;gap:12px}
+html{-webkit-text-size-adjust:100%}
+body{font:16px/1.5 Inter,system-ui,-apple-system,sans-serif;background:var(--ivory);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold2);outline-offset:2px;border-radius:10px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .hidden{display:none!important}
-.divider{display:flex;align-items:center;gap:12px;color:var(--gold);margin:14px 0}
-.divider:before,.divider:after{content:"";flex:1;height:1px;background:var(--line)}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.script{font-family:'Great Vibes',cursive}
+.eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold3);font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* ---------- fundo 3D ---------- */
+#bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:
+  radial-gradient(1200px 600px at 50% -10%,#fff 0%,transparent 60%),
+  radial-gradient(800px 500px at 100% 100%,#F3EADB 0%,transparent 60%),var(--ivory)}
+#bg .floor{position:absolute;left:50%;top:58%;width:160vw;transform:translate(-50%,-50%) perspective(900px) rotateX(58deg);text-align:center;opacity:.13;white-space:nowrap}
+#bg .floor .n3d{font-size:min(30vw,260px)}
+#bg .ringfloat{position:absolute;opacity:.5}
+#bg .r1{top:9%;right:-14px;transform:scale(.9)}
+#bg .r2{bottom:12%;left:-10px;transform:scale(.7)}
+#bg .pattern{position:absolute;inset:0;opacity:.35;background-image:radial-gradient(circle at 1px 1px,rgba(143,107,52,.18) 1px,transparent 0);background-size:26px 26px;mask-image:linear-gradient(to bottom,#000,transparent 70%)}
+
+/* ---------- nomes 3D ---------- */
+.n3d{font-family:'Great Vibes',cursive;line-height:1.05;display:inline-flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:.08em .22em;transform-style:preserve-3d}
+.n3d .w{position:relative;z-index:0;display:inline-block;background:var(--goldgrad);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 .06em;animation:foil 6s ease-in-out infinite}
+.n3d .w::before{content:attr(data-t);position:absolute;inset:0;padding:0 .06em;z-index:-1;color:var(--gold4);
+  text-shadow:1px 1px 0 #7A5A29,2px 2px 0 #745526,3px 3px 0 #6E5024,4px 4px 0 #684B21,5px 5px 0 #61461E,6px 7px 2px rgba(60,40,10,.35),8px 14px 18px rgba(40,25,5,.28)}
+.n3d .amp{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.55em;color:var(--gold3)}
+.n3d.flat .w::before{display:none}
+.stage3d{perspective:900px}
+.sway{animation:sway 7s ease-in-out infinite;transform-style:preserve-3d;display:inline-block}
+@keyframes sway{0%,100%{transform:rotateY(-10deg) rotateX(6deg)}50%{transform:rotateY(10deg) rotateX(-2deg)}}
+@keyframes foil{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
+
+/* ---------- alianças 3D ---------- */
+.rings{position:relative;width:96px;height:64px;perspective:500px;margin:0 auto}
+.rings .rot{position:absolute;inset:0;transform-style:preserve-3d;animation:spin 9s linear infinite}
+.ring{position:absolute;top:4px;width:56px;height:56px;border-radius:50%;
+  background:conic-gradient(from 20deg,#7E5D2B,#F6E7BE,#C9A464,#8F6B34,#F6E7BE,#B8904F,#7E5D2B);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));
+          mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));
+  filter:drop-shadow(0 6px 8px rgba(60,40,10,.25))}
+.ring.a{left:6px;transform:rotateY(25deg)}
+.ring.b{left:34px;transform:rotateY(-25deg) translateZ(6px)}
+@keyframes spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+
+/* ---------- layout ---------- */
+.page{max-width:620px;margin:0 auto;padding:0 16px calc(110px + var(--safe-b))}
+.page.wide{max-width:980px}
+.appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:rgba(250,247,242,.86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid rgba(230,221,207,.7)}
+.appbar .ttl{flex:1;min-width:0;text-align:center}
+.appbar .ttl b{display:block;font:600 19px 'Cormorant Garamond',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appbar .ttl span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold3);font-weight:600}
+.appbar .side{width:96px;display:flex}
+.appbar .side.r{justify-content:flex-end}
+.icon{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.back{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 10px 0 4px;border:0;background:none;color:var(--navy);font-weight:600;font-size:16px;cursor:pointer;border-radius:12px}
+.back:active{background:var(--soft)}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--navy);cursor:pointer;flex:none;box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 2px 4px rgba(40,30,15,.06)}
+.iconbtn:active{transform:translateY(1px)}
+.iconbtn.wa{color:#1A8C4E}
+.iconbtn.danger{color:var(--bad)}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.section{margin-top:16px}
+.section-title{display:flex;align-items:center;gap:10px;font:600 22px 'Cormorant Garamond',serif;color:var(--navy);margin:26px 4px 10px}
+.section-title:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+h1{font:600 34px/1.1 'Cormorant Garamond',serif;color:var(--navy)}
+h2{font:600 20px 'Cormorant Garamond',serif;color:var(--navy);margin-bottom:6px}
+label.f{display:block;font-size:14px;font-weight:600;color:var(--navy2);margin:14px 0 6px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+input.in,textarea.in{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:#FFFEFC;font-size:16px;transition:border-color .2s,box-shadow .2s}
+textarea.in{min-height:120px;resize:vertical;line-height:1.45}
+input.in:focus,textarea.in:focus{outline:none;border-color:var(--gold2);box-shadow:0 0 0 4px rgba(201,164,100,.18)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 20px;border-radius:14px;border:0;cursor:pointer;font-weight:600;font-size:16px;text-decoration:none;position:relative;transition:transform .12s,box-shadow .12s;user-select:none}
+.btn:active{transform:translateY(2px)}
+.btn.primary{background:linear-gradient(180deg,#34425E,#1C2536);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 4px 0 #0F1522,0 10px 20px rgba(28,37,54,.25)}
+.btn.primary:active{box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 0 #0F1522,0 4px 10px rgba(28,37,54,.2)}
+.btn.gold{background:linear-gradient(180deg,#E2C68C,#B8904F);color:#2A1D08;box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 4px 0 #8A6630,0 10px 20px rgba(143,107,52,.28)}
+.btn.gold:active{box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 2px 0 #8A6630,0 4px 10px rgba(143,107,52,.2)}
+.btn.line{background:var(--paper);color:var(--navy);border:1.5px solid var(--line);box-shadow:0 2px 0 var(--line)}
+.btn.wa{background:linear-gradient(180deg,#2DB866,#1A8C4E);color:#fff;box-shadow:0 4px 0 #136B3B,0 8px 16px rgba(26,140,78,.25)}
+.btn.danger{background:var(--paper);color:var(--bad);border:1.5px solid #EBC4C0;box-shadow:0 2px 0 #EBC4C0}
+.btn.danger.solid{background:linear-gradient(180deg,#C9372D,#A3241C);color:#fff;border:0;box-shadow:0 4px 0 #7A1A14}
+.btn.sm{min-height:42px;padding:0 14px;font-size:15px;border-radius:12px}
+.btn.full{width:100%}
+.btn:disabled{opacity:.55;pointer-events:none}
+.row{display:flex;gap:10px;align-items:center}
+.row.wrap{flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.chip{flex:none;min-height:40px;padding:0 16px;border-radius:99px;border:1.5px solid var(--line);background:var(--paper);font-weight:600;font-size:14px;color:var(--navy2);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--soft);border-radius:14px;border:1px solid var(--line);margin:14px 0}
+.seg button{min-height:46px;border:0;border-radius:11px;background:none;font-weight:600;color:var(--navy2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.seg button[aria-selected=true]{background:var(--paper);box-shadow:0 2px 6px rgba(40,30,15,.12);color:var(--navy)}
+
+/* estatísticas */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font:700 30px/1.1 'Cormorant Garamond',serif;color:var(--navy)}
+.stat span{font-size:13px;color:var(--muted);font-weight:500}
+.stat.hl{background:linear-gradient(160deg,#243049,#1C2536);color:#fff;border:0}
+.stat.hl b{color:var(--gold1)} .stat.hl span{color:#C9CFDA}
+.prog{height:8px;border-radius:9px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:10px}
+.prog i{display:block;height:100%;background:var(--goldgrad);transition:width .5s}
+.prog.light{background:var(--line)}
+
+/* lista de convidados */
+.glist{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.gi{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.gi:last-child{border-bottom:0}
+.gi.flash{animation:flash 2s}
+@keyframes flash{0%,40%{background:var(--okbg)}100%{background:transparent}}
+.av{width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:600 17px 'Cormorant Garamond',serif;background:var(--soft);color:var(--gold3);border:1.5px solid var(--line)}
+.av.in{background:var(--okbg);color:var(--ok);border-color:#BFE0CB}
+.gi .info{flex:1;min-width:0}
+.gi .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi .meta{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi .acts{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.wait{background:var(--soft);color:var(--gold3)}
+.chk{width:26px;height:26px;flex:none;accent-color:var(--navy)}
+.empty{padding:34px 18px;text-align:center;color:var(--muted)}
+
+/* barra inferior */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;justify-content:center;padding:8px 10px calc(8px + var(--safe-b));background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.tabbar .in{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:100%;max-width:560px;gap:4px}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:54px;justify-content:center;border-radius:12px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:600}
+.tabbar a[aria-current=page]{color:var(--navy);background:var(--soft)}
+.tabbar a[aria-current=page] .icon{stroke:var(--gold3)}
+.selbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 14px calc(10px + var(--safe-b));background:var(--navy);color:#fff;display:flex;gap:8px;align-items:center;justify-content:center}
+
 /* convite */
-.invite{text-align:center;padding:34px 22px}
-.invite .qr{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:inline-block;margin:18px 0 10px}
-.invite .qr img{display:block;width:240px;height:240px;image-rendering:pixelated}
-.badge{display:inline-block;padding:5px 12px;border-radius:99px;font-size:13px;font-weight:600}
-.badge.ok{background:#e3f4ea;color:var(--ok)}
-.badge.pend{background:#f6efe3;color:var(--gold2)}
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-.stat b{display:block;font-size:26px}
-.stat span{font-size:12px;color:var(--muted)}
-.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
-/* lista */
-.guest{display:flex;gap:10px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
-.guest:last-child{border-bottom:0}
-.guest .info{flex:1;min-width:0}
-.guest .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.guest .meta{font-size:12px;color:var(--muted)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
-.dot.in{background:var(--ok)}
-.acts{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
-.tabs{display:flex;gap:6px;margin:12px 0;overflow-x:auto}
-.tab{padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:#fff;font:500 13px Inter;cursor:pointer;white-space:nowrap}
-.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.inv-wrap{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px 14px 50px;perspective:1400px}
+.inv{width:100%;max-width:440px;position:relative;transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.inv .paper{position:relative;background:linear-gradient(180deg,#FFFEFB,#FBF6EC);border-radius:22px;padding:34px 24px 26px;text-align:center;
+  box-shadow:0 2px 4px rgba(40,30,15,.06),0 20px 40px rgba(40,30,15,.12),0 50px 80px -20px rgba(40,30,15,.25)}
+.inv .paper:before{content:"";position:absolute;inset:10px;border-radius:15px;border:1.5px solid transparent;background:var(--goldgrad) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.inv .paper:after{content:"";position:absolute;inset:16px;border-radius:11px;border:1px solid rgba(201,164,100,.35);pointer-events:none}
+.inv .shine{position:absolute;inset:0;border-radius:22px;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);background-size:250% 100%;background-position:var(--sx,120%) 0;mix-blend-mode:soft-light}
+.inv .names{font-size:clamp(46px,14vw,66px);margin:8px 0 4px;transform:translateZ(40px)}
+.inv .ttl-flat{font:600 34px/1.15 'Cormorant Garamond',serif;color:var(--navy);margin:8px 0}
+.orn{display:flex;align-items:center;gap:12px;justify-content:center;color:var(--gold2);margin:16px 0}
+.orn:before,.orn:after{content:"";height:1px;width:70px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.orn:after{transform:scaleX(-1)}
+.inv .info{display:flex;flex-direction:column;gap:6px;align-items:center;color:var(--navy2);font-size:15px}
+.inv .info div{display:flex;gap:8px;align-items:center}
+.inv .info .icon{width:18px;height:18px;stroke:var(--gold3)}
+.inv .guest{font:600 28px/1.15 'Cormorant Garamond',serif;color:var(--navy)}
+.qrplate{position:relative;display:inline-block;background:#fff;padding:16px;border-radius:16px;margin:18px 0 12px;transform:translateZ(30px);box-shadow:0 2px 0 var(--line),0 14px 30px rgba(40,30,15,.14)}
+.qrplate img{display:block;width:min(62vw,236px);height:auto;image-rendering:pixelated}
+.qrplate i{position:absolute;width:22px;height:22px;border:3px solid var(--gold2)}
+.qrplate i:nth-of-type(1){top:6px;left:6px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
+.qrplate i:nth-of-type(2){top:6px;right:6px;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
+.qrplate i:nth-of-type(3){bottom:6px;left:6px;border-right:0;border-top:0;border-radius:0 0 0 6px}
+.qrplate i:nth-of-type(4){bottom:6px;right:6px;border-left:0;border-top:0;border-radius:0 0 6px 0}
+.note{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 16px;white-space:pre-line;font-size:15px;color:var(--ink);text-align:left;margin-top:14px}
+.quote{font:italic 500 21px/1.35 'Cormorant Garamond',serif;color:var(--navy2);white-space:pre-line;margin:6px 4px 4px}
+
+/* home */
+.hero{text-align:center;padding:40px 10px 10px}
+.hero .names{font-size:clamp(52px,16vw,84px);margin:14px 0 4px}
+.tile{display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .15s}
+.tile:active{transform:scale(.985)}
+.tile .ti{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:none;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522}
+.tile .ti .icon{width:28px;height:28px}
+.tile b{display:block;font:600 22px 'Cormorant Garamond',serif;color:var(--navy)}
+.tile span{font-size:14px;color:var(--muted)}
+
 /* portaria */
-#reader{width:100%;border-radius:16px;overflow:hidden;background:#000;min-height:280px}
-#reader video{border-radius:16px}
-.result{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;z-index:50}
-.result.ok{background:var(--ok)}.result.bad{background:var(--bad)}.result.warn{background:var(--warn)}
-.result .ic{font-size:90px;line-height:1}
-.result .t{font-size:30px;font-weight:700;margin:14px 0 6px}
-.result .n{font-size:26px;font-weight:600}
-.result .s{font-size:17px;opacity:.9;margin-top:8px}
-.modal{position:fixed;inset:0;background:rgba(30,25,20,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:40}
-.modal .card{width:100%;max-width:420px;max-height:90vh;overflow:auto}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:60}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+#reader{width:100%;border-radius:20px;overflow:hidden;background:#0E1320;min-height:300px;box-shadow:var(--shadow);position:relative}
+#reader video{border-radius:20px;object-fit:cover}
+.result{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+.result.ok{background:radial-gradient(circle at 50% 35%,#2A9A5C,#14603A)}
+.result.bad{background:radial-gradient(circle at 50% 35%,#D23E33,#8E1D16)}
+.result.warn{background:radial-gradient(circle at 50% 35%,#D38A1B,#8E5400)}
+.result .ic{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:66px;font-weight:700}
+.result .t{font-size:30px;font-weight:800;letter-spacing:.04em;margin:20px 0 8px}
+.result .n{font:600 34px/1.15 'Cormorant Garamond',serif}
+.result .s{font-size:18px;opacity:.92;margin-top:10px;max-width:420px}
+.result .tap{margin-top:36px;font-size:14px;opacity:.75}
+
+/* modais */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(20,22,30,.5);display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+@media(min-width:700px){.overlay{align-items:center}}
+@keyframes fade{from{opacity:0}}
+.sheet{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--ivory);border-radius:24px 24px 0 0;padding:0 18px calc(22px + var(--safe-b));animation:up .25s ease-out}
+@media(min-width:700px){.sheet{border-radius:24px}}
+@keyframes up{from{transform:translateY(40px);opacity:.6}}
+.sheet .sh-head{position:sticky;top:0;background:var(--ivory);display:flex;align-items:center;gap:6px;padding:12px 0 8px;z-index:2}
+.sheet .sh-head b{flex:1;text-align:center;font:600 21px 'Cormorant Garamond',serif;color:var(--navy);padding-right:60px}
+.grab{width:42px;height:5px;border-radius:5px;background:var(--line);margin:8px auto 0}
+.dialog{background:var(--paper);border-radius:22px;padding:24px 20px 20px;width:calc(100% - 32px);max-width:400px;margin:auto;box-shadow:0 30px 60px rgba(0,0,0,.25);text-align:center;animation:pop .2s}
+.overlay.center{align-items:center}
+.dialog .dic{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:var(--badbg);color:var(--bad)}
+.dialog .dic.info{background:var(--soft);color:var(--gold3)}
+.dialog p{color:var(--muted);margin:6px 0 16px}
+
+.toggle{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.toggle:last-child{border-bottom:0}
+.toggle .tx{flex:1}
+.toggle .tx b{display:block;font-weight:600;color:var(--navy)}
+.toggle .tx span{font-size:13px;color:var(--muted)}
+.sw{position:relative;width:54px;height:32px;flex:none}
+.sw input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:99px;background:#D9D2C6;transition:.2s}
+.sw i:after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2);transition:.2s}
+.sw input:checked+i{background:var(--navy)}
+.sw input:checked+i:after{transform:translateX(22px)}
+.sw input:focus-visible+i{outline:3px solid var(--gold2);outline-offset:2px}
+
+.preview3d{border-radius:18px;padding:22px 10px;text-align:center;background:linear-gradient(180deg,#FFFEFB,#F7F0E3);border:1px solid var(--line);margin-top:12px;overflow:hidden}
+.preview3d .n3d{font-size:clamp(40px,12vw,58px)}
+.drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 16px;border:2px dashed #D8C9AE;border-radius:18px;background:#FFFDF8;text-align:center;cursor:pointer}
+.drop .icon{width:36px;height:36px;stroke:var(--gold3)}
+.drop b{color:var(--navy)}
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translateX(-50%);z-index:90;background:var(--navy);color:#fff;padding:13px 20px;border-radius:14px;font-size:15px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100% - 32px);text-align:center;animation:pop .2s}
+.spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rot .8s linear infinite}
+.spin.dark{border-color:var(--line);border-top-color:var(--gold3)}
+@keyframes rot{to{transform:rotate(360deg)}}
+.loading{display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="bg" aria-hidden="true"><div class="pattern"></div></div>
+<main id="app" aria-live="polite"></main>
 
 <script>
+/* =================== CONFIG =================== */
 const SB_URL = "https://xvnkejsnqzbmcmgpfflq.supabase.co";
 const SB_KEY = "sb_publishable_XuXZ7vFDXxN_HVlIu0Y1hw_azroc6Gr";
 const BASE = location.origin + location.pathname;
-const $ = s => document.querySelector(s);
+
+/* =================== UTIL =================== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const app = $('#app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}} };
-
-async function rpc(fn, args = {}) {
-  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
-    method: 'POST',
-    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(args)
-  });
-  const t = await r.text();
-  const d = t ? JSON.parse(t) : null;
-  if (!r.ok) throw new Error(d?.message || 'Erro de conexão');
-  return d;
-}
-function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
-function qrImg(text, size=8){ const q=qrcode(0,'M'); q.addData(text); q.make(); return q.createDataURL(size, 2); }
-const linkConvite = token => `${BASE}?c=${token}`;
 const hora = iso => iso ? new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
 const horaCurta = iso => iso ? new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+const iniciais = n => String(n||'?').trim().split(/\s+/).filter(w=>w.length>2||/^[A-ZÀ-Ú]/.test(w)).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '?';
+const linkConvite = t => `${BASE}?c=${t}`;
 
-/* ---------------- ROTEAMENTO ---------------- */
-function route(){
+async function rpc(fn, args = {}) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json' }, body: JSON.stringify(args) });
+  const t = await r.text(); let d = null; try { d = t ? JSON.parse(t) : null; } catch(e){}
+  if (!r.ok) throw new Error(d?.message || 'Sem conexão com o servidor');
+  return d;
+}
+function toast(msg){ $$('.toast').forEach(t=>t.remove()); const t=document.createElement('div'); t.className='toast'; t.role='status'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+function qrImg(text, cell=8){ const q=qrcode(0,'M'); q.addData(text); q.make(); return q.createDataURL(cell, 2); }
+function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector(`script[src="${src}"]`)) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('Falha ao carregar componente')); document.head.appendChild(s); }); }
+async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast('Link copiado'); }catch(e){ prompt('Copie o link:', t); } }
+
+const ICONS = {
+  back:'<path d="M15 18l-6-6 6-6"/>', x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  wa:'<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.5 8.5 0 1 1 21 11.5z"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+  search:'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>',
+  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15l3-3 3 3"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  door:'<path d="M3 21h18"/><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M15 12h.01"/>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
+  select:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'
+};
+const ic = (n, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+
+/* nomes 3D */
+function nomes3D(ev, flat=false){
+  const a=(ev.noivo1||'').trim(), b=(ev.noivo2||'').trim();
+  if(!a && !b) return '';
+  const w = t => `<span class="w" data-t="${esc(t)}">${esc(t)}</span>`;
+  return `<span class="n3d ${flat?'flat':''}">${a?w(a):''}${a&&b?'<span class="amp">&amp;</span>':''}${b?w(b):''}</span>`;
+}
+const temNomes = ev => !!((ev.noivo1||'').trim() || (ev.noivo2||'').trim());
+function tituloEvento(ev){ return ev.titulo && ev.titulo!=='Nosso Casamento' ? ev.titulo : (temNomes(ev) ? `Casamento de ${[ev.noivo1,ev.noivo2].filter(Boolean).join(' & ')}` : (ev.titulo||'Nosso Casamento')); }
+
+/* fundo */
+let EV = null;
+async function evento(force){ if(!EV || force){ try{ EV = await rpc('cas_evento') || {}; }catch(e){ EV = EV || {}; } } return EV; }
+function pintaFundo(ev){
+  const bg=$('#bg');
+  bg.innerHTML = '<div class="pattern"></div>' + (ev && ev.fundo3d !== false ? `
+    ${temNomes(ev)?`<div class="floor">${nomes3D(ev)}</div>`:''}
+    <div class="ringfloat r1"><div class="rings"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div></div>
+    <div class="ringfloat r2"><div class="rings"><div class="rot" style="animation-duration:13s"><span class="ring a"></span><span class="ring b"></span></div></div></div>` : '');
+}
+const rings = () => `<div class="rings" aria-hidden="true"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div>`;
+
+/* appbar */
+function appbar({ title, sub='', back=null, backLabel='Voltar', right='' }){
+  return `<header class="appbar">
+    <div class="side">${back!==null?`<button class="back" data-back="${esc(back)}" aria-label="${esc(backLabel)}">${ic('back')}<span>${esc(backLabel)}</span></button>`:''}</div>
+    <div class="ttl">${sub?`<span>${esc(sub)}</span>`:''}<b>${esc(title)}</b></div>
+    <div class="side r">${right}</div></header>`;
+}
+function ligaVoltar(root=app){ $$('[data-back]', root).forEach(b => b.onclick = () => { location.hash = b.dataset.back; }); }
+
+/* diálogos */
+function confirmar({ titulo, texto='', ok='Confirmar', perigo=false, digitar=null, icone='trash' }){
+  return new Promise(res => {
+    const o=document.createElement('div'); o.className='overlay center'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true');
+    o.innerHTML = `<div class="dialog"><div class="dic ${perigo?'':'info'}">${ic(icone)}</div><h2>${esc(titulo)}</h2><p>${esc(texto)}</p>
+      ${digitar?`<input class="in" data-d placeholder="Digite ${esc(digitar)} para confirmar" autocapitalize="characters" style="text-align:center;margin-bottom:14px">`:''}
+      <div class="grid2"><button class="btn line" data-n>Cancelar</button><button class="btn ${perigo?'danger solid':'primary'}" data-y ${digitar?'disabled':''}>${esc(ok)}</button></div></div>`;
+    document.body.appendChild(o);
+    const fim=v=>{ o.remove(); res(v); };
+    $('[data-n]',o).onclick=()=>fim(false); $('[data-y]',o).onclick=()=>fim(true);
+    o.onclick=e=>{ if(e.target===o) fim(false); };
+    if(digitar){ const i=$('[data-d]',o); i.oninput=()=>{ $('[data-y]',o).disabled = i.value.trim().toUpperCase()!==digitar; }; i.focus(); } else $('[data-y]',o).focus();
+  });
+}
+function sheet(title, html){
+  const o=document.createElement('div'); o.className='overlay'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="sheet"><div class="grab"></div><div class="sh-head"><button class="back" data-close>${ic('back')}<span>Voltar</span></button><b>${esc(title)}</b></div>${html}</div>`;
+  document.body.appendChild(o);
+  const fechar=()=>{ o.remove(); document.removeEventListener('keydown',esc_); };
+  const esc_=e=>{ if(e.key==='Escape') fechar(); };
+  document.addEventListener('keydown',esc_);
+  $('[data-close]',o).onclick=fechar; o.onclick=e=>{ if(e.target===o) fechar(); };
+  o.fechar=fechar; return o;
+}
+
+/* =================== ROTAS =================== */
+let limpar = [];
+function limparTudo(){ limpar.forEach(f=>{try{f()}catch(e){}}); limpar=[]; $$('.overlay,.result,.selbar').forEach(e=>e.remove()); }
+async function route(){
+  limparTudo(); window.scrollTo(0,0);
   const p = new URLSearchParams(location.search);
   if (p.get('c')) return viewConvite(p.get('c'));
-  const h = location.hash.replace('#','');
-  if (h === 'admin') return viewLogin('admin');
-  if (h === 'portaria') return viewLogin('portaria');
+  const [r, sub] = location.hash.replace('#','').split('/');
+  if (r === 'admin') return entrarAdmin(sub || 'lista');
+  if (r === 'portaria') return entrarPortaria(sub || 'scan');
   return viewHome();
 }
 window.addEventListener('hashchange', route);
 
-/* ---------------- HOME ---------------- */
+/* =================== HOME =================== */
 async function viewHome(){
-  let ev = {}; try { ev = await rpc('cas_evento') || {}; } catch(e){}
-  app.innerHTML = `<div class="wrap"><div class="card invite">
-    <div class="muted" style="letter-spacing:3px;font-size:12px">CONTROLE DE ENTRADA</div>
-    <h1 style="margin:10px 0">${esc(ev.titulo||'Casamento')}</h1>
-    <div class="muted">${esc(ev.data||'')}</div>
-    <div class="divider">✦</div>
-    <div class="grid">
-      <a class="btn full" href="#portaria">📷 Portaria (ler QR Code)</a>
-      <a class="btn ghost full" href="#admin">⚙️ Administração</a>
-    </div></div></div>`;
+  app.innerHTML = `<div class="loading"><div class="spin dark"></div></div>`;
+  const ev = await evento(true); pintaFundo(ev);
+  app.innerHTML = `<div class="page">
+    <section class="hero">
+      ${rings()}
+      <div class="eyebrow" style="margin-top:14px">Controle de convidados</div>
+      ${temNomes(ev) ? `<div class="names stage3d"><span class="sway">${nomes3D(ev, ev.nome3d===false)}</span></div>` : `<h1 style="margin:14px 0 6px">${esc(tituloEvento(ev))}</h1>`}
+      ${ev.data?`<div class="serif" style="font-size:21px;font-style:italic;color:var(--gold3)">${esc(ev.data)}</div>`:''}
+    </section>
+    <nav class="section" style="display:grid;gap:12px;margin-top:28px" aria-label="Áreas do aplicativo">
+      <a class="tile" href="#portaria"><span class="ti">${ic('qr')}</span><div><b>Portaria</b><span>Ler o QR Code e liberar a entrada</span></div></a>
+      <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Painel dos Noivos</b><span>Convidados, convites e evento</span></div></a>
+    </nav>
+    <p class="muted small" style="text-align:center;margin-top:28px">Acesso restrito por senha</p>
+  </div>`;
 }
 
-/* ---------------- CONVITE (convidado) ---------------- */
+/* =================== CONVITE =================== */
 async function viewConvite(token){
-  app.innerHTML = `<div class="wrap"><div class="card invite"><div class="muted">Carregando convite…</div></div></div>`;
+  app.innerHTML = `<div class="loading"><div class="spin dark"></div>Abrindo seu convite…</div>`;
   let ev={}, cv=null;
-  try { [ev, cv] = await Promise.all([rpc('cas_evento'), rpc('cas_convite',{p_token:token})]); } catch(e){}
-  if (!cv) { app.innerHTML = `<div class="wrap"><div class="card invite"><h1>Convite não encontrado</h1><p class="muted" style="margin-top:10px">Verifique o link recebido ou fale com os noivos.</p></div></div>`; return; }
+  try { [ev, cv] = await Promise.all([evento(true), rpc('cas_convite',{p_token:token})]); } catch(e){}
+  pintaFundo(ev);
+  if (!cv) { app.innerHTML = `<div class="inv-wrap"><div class="inv"><div class="paper">${rings()}<h1 style="margin-top:16px">Convite não encontrado</h1><p class="muted" style="margin-top:10px">Confira o link recebido ou fale com os noivos.</p></div></div></div>`; return; }
   const img = qrImg(linkConvite(token), 8);
-  app.innerHTML = `<div class="wrap"><div class="card invite">
-    <div class="muted" style="letter-spacing:3px;font-size:12px">VOCÊ ESTÁ CONVIDADO(A)</div>
-    <h1 style="margin:10px 0 4px">${esc(ev.titulo)}</h1>
-    <div class="serif" style="font-size:20px;font-style:italic;color:var(--gold2)">${esc(ev.data)}</div>
-    ${ev.local?`<div class="muted" style="margin-top:4px">📍 ${esc(ev.local)}</div>`:''}
-    <div class="divider">✦</div>
-    <div class="muted">Convidado(a)</div>
-    <div style="font-size:22px;font-weight:600;margin-top:2px">${esc(cv.nome)}</div>
-    <div class="muted">${cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Válido para 1 pessoa'}</div>
-    ${cv.mensagem?`<div style="background:#f6efe3;border-radius:12px;padding:14px;margin-top:16px;white-space:pre-line;font-size:15px">💌 ${esc(cv.mensagem)}</div>`:''}
-    <div class="qr"><img id="qrimg" src="${img}" alt="QR Code"></div>
-    ${ev.mensagem?`<div class="serif" style="font-size:19px;font-style:italic;color:var(--ink);white-space:pre-line;margin:6px 0 14px;line-height:1.35">${esc(ev.mensagem)}</div>`:''}
-    <div>${cv.entrou_em?`<span class="badge ok">✓ Entrada registrada às ${horaCurta(cv.entrou_em)}</span>`:`<span class="badge pend">Apresente este QR Code na entrada</span>`}</div>
-    <p class="muted" style="margin:16px 0 14px;font-size:13px">O QR Code é pessoal e só pode ser usado uma vez. Dica: tire um print ou salve a imagem para não depender de internet na portaria.</p>
-    <button class="btn gold full" id="salvar">⬇️ Salvar convite com QR Code</button>
-  </div></div>`;
-  $('#salvar').onclick = () => salvarCartao(ev, cv, img);
+  const mapa = ev.local ? `https://maps.google.com/?q=${encodeURIComponent(ev.local)}` : '';
+  app.innerHTML = `<div class="inv-wrap"><article class="inv" id="inv" aria-label="Convite de ${esc(cv.nome)}">
+    <div class="paper">
+      <div class="shine"></div>
+      ${rings()}
+      <div class="eyebrow" style="margin-top:12px">Temos a honra de convidar para o casamento de</div>
+      ${temNomes(ev) ? `<div class="names stage3d" role="heading" aria-level="1" aria-label="${esc([ev.noivo1,ev.noivo2].filter(Boolean).join(' e '))}">${nomes3D(ev, ev.nome3d===false)}</div>` : `<h1 class="ttl-flat">${esc(tituloEvento(ev))}</h1>`}
+      <div class="info">
+        ${ev.data?`<div>${ic('cal')}<span>${esc(ev.data)}</span></div>`:''}
+        ${ev.local?`<div>${ic('pin')}<span>${esc(ev.local)}</span></div>`:''}
+      </div>
+      <div class="orn">✦</div>
+      <div class="eyebrow" style="color:var(--muted)">Convidado(a)</div>
+      <div class="guest">${esc(cv.nome)}</div>
+      <div class="muted small">${cv.pessoas>1?`Convite válido para ${cv.pessoas} pessoas`:'Convite individual'}</div>
+      ${cv.mensagem?`<div class="note">${esc(cv.mensagem)}</div>`:''}
+      <div class="qrplate"><i></i><i></i><i></i><i></i><img src="${img}" alt="QR Code de entrada de ${esc(cv.nome)}"></div>
+      <div>${cv.entrou_em?`<span class="pill ok">${ic('check')} Entrada registrada às ${horaCurta(cv.entrou_em)}</span>`:`<span class="pill wait">Apresente este QR Code na recepção</span>`}</div>
+      ${ev.mensagem?`<div class="orn">✦</div><div class="quote">${esc(ev.mensagem)}</div>`:''}
+      <p class="muted small" style="margin:16px 4px 18px">QR Code pessoal e intransferível, válido para uma única entrada. Salve a imagem para apresentar mesmo sem internet.</p>
+      <div style="display:grid;gap:10px">
+        <button class="btn gold full" id="salvar">${ic('download')} Salvar convite</button>
+        ${mapa?`<a class="btn line full" href="${mapa}" target="_blank" rel="noopener">${ic('pin')} Como chegar</a>`:''}
+      </div>
+    </div></article></div>`;
+  $('#salvar').onclick = e => salvarCartao(ev, cv, img, e.currentTarget);
+  tilt($('#inv'));
+}
+function tilt(el){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const shine = $('.shine', el);
+  const set = (rx, ry) => { el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`; shine && shine.style.setProperty('--sx', `${50 - ry*6}%`); };
+  const mv = e => { const p = e.touches ? e.touches[0] : e; const r = el.getBoundingClientRect(); const x=(p.clientX-r.left)/r.width-.5, y=(p.clientY-r.top)/r.height-.5; set(-y*8, x*10); };
+  const out = () => set(0,0);
+  el.addEventListener('pointermove', mv); el.addEventListener('pointerleave', out);
+  const ori = e => { if(e.beta==null) return; set(Math.max(-8,Math.min(8,(e.beta-45)/4)), Math.max(-10,Math.min(10,e.gamma/3))); };
+  window.addEventListener('deviceorientation', ori);
+  limpar.push(()=>window.removeEventListener('deviceorientation', ori));
+  let t=0; const idle=()=>{ if(!el.isConnected) return; if(!el.matches(':hover')) set(Math.sin(t)*2, Math.cos(t*.8)*3); t+=.02; requestAnimationFrame(idle); };
+  if (!('ondeviceorientation' in window)) idle();
 }
 function quebra(ctx, txt, max){ const out=[]; for (const par of String(txt||'').split('\n')) { let l=''; for (const w of par.split(' ')) { const t=l?l+' '+w:w; if (ctx.measureText(t).width>max && l) { out.push(l); l=w; } else l=t; } out.push(l); } return out; }
-async function salvarCartao(ev, cv, img){
-  const W=900, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
-  const q=new Image(); q.src=img; await q.decode().catch(()=>{});
-  const linhas=[];
-  const add=(t,font,color,gap=12)=>{ x.font=font; for (const l of quebra(x,t,W-120)) linhas.push({l,font,color,h:parseInt(font.match(/(\d+)px/)[1])+gap}); };
-  add('VOCÊ ESTÁ CONVIDADO(A)','600 22px Inter, sans-serif','#8a8178',20);
-  add(ev.titulo,'600 56px Georgia, serif','#2b2622');
-  if (ev.data) add(ev.data,'italic 32px Georgia, serif','#8c6d3d');
-  if (ev.local) add('📍 '+ev.local,'26px Inter, sans-serif','#8a8178');
-  linhas.push({gap:30});
-  add(cv.nome,'700 40px Inter, sans-serif','#2b2622',8);
-  add(cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Válido para 1 pessoa','26px Inter, sans-serif','#8a8178');
-  if (cv.mensagem) { linhas.push({gap:16}); add(cv.mensagem,'28px Inter, sans-serif','#2b2622'); }
-  const QR=480, depois=[];
-  if (ev.mensagem) { x.font='italic 32px Georgia, serif'; for (const l of quebra(x,ev.mensagem,W-120)) depois.push({l,font:'italic 32px Georgia, serif',color:'#2b2622',h:44}); }
-  depois.push({gap:20}); x.font='22px Inter, sans-serif';
-  for (const l of quebra(x,'Apresente este QR Code na entrada. Uso único e pessoal.',W-120)) depois.push({l,font:'22px Inter, sans-serif',color:'#8a8178',h:32});
-  const alt = l => l.gap || l.h;
-  c.height = 80 + linhas.reduce((s,l)=>s+alt(l),0) + 40 + QR + 40 + depois.reduce((s,l)=>s+alt(l),0) + 60;
-  x.fillStyle='#f7f2ea'; x.fillRect(0,0,W,c.height);
-  x.strokeStyle='#b08d57'; x.lineWidth=3; x.strokeRect(24,24,W-48,c.height-48);
-  x.textAlign='center'; let y=80;
-  const desenha = arr => { for (const l of arr) { if (l.gap){ y+=l.gap; continue; } x.font=l.font; x.fillStyle=l.color; y+=l.h; x.fillText(l.l, W/2, y-10); } };
-  desenha(linhas); y+=40;
-  x.fillStyle='#fff'; x.fillRect((W-QR)/2-16,y-16,QR+32,QR+32);
-  x.imageSmoothingEnabled=false; x.drawImage(q,(W-QR)/2,y,QR,QR); y+=QR+40;
-  desenha(depois);
-  const url=c.toDataURL('image/png');
-  const nome=`convite-${cv.nome.replace(/\s+/g,'-')}.png`;
-  try { const blob=await (await fetch(url)).blob(); const f=new File([blob],nome,{type:'image/png'});
-    if (navigator.canShare && navigator.canShare({files:[f]})) { await navigator.share({files:[f], title:'Meu convite'}); return; } } catch(e){ if (e.name==='AbortError') return; }
-  const a=document.createElement('a'); a.href=url; a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+async function salvarCartao(ev, cv, img, btn){
+  btn.disabled = true;
+  try {
+    await Promise.all([document.fonts.load('80px "Great Vibes"'), document.fonts.load('600 40px "Cormorant Garamond"'), document.fonts.load('italic 500 30px "Cormorant Garamond"')]).catch(()=>{});
+    const W=1080, M=110, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
+    const q=new Image(); q.src=img; await q.decode().catch(()=>{});
+    const nomes = temNomes(ev) ? [ev.noivo1,ev.noivo2].filter(Boolean).join(' & ') : '';
+    const blocos=[]; const T=(t,font,color,lh,extra={})=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>blocos.push({l,font,color,lh,...extra})); };
+    const G=h=>blocos.push({gap:h});
+    G(40); T('TEMOS A HONRA DE CONVIDAR PARA O CASAMENTO DE','600 22px Inter, sans-serif','#8F6B34',40);
+    if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>blocos.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
+    else T(tituloEvento(ev),'600 64px "Cormorant Garamond", serif','#1C2536',76);
+    if (ev.data) T(ev.data,'italic 500 38px "Cormorant Garamond", serif','#2E3B54',52);
+    if (ev.local) T(ev.local,'26px Inter, sans-serif','#625B53',38);
+    G(30); blocos.push({orn:true,lh:30}); G(24);
+    T('CONVIDADO(A)','600 20px Inter, sans-serif','#625B53',34);
+    T(cv.nome,'600 54px "Cormorant Garamond", serif','#1C2536',64);
+    T(cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Convite individual','26px Inter, sans-serif','#625B53',40);
+    if (cv.mensagem){ G(16); T(cv.mensagem,'28px Inter, sans-serif','#1F1B17',40); }
+    G(30); const QR=520; blocos.push({qr:true,lh:QR+40}); G(20);
+    if (ev.mensagem){ T(ev.mensagem,'italic 500 36px "Cormorant Garamond", serif','#2E3B54',48); G(16); }
+    T('QR Code pessoal e intransferível — válido para uma única entrada.','22px Inter, sans-serif','#625B53',34);
+    G(70);
+    c.height = blocos.reduce((s,b)=>s+(b.gap||b.lh),0);
+    const bgG=x.createLinearGradient(0,0,0,c.height); bgG.addColorStop(0,'#FFFEFB'); bgG.addColorStop(1,'#F7EFE1'); x.fillStyle=bgG; x.fillRect(0,0,W,c.height);
+    const gold=x.createLinearGradient(0,0,W,c.height); gold.addColorStop(0,'#7E5D2B'); gold.addColorStop(.3,'#C9A464'); gold.addColorStop(.5,'#F6E7BE'); gold.addColorStop(.7,'#C9A464'); gold.addColorStop(1,'#8F6B34');
+    x.strokeStyle=gold; x.lineWidth=5; x.strokeRect(30,30,W-60,c.height-60); x.lineWidth=1.5; x.strokeStyle='rgba(201,164,100,.6)'; x.strokeRect(46,46,W-92,c.height-92);
+    x.textAlign='center'; x.textBaseline='alphabetic'; let y=0;
+    for (const b of blocos){
+      if (b.gap){ y+=b.gap; continue; }
+      if (b.orn){ x.fillStyle='#C9A464'; x.font='28px serif'; x.fillText('✦',W/2,y+24); x.fillRect(W/2-170,y+14,120,1.5); x.fillRect(W/2+50,y+14,120,1.5); y+=b.lh; continue; }
+      if (b.qr){ const qx=(W-QR)/2; x.shadowColor='rgba(40,30,15,.18)'; x.shadowBlur=30; x.shadowOffsetY=12; x.fillStyle='#fff'; x.fillRect(qx-22,y,QR+44,QR+44); x.shadowColor='transparent'; x.imageSmoothingEnabled=false; x.drawImage(q,qx,y+22,QR,QR); y+=b.lh+22; continue; }
+      if (b.nome){
+        x.font=b.font; const by=y+b.lh-34;
+        if (ev.nome3d!==false){ for(let i=7;i>=1;i--){ x.fillStyle=`rgb(${96+i*3},${70+i*2},${30+i})`; x.fillText(b.l,W/2+i,by+i); } x.shadowColor='rgba(40,25,5,.3)'; x.shadowBlur=18; x.shadowOffsetY=10; }
+        const g2=x.createLinearGradient(W/2-350,0,W/2+350,0); g2.addColorStop(0,'#8F6B34'); g2.addColorStop(.3,'#D9B877'); g2.addColorStop(.5,'#FBEFCB'); g2.addColorStop(.7,'#C9A464'); g2.addColorStop(1,'#8F6B34');
+        x.fillStyle=g2; x.fillText(b.l,W/2,by); x.shadowColor='transparent'; y+=b.lh; continue;
+      }
+      x.font=b.font; x.fillStyle=b.color; y+=b.lh; x.fillText(b.l,W/2,y-12);
+    }
+    const blob = await new Promise(r=>c.toBlob(r,'image/png'));
+    const nome = `convite-${cv.nome.replace(/\s+/g,'-')}.png`;
+    const f = new File([blob], nome, {type:'image/png'});
+    if (navigator.canShare && navigator.canShare({files:[f]})) { try { await navigator.share({files:[f], title:'Meu convite'}); return; } catch(e){ if(e.name==='AbortError') return; } }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+    toast('Convite salvo');
+  } catch(e){ toast('Não foi possível gerar a imagem'); }
+  finally { btn.disabled = false; }
 }
 
-/* ---------------- LOGIN ---------------- */
-const campoSenha = (id, ph) => `<input id="${id}" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" style="margin:6px 0 10px;font-size:20px;text-align:center">`;
-async function viewSetup(){
-  app.innerHTML = `<div class="wrap"><div class="card" style="margin-top:30px">
-    <h1 style="margin-bottom:4px">Primeiro acesso</h1>
-    <p class="muted">Crie as duas senhas do sistema (mínimo 4 letras ou números).</p>
-    <label>Sua senha (painel dos noivos)</label>${campoSenha('sa','Ex.: lucas2026')}
-    <label>Senha do porteiro</label>${campoSenha('sp','Ex.: portaria14')}
-    <button class="btn gold full" id="criar" style="margin-top:6px">Criar senhas e entrar</button>
-    <p id="err" class="muted" style="color:var(--bad);margin-top:10px"></p></div></div>`;
+/* =================== LOGIN / PRIMEIRO ACESSO =================== */
+const campo = (id, ph, extra='') => `<input class="in" id="${id}" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>`;
+function viewSetup(){
+  app.innerHTML = appbar({title:'Primeiro acesso', sub:'Painel dos noivos', back:''}) + `<div class="page"><div class="card section">
+    ${rings()}
+    <h1 style="text-align:center;margin-top:12px">Bem-vindos</h1>
+    <p class="muted" style="text-align:center;margin-top:6px">Crie as duas senhas do sistema. Use pelo menos 4 letras ou números.</p>
+    <label class="f" for="sa">Sua senha (Painel dos Noivos)</label>${campo('sa','Ex.: ana2026')}
+    <label class="f" for="sp">Senha do porteiro</label>${campo('sp','Ex.: portaria14')}
+    <p class="hint">As senhas precisam ser diferentes. Você poderá alterá-las depois em "Evento".</p>
+    <button class="btn gold full" id="criar" style="margin-top:20px">${ic('lock')} Criar senhas e entrar</button>
+    <p id="err" role="alert" style="color:var(--bad);margin-top:12px;text-align:center"></p></div></div>`;
+  ligaVoltar();
   $('#criar').onclick = async () => {
     const a=$('#sa').value.trim(), p=$('#sp').value.trim();
-    try { await rpc('cas_setup',{p_admin:a,p_portaria:p}); store.set('cas_pin_admin',a); toast('Senhas criadas!'); viewAdmin(a); }
+    try { await rpc('cas_setup',{p_admin:a,p_portaria:p}); store.set('cas_pin_admin',a); toast('Senhas criadas com sucesso'); A.data=null; location.hash='#admin/evento'; }
     catch(e){ $('#err').textContent=e.message; }
   };
 }
-async function viewLogin(papel){
-  stopScanner();
-  const saved = store.get('cas_pin_'+papel);
-  if (saved) return papel==='admin' ? viewAdmin(saved) : viewPortaria(saved);
-  if (papel==='admin') { try { if (!(await rpc('cas_configurado'))) return viewSetup(); } catch(e){} }
-  app.innerHTML = `<div class="wrap"><div class="card" style="margin-top:40px">
-    <a href="#" class="muted" style="text-decoration:none">← voltar</a>
-    <h1 style="margin:12px 0 4px">${papel==='admin'?'Administração':'Portaria'}</h1>
-    <p class="muted">Digite a senha de acesso</p>
-    ${campoSenha('pin','Senha')}
-    <button class="btn full" id="entrar">Entrar</button>
-    <p id="err" class="muted" style="color:var(--bad);margin-top:10px"></p></div></div>`;
+function viewLogin(papel, onOk){
+  const adm = papel==='admin';
+  app.innerHTML = appbar({title: adm?'Painel dos Noivos':'Portaria', sub:'Acesso restrito', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
+    <div style="width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522">${ic(adm?'heart':'qr')}</div>
+    <h1 style="text-align:center">${adm?'Painel dos Noivos':'Portaria'}</h1>
+    <p class="muted" style="text-align:center;margin-top:4px">Digite a senha de acesso</p>
+    <label class="f sr" for="pin">Senha</label>${campo('pin','Senha','style="text-align:center;font-size:20px;margin-top:18px" enterkeyhint="go"')}
+    <button class="btn primary full" id="entrar" style="margin-top:16px">Entrar</button>
+    <p id="err" role="alert" style="color:var(--bad);margin-top:12px;text-align:center"></p></div></div>`;
+  ligaVoltar();
   const go = async () => {
-    const pin = $('#pin').value.trim();
+    const pin = $('#pin').value.trim(); if(!pin) return;
+    $('#entrar').disabled = true;
     try {
       const r = await rpc('cas_login',{p_pin:pin});
-      if (!r || (papel==='admin' && r!=='admin')) { $('#err').textContent='Senha incorreta'; return; }
-      store.set('cas_pin_'+papel, pin);
-      papel==='admin' ? viewAdmin(pin) : viewPortaria(pin);
+      if (!r || (adm && r!=='admin')) { $('#err').textContent='Senha incorreta. Tente novamente.'; return; }
+      store.set('cas_pin_'+papel, pin); onOk(pin);
     } catch(e){ $('#err').textContent = e.message; }
+    finally { const b=$('#entrar'); if(b) b.disabled=false; }
   };
-  $('#entrar').onclick = go; $('#pin').onkeydown = e => e.key==='Enter' && go(); $('#pin').focus();
+  $('#entrar').onclick = go; $('#pin').onkeydown = e => e.key==='Enter' && go(); setTimeout(()=>$('#pin')?.focus(),100);
 }
-function sair(papel){ store.del('cas_pin_'+papel); stopScanner(); location.hash=''; route(); }
+function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=null; location.hash=''; }
 
-/* ---------------- PORTARIA ---------------- */
-let scanner=null, busy=false, resumoTimer=null;
-function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector(`script[src="${src}"]`)) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
-function stopScanner(){ clearInterval(resumoTimer); if(scanner){ try{scanner.stop().catch(()=>{})}catch(e){} scanner=null; } }
-
-async function viewPortaria(pin){
-  app.innerHTML = `<div class="wrap">
-    <div class="top"><div><h1 style="font-size:28px">Portaria</h1></div>
-      <button class="btn ghost sm" id="sair">Sair</button></div>
-    <div class="stat"><div class="row" style="justify-content:space-between"><div><b id="pIn">–</b><span>pessoas entraram</span></div><div style="text-align:right"><b id="pTot" style="color:var(--muted)">–</b><span>esperadas</span></div></div><div class="bar"><i id="pBar" style="width:0"></i></div></div>
-    <div class="tabs"><button class="tab on" data-t="scan">📷 Ler QR</button><button class="tab" data-t="lista">📋 Lista de convidados</button></div>
-    <div id="tScan"><div id="reader"></div><p class="muted" style="text-align:center;margin-top:10px">Aponte a câmera para o QR Code do convidado</p>
-      <div id="ultimos" class="card" style="margin-top:12px;padding:8px 14px"></div></div>
-    <div id="tLista" class="hidden"><input id="q" placeholder="Buscar nome…">
-      <div class="tabs"><button class="tab on" data-pf="todos">Todos</button><button class="tab" data-pf="fora">Faltam</button><button class="tab" data-pf="dentro">Entraram</button></div>
-      <div id="res" class="card" style="padding:8px 14px"></div></div>
+/* =================== PORTARIA =================== */
+const P = { pin:null, lista:[], filtro:'todos', ultimo:null, busy:false, scanner:null };
+async function entrarPortaria(sub){
+  const ev = await evento(); pintaFundo(ev);
+  const pin = store.get('cas_pin_portaria');
+  if (!pin) return viewLogin('portaria', () => route());
+  P.pin = pin; viewPortaria(sub);
+}
+function viewPortaria(sub){
+  const scan = sub !== 'lista';
+  app.innerHTML = appbar({title:'Portaria', sub:'Recepção', back:'', right:`<button class="iconbtn" id="sair" aria-label="Sair da portaria">${ic('logout')}</button>`}) + `<div class="page">
+    <div class="stat hl section"><div class="row" style="justify-content:space-between;align-items:flex-end">
+      <div><b id="pIn">–</b><span>pessoas já entraram</span></div><div style="text-align:right"><b id="pTot" style="color:#fff;opacity:.85">–</b><span>esperadas</span></div></div>
+      <div class="prog"><i id="pBar" style="width:0"></i></div></div>
+    <div class="seg" role="tablist"><button role="tab" aria-selected="${scan}" data-go="#portaria">${ic('qr')} Ler QR Code</button><button role="tab" aria-selected="${!scan}" data-go="#portaria/lista">${ic('list')} Lista</button></div>
+    ${scan ? `<div id="reader" aria-label="Câmera"></div>
+      <p class="muted" style="text-align:center;margin-top:10px">Aponte a câmera para o QR Code do convidado</p>
+      <div class="section-title">Últimas entradas</div><div class="glist" id="ultimos"></div>`
+    : `<label class="sr" for="q">Buscar convidado</label><div style="position:relative">${campo('q','Buscar pelo nome…','style="padding-left:46px"')}<span style="position:absolute;left:14px;top:14px;color:var(--muted)">${ic('search')}</span></div>
+      <div class="chips" style="margin-top:10px" role="group" aria-label="Filtro">
+        <button class="chip" data-pf="todos" aria-pressed="${P.filtro==='todos'}">Todos</button><button class="chip" data-pf="fora" aria-pressed="${P.filtro==='fora'}">Aguardando</button><button class="chip" data-pf="dentro" aria-pressed="${P.filtro==='dentro'}">Já entraram</button></div>
+      <div class="glist" id="res"></div>`}
   </div>`;
-  P.pin = pin;
-  $('#sair').onclick = () => sair('portaria');
-  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
-    document.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));
-    const scan = b.dataset.t==='scan';
-    $('#tScan').classList.toggle('hidden',!scan); $('#tLista').classList.toggle('hidden',scan);
-    if (scan) startScan(pin); else { stopCam(); renderPLista(); }
-  });
-  document.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pf]').forEach(x=>x.classList.toggle('on',x===b)); P.filtro=b.dataset.pf; renderPLista(); });
-  $('#q').oninput = () => renderPLista();
-  atualizaPortaria(); resumoTimer = setInterval(atualizaPortaria, 8000);
-  startScan(pin);
+  ligaVoltar();
+  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair da portaria?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) { pararCam(); sair('portaria'); } };
+  $$('[data-go]').forEach(b => b.onclick = () => { location.hash = b.dataset.go; });
+  $$('[data-pf]').forEach(b => b.onclick = () => { P.filtro=b.dataset.pf; $$('[data-pf]').forEach(x=>x.setAttribute('aria-pressed', x===b)); renderPLista(); });
+  if ($('#q')) $('#q').oninput = renderPLista;
+  atualizaPortaria(); const t = setInterval(atualizaPortaria, 7000); limpar.push(()=>clearInterval(t));
+  if (scan) iniciarCam(); limpar.push(pararCam);
 }
-const P = { pin:null, lista:[], filtro:'todos', ultimo:null };
 async function atualizaPortaria(){
   try {
     const L = await rpc('cas_portaria_lista',{p_pin:P.pin});
-    if (L === null) { sair('portaria'); return; }
+    if (L === null) { toast('Senha da portaria alterada. Entre novamente.'); sair('portaria'); return; }
     P.lista = L;
     const tot=L.reduce((s,g)=>s+g.pessoas,0), dentro=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
-    $('#pIn').textContent=dentro; $('#pTot').textContent=tot; $('#pBar').style.width=(tot?100*dentro/tot:0)+'%';
+    if ($('#pIn')) { $('#pIn').textContent=dentro; $('#pTot').textContent=tot; $('#pBar').style.width=(tot?100*dentro/tot:0)+'%'; }
     renderPLista();
   } catch(e){}
 }
-const linhaP = g => `<div class="guest" ${P.ultimo===g.nome?'style="background:#eef8f1;border-radius:10px"':''}><span class="dot ${g.entrou_em?'in':''}"></span><div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s) ${g.entrou_em?'• entrou às '+horaCurta(g.entrou_em):''}</div></div>
-    ${g.entrou_em?'<span class="badge ok">✓ Entrou</span>':`<button class="btn sm" data-id="${g.id}">Liberar</button>`}</div>`;
+const linhaP = g => `<div class="gi ${P.ultimo===g.id?'flash':''}"><span class="av ${g.entrou_em?'in':''}">${g.entrou_em?ic('check'):esc(iniciais(g.nome))}</span>
+  <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas>1?g.pessoas+' pessoas':'1 pessoa'}${g.entrou_em?' • entrou às '+horaCurta(g.entrou_em):''}</div></div>
+  ${g.entrou_em?`<span class="pill ok">Entrou</span>`:`<button class="btn primary sm" data-lib="${g.id}" aria-label="Liberar entrada de ${esc(g.nome)}">Liberar</button>`}</div>`;
 function renderPLista(){
-  if (!$('#res')) return;
-  const ult = P.lista.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em)).slice(0,5);
-  $('#ultimos').innerHTML = `<h2 style="margin:8px 0 4px">Últimas entradas</h2>` + (ult.length ? ult.map(linhaP).join('') : '<p class="muted" style="padding:8px 0">Ninguém entrou ainda</p>');
-  const q = ($('#q').value||'').toLowerCase().trim();
-  let L = P.lista;
-  if (P.filtro==='fora') L=L.filter(g=>!g.entrou_em);
-  if (P.filtro==='dentro') L=L.filter(g=>g.entrou_em);
-  if (q) L=L.filter(g=>g.nome.toLowerCase().includes(q));
-  $('#res').innerHTML = L.length ? L.map(linhaP).join('') : '<p class="muted" style="padding:10px 0">Nenhum convidado aqui</p>';
-  document.querySelectorAll('#res button[data-id], #ultimos button[data-id]').forEach(b=>b.onclick=async()=>{
-    const g = P.lista.find(x=>x.id===b.dataset.id);
-    if(!confirm(`Liberar a entrada de ${g?.nome} sem QR Code?`)) return;
-    const r = await rpc('cas_entrada_manual',{p_pin:P.pin,p_id:b.dataset.id}); P.ultimo=r.nome; mostraResultado(r, atualizaPortaria);
+  const ult=$('#ultimos'), res=$('#res');
+  if (ult) { const u=P.lista.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em)).slice(0,6); ult.innerHTML = u.length ? u.map(linhaP).join('') : '<div class="empty">Ninguém entrou ainda</div>'; }
+  if (res) {
+    const q=($('#q').value||'').toLowerCase().trim(); let L=P.lista;
+    if (P.filtro==='fora') L=L.filter(g=>!g.entrou_em); if (P.filtro==='dentro') L=L.filter(g=>g.entrou_em);
+    if (q) L=L.filter(g=>g.nome.toLowerCase().includes(q));
+    res.innerHTML = L.length ? L.map(linhaP).join('') : '<div class="empty">Nenhum convidado encontrado</div>';
+  }
+  $$('[data-lib]').forEach(b=>b.onclick=async()=>{
+    const g=P.lista.find(x=>x.id===b.dataset.lib);
+    if (!await confirmar({titulo:'Liberar sem QR Code?', texto:`Confirme a entrada de ${g.nome}${g.pessoas>1?` (${g.pessoas} pessoas)`:''}.`, ok:'Liberar entrada', icone:'door'})) return;
+    try { const r=await rpc('cas_entrada_manual',{p_pin:P.pin,p_id:g.id}); P.ultimo=g.id; resultado(r); atualizaPortaria(); } catch(e){ resultado({status:'erro'}); }
   });
 }
-function stopCam(){ if(scanner){ try{scanner.stop().catch(()=>{})}catch(e){} scanner=null; } }
-async function startScan(pin){
+async function iniciarCam(){
+  const box=$('#reader'); if(!box) return;
+  box.innerHTML='<div class="loading" style="min-height:300px;color:#C9CFDA"><div class="spin"></div>Abrindo câmera…</div>';
   try { await loadScript('https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'); }
-  catch(e){ $('#reader').innerHTML='<p style="color:#fff;padding:20px">Não foi possível carregar o leitor. Verifique a internet.</p>'; return; }
-  if (scanner) return;
-  scanner = new Html5Qrcode('reader');
-  try {
-    await scanner.start({facingMode:'environment'}, {fps:10, qrbox:{width:240,height:240}}, txt => onScan(pin, txt), ()=>{});
-  } catch(e){ scanner=null; $('#reader').innerHTML=`<p style="color:#fff;padding:20px">Sem acesso à câmera. Permita o uso da câmera no navegador e recarregue a página.<br><br><small>${esc(e?.message||e)}</small></p>`; }
+  catch(e){ box.innerHTML='<p style="color:#fff;padding:24px">Não foi possível carregar o leitor. Verifique a internet.</p>'; return; }
+  if (!$('#reader')) return;
+  box.innerHTML='';
+  P.scanner = new Html5Qrcode('reader');
+  try { await P.scanner.start({facingMode:'environment'}, {fps:12, qrbox:(w,h)=>{const s=Math.min(w,h)*.7; return {width:s,height:s};}}, txt=>lido(txt), ()=>{}); }
+  catch(e){ P.scanner=null; box.innerHTML=`<div style="color:#fff;padding:24px;text-align:center"><b>Sem acesso à câmera</b><p style="opacity:.8;margin-top:8px">Permita o uso da câmera nas configurações do navegador e toque abaixo.</p><button class="btn gold" style="margin-top:14px" onclick="iniciarCam()">Tentar novamente</button></div>`; }
 }
-function extraiToken(txt){ try { const u=new URL(txt); return u.searchParams.get('c'); } catch(e){ return /^[a-z0-9]{8,20}$/i.test(txt)?txt:null; } }
-async function onScan(pin, txt){
-  if (busy) return; busy = true;
-  const token = extraiToken(txt);
-  let r;
-  try { r = token ? await rpc('cas_validar',{p_pin:pin,p_token:token}) : {status:'invalido'}; }
-  catch(e){ r = {status:'erro', msg:e.message}; }
-  if (r.nome) P.ultimo = r.nome;
-  mostraResultado(r, atualizaPortaria);
+function pararCam(){ if(P.scanner){ const s=P.scanner; P.scanner=null; try{ s.stop().then(()=>s.clear()).catch(()=>{}); }catch(e){} } }
+function tokenDe(txt){ try { return new URL(txt).searchParams.get('c'); } catch(e){ return /^[a-z0-9]{8,20}$/i.test(txt)?txt:null; } }
+async function lido(txt){
+  if (P.busy) return; P.busy = true;
+  const t = tokenDe(txt); let r;
+  try { r = t ? await rpc('cas_validar',{p_pin:P.pin,p_token:t}) : {status:'invalido'}; } catch(e){ r={status:'erro'}; }
+  const g = P.lista.find(x=>x.nome===r.nome); if (g) P.ultimo=g.id;
+  resultado(r, ()=>{ P.busy=false; }); atualizaPortaria();
 }
-function beep(ok){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(); const g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=ok?880:220; g.gain.value=.2; o.start(); o.stop(c.currentTime+(ok?.18:.5)); }catch(e){} try{navigator.vibrate&&navigator.vibrate(ok?120:[200,100,200])}catch(e){} }
-function mostraResultado(r, cb){
+function som(ok){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.value=ok?880:240; g.gain.value=.25; o.start(); if(ok){ o.frequency.setValueAtTime(1320,c.currentTime+.12); } o.stop(c.currentTime+(ok?.25:.55)); }catch(e){} try{ navigator.vibrate && navigator.vibrate(ok?120:[220,100,220]); }catch(e){} }
+function resultado(r, cb){
   const m = {
-    ok:      ['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas>1?`${r.pessoas} pessoas`:'1 pessoa'],
-    ja_entrou:['warn','⚠','JÁ ENTROU', r.nome, `QR usado às ${horaCurta(r.entrou_em)} — não liberar novamente`],
-    invalido:['bad','✕','QR INVÁLIDO','', 'Este código não está na lista de convidados'],
-    pin_invalido:['bad','✕','SENHA INVÁLIDA','','Saia e entre novamente'],
-    erro:    ['bad','!','SEM CONEXÃO','', 'Verifique a internet e tente de novo']
+    ok:['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas>1?`Liberar ${r.pessoas} pessoas`:'Liberar 1 pessoa'],
+    ja_entrou:['warn','!','CONVITE JÁ UTILIZADO', r.nome, `Entrada registrada às ${horaCurta(r.entrou_em)}. Não liberar novamente.`],
+    invalido:['bad','✕','QR CODE INVÁLIDO','', 'Este código não pertence à lista de convidados.'],
+    pin_invalido:['bad','✕','SENHA INVÁLIDA','', 'Saia e entre novamente na portaria.'],
+    erro:['bad','!','SEM CONEXÃO','', 'Verifique a internet e tente novamente.']
   }[r.status] || ['bad','!','ERRO','',''];
-  beep(r.status==='ok');
-  const d=document.createElement('div'); d.className='result '+m[0];
-  d.innerHTML=`<div class="ic">${m[1]}</div><div class="t">${m[2]}</div><div class="n">${esc(m[3])}</div><div class="s">${esc(m[4])}</div><div class="s" style="margin-top:30px;font-size:14px">Toque para continuar</div>`;
+  som(r.status==='ok');
+  const d=document.createElement('div'); d.className='result '+m[0]; d.setAttribute('role','alert');
+  d.innerHTML=`<div class="ic">${m[1]}</div><div class="t">${m[2]}</div>${m[3]?`<div class="n">${esc(m[3])}</div>`:''}<div class="s">${esc(m[4])}</div><div class="tap">Toque na tela para continuar</div>`;
   document.body.appendChild(d);
-  const fechar=()=>{ d.remove(); busy=false; cb&&cb(); };
-  d.onclick=fechar; setTimeout(()=>d.isConnected&&fechar(), r.status==='ok'?2500:5000);
-}
-async function buscar(pin){
-  const q=$('#q').value.trim(); const box=$('#res');
-  if (q.length<2){ box.innerHTML='<p class="muted" style="padding:10px 0">Digite pelo menos 2 letras</p>'; return; }
-  const l = await rpc('cas_buscar',{p_pin:pin,p_termo:q});
-  box.innerHTML = l.length ? l.map(g=>`<div class="guest"><span class="dot ${g.entrou_em?'in':''}"></span><div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s) ${g.entrou_em?'• entrou às '+horaCurta(g.entrou_em):''}</div></div>
-    ${g.entrou_em?'<span class="badge ok">Entrou</span>':`<button class="btn sm" data-id="${g.id}">Liberar</button>`}</div>`).join('') : '<p class="muted" style="padding:10px 0">Ninguém encontrado com esse nome</p>';
-  box.querySelectorAll('button[data-id]').forEach(b=>b.onclick=async()=>{
-    if(!confirm('Confirmar entrada manual deste convidado?')) return;
-    const r = await rpc('cas_entrada_manual',{p_pin:pin,p_id:b.dataset.id}); mostraResultado(r, ()=>buscar(pin));
-  });
+  const fim=()=>{ if(!d.isConnected) return; d.remove(); cb&&cb(); };
+  d.onclick=fim; setTimeout(fim, r.status==='ok'?2600:5000);
 }
 
-/* ---------------- ADMIN ---------------- */
-let A = { pin:null, data:null, filtro:'todos', busca:'' }, adminTimer=null;
-async function viewAdmin(pin){
+/* =================== PAINEL DOS NOIVOS =================== */
+const A = { pin:null, data:null, filtro:'todos', busca:'', sel:null };
+async function entrarAdmin(sub){
+  const ev = await evento(); pintaFundo(ev);
+  const pin = store.get('cas_pin_admin');
+  if (!pin) {
+    let conf = true; try { conf = await rpc('cas_configurado'); } catch(e){}
+    if (!conf) return viewSetup();
+    return viewLogin('admin', () => route());
+  }
   A.pin = pin;
-  app.innerHTML = `<div class="wrap wide">
-    <div class="top"><div><div class="muted" style="font-size:12px;letter-spacing:2px">ADMINISTRAÇÃO</div><h1 id="aTit" style="font-size:30px">…</h1></div>
-      <div class="row"><button class="btn ghost sm" id="cfg">⚙️ Evento</button><button class="btn ghost sm" id="sair">Sair</button></div></div>
-    <div class="stats" id="stats"></div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start">
-      <div class="card">
-        <h2>📥 Importar lista pronta</h2>
-        <p class="muted" style="font-size:13px">Planilha Excel (.xlsx), CSV ou arquivo de texto. Coluna 1 = nome, coluna 2 = nº de pessoas, coluna 3 = telefone.</p>
-        <label class="btn gold full" style="margin:10px 0 0;color:#fff;font-size:15px">📂 Escolher arquivo da lista<input type="file" id="arq" accept=".xlsx,.xls,.csv,.txt,.ods" class="hidden"></label>
-        <p id="arqInfo" class="muted" style="font-size:13px;margin-top:6px"></p>
-        <div class="divider">ou digite</div>
-        <h2>➕ Adicionar convidados</h2>
-        <p class="muted" style="font-size:13px">Um por linha. Formato: <b>Nome ; pessoas ; telefone</b> (pessoas e telefone são opcionais)</p>
-        <textarea id="lista" placeholder="Maria Silva ; 2 ; 82999998888&#10;João Souza ; 1&#10;Família Santos ; 4"></textarea>
-        <button class="btn full" id="add" style="margin-top:10px">Adicionar à lista</button>
-        <div class="divider">✦</div>
-        <h2>Link da portaria</h2>
-        <p class="muted" style="font-size:13px">Envie para o porteiro abrir no celular. Senha do porteiro: <b id="pinP"></b></p>
-        <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="cpPort">Copiar link</button><button class="btn wa sm" id="waPort">Enviar no WhatsApp</button></div>
-      </div>
-      <div class="card" style="grid-column:span 2;min-width:0">
-        <div class="row" style="justify-content:space-between"><h2 style="margin:0">Convidados</h2><button class="btn ghost sm" id="csv">⬇️ Exportar</button></div>
-        <input id="busca" placeholder="Buscar nome…" style="margin-top:10px">
-        <div class="tabs"><button class="tab on" data-f="todos">Todos</button><button class="tab" data-f="dentro">Entraram</button><button class="tab" data-f="fora">Faltam</button></div>
-        <div id="lst"></div>
-      </div>
-    </div></div>`;
-  $('#sair').onclick=()=>{ clearInterval(adminTimer); sair('admin'); };
-  $('#cfg').onclick=modalConfig;
-  $('#add').onclick=adicionar;
-  $('#arq').onchange=importarArquivo;
-  $('#csv').onclick=exportar;
-  $('#busca').oninput=e=>{ A.busca=e.target.value.toLowerCase(); renderLista(); };
-  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b)); A.filtro=b.dataset.f; renderLista(); });
-  const portLink = BASE+'#portaria';
-  $('#cpPort').onclick=()=>copiar(portLink);
-  $('#waPort').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Link da portaria do casamento: ${portLink}\nSenha: ${A.data?.config?.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado. Verde = liberado, amarelo = já entrou, vermelho = inválido.`));
-  await carregar(); clearInterval(adminTimer); adminTimer=setInterval(()=>{ if(location.hash==='#admin' && !document.querySelector('.modal')) carregar(); else if(location.hash!=='#admin') clearInterval(adminTimer); }, 10000);
+  if (!A.data) { app.innerHTML = `<div class="loading"><div class="spin dark"></div>Carregando…</div>`; if(!(await carregar())) return; }
+  viewAdmin(sub);
 }
 async function carregar(){
-  try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); }
-  catch(e){ toast(e.message); if(/Senha inv/.test(e.message)) sair('admin'); return; }
-  const c=A.data.config, L=A.data.convidados;
-  $('#aTit').textContent=c.titulo; $('#pinP').textContent=c.pin_portaria;
-  const pes=L.reduce((s,g)=>s+g.pessoas,0), pin_=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
-  $('#stats').innerHTML=`
-    <div class="stat"><b>${L.length}</b><span>convites</span></div>
-    <div class="stat"><b>${pes}</b><span>pessoas esperadas</span></div>
-    <div class="stat"><b style="color:var(--ok)">${pin_}</b><span>pessoas já entraram</span><div class="bar"><i style="width:${pes?100*pin_/pes:0}%"></i></div></div>
-    <div class="stat"><b>${pes-pin_}</b><span>ainda faltam</span></div>`;
-  renderLista();
+  try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); return true; }
+  catch(e){ if (/Senha inv/.test(e.message)) { toast('Sessão expirada. Entre novamente.'); sair('admin'); } else toast(e.message); return false; }
 }
-function renderLista(){
-  let L=A.data.convidados;
+function tabbar(sub){
+  const t=(k,href,icon,label)=>`<a href="${href}" ${sub===k?'aria-current="page"':''}>${ic(icon)}<span>${label}</span></a>`;
+  return `<nav class="tabbar" aria-label="Menu do painel"><div class="in">${t('lista','#admin','users','Convidados')}${t('adicionar','#admin/adicionar','plus','Adicionar')}${t('evento','#admin/evento','sliders','Evento')}</div></nav>`;
+}
+function viewAdmin(sub){
+  const c=A.data.config;
+  const titulos={lista:'Convidados',adicionar:'Adicionar',evento:'Evento'};
+  const back = sub==='lista' ? '' : '#admin';
+  app.innerHTML = appbar({title:titulos[sub]||'Painel', sub:temNomes(c)?[c.noivo1,c.noivo2].filter(Boolean).join(' & '):'Painel dos noivos', back, backLabel: sub==='lista'?'Início':'Voltar',
+    right:`<button class="iconbtn" id="sair" aria-label="Sair do painel">${ic('logout')}</button>`}) +
+    `<div class="page wide" id="body"></div>` + tabbar(sub);
+  ligaVoltar();
+  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair do painel?', texto:'Será preciso digitar sua senha novamente.', ok:'Sair', icone:'logout'})) sair('admin'); };
+  if (sub==='adicionar') return telaAdicionar();
+  if (sub==='evento') return telaEvento();
+  telaLista();
+  const t=setInterval(async()=>{ if(!document.querySelector('.overlay') && !A.sel && await carregar()) { renderStats(); renderLista(); } }, 10000);
+  limpar.push(()=>clearInterval(t));
+}
+
+/* --- lista --- */
+function telaLista(){
+  $('#body').innerHTML = `
+    <div class="stats" id="stats"></div>
+    <div class="section-title">Lista de convidados</div>
+    <div class="row">
+      <div style="position:relative;flex:1"><label class="sr" for="busca">Buscar convidado</label>${campo('busca','Buscar pelo nome…','style="padding-left:46px"')}<span style="position:absolute;left:14px;top:14px;color:var(--muted)">${ic('search')}</span></div>
+      <button class="iconbtn" id="selBtn" aria-label="Selecionar vários para excluir" style="height:50px;width:50px">${ic('select')}</button>
+      <button class="iconbtn" id="csv" aria-label="Exportar lista para Excel" style="height:50px;width:50px">${ic('download')}</button>
+    </div>
+    <div class="chips" style="margin-top:10px" role="group" aria-label="Filtro">
+      <button class="chip" data-f="todos" aria-pressed="${A.filtro==='todos'}">Todos</button>
+      <button class="chip" data-f="fora" aria-pressed="${A.filtro==='fora'}">Aguardando</button>
+      <button class="chip" data-f="dentro" aria-pressed="${A.filtro==='dentro'}">Já entraram</button>
+    </div>
+    <div class="glist" id="lst"></div>`;
+  const b=$('#busca'); b.value=A.busca; b.oninput=e=>{ A.busca=e.target.value.toLowerCase(); renderLista(); };
+  $$('[data-f]').forEach(x=>x.onclick=()=>{ A.filtro=x.dataset.f; $$('[data-f]').forEach(y=>y.setAttribute('aria-pressed',y===x)); renderLista(); });
+  $('#csv').onclick=exportar;
+  $('#selBtn').onclick=()=> A.sel ? fimSel() : iniciaSel();
+  renderStats(); renderLista();
+}
+function renderStats(){
+  const L=A.data.convidados, pes=L.reduce((s,g)=>s+g.pessoas,0), den=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
+  const el=$('#stats'); if(!el) return;
+  el.innerHTML=`<div class="stat hl"><b>${den}</b><span>pessoas já entraram</span><div class="prog"><i style="width:${pes?100*den/pes:0}%"></i></div></div>
+    <div class="stat"><b>${pes}</b><span>pessoas esperadas</span></div>
+    <div class="stat"><b>${L.length}</b><span>convites enviados</span></div>
+    <div class="stat"><b>${pes-den}</b><span>ainda faltam</span></div>`;
+}
+function filtrada(){ let L=A.data.convidados;
   if(A.filtro==='dentro') L=L.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em));
   if(A.filtro==='fora') L=L.filter(g=>!g.entrou_em);
-  if(A.busca) L=L.filter(g=>g.nome.toLowerCase().includes(A.busca));
-  $('#lst').innerHTML = L.length ? L.map(g=>`<div class="guest">
-    <span class="dot ${g.entrou_em?'in':''}"></span>
-    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s)${g.telefone?' • '+esc(g.telefone):''}${g.entrou_em?` • <b style="color:var(--ok)">entrou ${hora(g.entrou_em)}</b>${g.entrada_manual?' (manual)':''}`:''}</div></div>
-    <div class="acts">
-      <button class="btn wa sm" data-a="wa" data-id="${g.id}" title="Enviar convite">WhatsApp</button>
-      <button class="btn ghost sm" data-a="mais" data-id="${g.id}">⋯</button>
-    </div></div>`).join('') : '<p class="muted" style="padding:16px 0">Nenhum convidado aqui ainda.</p>';
-  $('#lst').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const g=A.data.convidados.find(x=>x.id===b.dataset.id); b.dataset.a==='wa'?enviarWa(g):modalConvidado(g); });
+  if(A.busca) L=L.filter(g=>g.nome.toLowerCase().includes(A.busca)); return L; }
+function renderLista(){
+  const el=$('#lst'); if(!el) return; const L=filtrada();
+  el.innerHTML = L.length ? L.map(g=>`<div class="gi">
+    ${A.sel?`<input type="checkbox" class="chk" data-ck="${g.id}" ${A.sel.has(g.id)?'checked':''} aria-label="Selecionar ${esc(g.nome)}">`:''}
+    <span class="av ${g.entrou_em?'in':''}">${g.entrou_em?ic('check'):esc(iniciais(g.nome))}</span>
+    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas>1?g.pessoas+' pessoas':'1 pessoa'}${g.telefone?' • '+esc(g.telefone):''}</div>
+      <div style="margin-top:3px">${g.entrou_em?`<span class="pill ok">Entrou ${hora(g.entrou_em)}${g.entrada_manual?' (manual)':''}</span>`:'<span class="pill wait">Aguardando</span>'}</div></div>
+    ${A.sel?'':`<div class="acts">
+      <button class="iconbtn wa" data-a="wa" data-id="${g.id}" aria-label="Enviar convite de ${esc(g.nome)} pelo WhatsApp">${ic('wa')}</button>
+      <button class="iconbtn" data-a="ed" data-id="${g.id}" aria-label="Editar ${esc(g.nome)}">${ic('edit')}</button>
+      <button class="iconbtn danger" data-a="rm" data-id="${g.id}" aria-label="Excluir ${esc(g.nome)}">${ic('trash')}</button></div>`}
+  </div>`).join('') : `<div class="empty">${A.data.convidados.length?'Nenhum convidado neste filtro':`Nenhum convidado cadastrado ainda.<br><br><a class="btn gold" href="#admin/adicionar">${ic('plus')} Adicionar convidados</a>`}</div>`;
+  $$('[data-a]',el).forEach(b=>b.onclick=()=>{ const g=A.data.convidados.find(x=>x.id===b.dataset.id); ({wa:enviarWa,ed:editar,rm:excluir})[b.dataset.a](g); });
+  $$('[data-ck]',el).forEach(c=>c.onchange=()=>{ c.checked?A.sel.add(c.dataset.ck):A.sel.delete(c.dataset.ck); barraSel(); });
 }
-function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nVocê está convidado(a) para ${c.titulo}${c.data?' – '+c.data:''}${c.local?'\n📍 '+c.local:''}.\n\nAbra seu convite e apresente o QR Code na entrada:\n${linkConvite(g.token)}\n\n${g.pessoas>1?`Seu convite é válido para ${g.pessoas} pessoas. `:''}O QR Code é pessoal e vale uma única entrada.`; }
-function enviarWa(g){ const tel=(g.telefone||'').replace(/\D/g,''); const num = tel ? (tel.length<=11?'55'+tel:tel) : ''; window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgConvite(g))}`); }
-async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast('Copiado!'); }catch(e){ prompt('Copie:',t); } }
+function iniciaSel(){ A.sel=new Set(); renderLista(); barraSel(); $('.tabbar').classList.add('hidden'); }
+function fimSel(){ A.sel=null; $$('.selbar').forEach(e=>e.remove()); $('.tabbar')?.classList.remove('hidden'); renderLista(); }
+function barraSel(){
+  let b=$('.selbar'); if(!b){ b=document.createElement('div'); b.className='selbar'; document.body.appendChild(b); limpar.push(()=>{A.sel=null;}); }
+  const n=A.sel.size, todos=filtrada();
+  b.innerHTML=`<button class="btn sm line" data-c>Cancelar</button><button class="btn sm line" data-t>${n===todos.length&&n?'Desmarcar':'Marcar todos'}</button><button class="btn sm danger solid" data-x ${n?'':'disabled'}>${ic('trash')} Excluir (${n})</button>`;
+  $('[data-c]',b).onclick=fimSel;
+  $('[data-t]',b).onclick=()=>{ if(A.sel.size===todos.length) A.sel.clear(); else todos.forEach(g=>A.sel.add(g.id)); renderLista(); barraSel(); };
+  $('[data-x]',b).onclick=async()=>{
+    if(!await confirmar({titulo:`Excluir ${n} convidado(s)?`, texto:'Os convites selecionados deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir', perigo:true})) return;
+    try { const k=await rpc('cas_admin_remover_varios',{p_pin:A.pin,p_ids:[...A.sel]}); toast(`${k} convidado(s) excluído(s)`); await carregar(); fimSel(); renderStats(); } catch(e){ toast(e.message); }
+  };
+}
+function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nCom muita alegria, convidamos você para ${tituloEvento(c)}${c.data?'\n📅 '+c.data:''}${c.local?'\n📍 '+c.local:''}\n\nAbra seu convite e apresente o QR Code na recepção:\n${linkConvite(g.token)}\n\n${g.pessoas>1?`Convite válido para ${g.pessoas} pessoas. `:''}O QR Code é pessoal e vale para uma única entrada.`; }
+function enviarWa(g){ const tel=(g.telefone||'').replace(/\D/g,''); const num = tel ? (tel.length<=11?'55'+tel:tel) : ''; window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgConvite(g))}`,'_blank'); }
+async function excluir(g){
+  if(!await confirmar({titulo:`Excluir ${g.nome}?`, texto:'O convite e o QR Code deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir', perigo:true})) return;
+  try { await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); toast('Convidado excluído'); await carregar(); renderStats(); renderLista(); } catch(e){ toast(e.message); }
+}
+function editar(g){
+  const link=linkConvite(g.token), img=qrImg(link,6);
+  const s=sheet(g.nome, `
+    <div class="card" style="text-align:center;padding:16px">
+      <div class="qrplate" style="margin:4px 0 12px;transform:none"><i></i><i></i><i></i><i></i><img src="${img}" alt="QR Code de ${esc(g.nome)}" style="width:170px"></div>
+      <div class="grid2"><button class="btn line sm" data-cp>${ic('link')} Copiar link</button><a class="btn line sm" href="${link}" target="_blank" rel="noopener">${ic('share')} Ver convite</a></div>
+      <button class="btn wa sm full" data-wa style="margin-top:10px">${ic('wa')} Enviar pelo WhatsApp</button>
+    </div>
+    <div class="section-title">Dados do convidado</div>
+    <div class="card">
+      <label class="f" for="e_n">Nome</label><input class="in" id="e_n" value="${esc(g.nome)}">
+      <div class="grid2"><div><label class="f" for="e_p">Pessoas</label><input class="in" id="e_p" type="number" inputmode="numeric" min="1" max="20" value="${g.pessoas}"></div>
+      <div><label class="f" for="e_t">WhatsApp</label><input class="in" id="e_t" inputmode="tel" placeholder="82 99999-9999" value="${esc(g.telefone||'')}"></div></div>
+      <label class="f" for="e_m">Mensagem só para este convidado</label><textarea class="in" id="e_m" style="min-height:90px" placeholder="Ex.: Sua mesa é a de número 5.">${esc(g.mensagem||'')}</textarea>
+      <p class="hint">Aparece em destaque somente no convite desta pessoa.</p>
+      <button class="btn primary full" data-s style="margin-top:16px">${ic('check')} Salvar alterações</button>
+    </div>
+    <div style="display:grid;gap:10px;margin-top:14px">
+      ${g.entrou_em?`<button class="btn line full" data-u>${ic('undo')} Desfazer entrada (${hora(g.entrou_em)})</button>`:''}
+      <button class="btn danger full" data-r>${ic('trash')} Excluir convidado</button>
+    </div>`);
+  $('[data-cp]',s).onclick=()=>copiar(link);
+  $('[data-wa]',s).onclick=()=>enviarWa(g);
+  $('[data-s]',s).onclick=async e=>{ e.currentTarget.disabled=true; try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:$('#e_n',s).value,p_pessoas:parseInt($('#e_p',s).value)||1,p_telefone:$('#e_t',s).value,p_mensagem:$('#e_m',s).value}); s.fechar(); toast('Alterações salvas'); await carregar(); renderStats(); renderLista(); }catch(er){ toast(er.message); e.currentTarget.disabled=false; } };
+  const u=$('[data-u]',s); if(u) u.onclick=async()=>{ if(!await confirmar({titulo:'Desfazer entrada?', texto:'O QR Code deste convidado volta a valer para entrar.', ok:'Desfazer', icone:'undo'})) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); s.fechar(); toast('Entrada desfeita'); await carregar(); renderStats(); renderLista(); };
+  $('[data-r]',s).onclick=async()=>{ s.fechar(); excluir(g); };
+}
+function exportar(){
+  const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Situação','Horário de entrada','Entrada manual','Link do convite']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Entrou':'Aguardando',hora(g.entrou_em),g.entrada_manual?'Sim':'',linkConvite(g.token)]));
+  const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='convidados-casamento.csv'; a.click(); toast('Lista exportada');
+}
+
+/* --- adicionar / importar --- */
+function telaAdicionar(){
+  $('#body').innerHTML = `
+    <div class="section-title">Importar lista pronta</div>
+    <label class="drop" for="arq">
+      ${ic('file')}<b>Escolher arquivo</b><span class="muted small">PDF, Excel (.xlsx), CSV ou texto (.txt)</span>
+      <input type="file" id="arq" accept=".pdf,.xlsx,.xls,.ods,.csv,.txt,application/pdf" class="sr">
+    </label>
+    <p class="hint" style="margin:8px 4px 0">Um convidado por linha. Pode ter nome, quantidade de pessoas e telefone — o sistema identifica sozinho.</p>
+    <p id="arqInfo" role="status" style="margin:10px 4px 0"></p>
+    <div class="section-title">Digitar ou colar nomes</div>
+    <div class="card">
+      <label class="f" for="lista" style="margin-top:0">Um convidado por linha</label>
+      <textarea class="in" id="lista" style="min-height:180px" placeholder="Maria Silva ; 2 ; 82 99999-8888&#10;João Souza&#10;Família Santos ; 4"></textarea>
+      <p class="hint">Formato: <b>Nome ; pessoas ; telefone</b> — pessoas e telefone são opcionais.</p>
+      <button class="btn gold full" id="add" style="margin-top:16px">${ic('plus')} Adicionar à lista</button>
+    </div>`;
+  $('#arq').onchange=importarArquivo; $('#add').onclick=adicionar;
+}
+function interpretaLinha(cels){
+  cels = cels.map(c=>String(c??'').trim()).filter(Boolean);
+  if (!cels.length) return null;
+  if (/^(n[ºo°.]?|nomes?|convidados?|lista.*)$/i.test(cels[0]) || cels.every(c=>/^(n[ºo°.]?|nomes?|convidados?|pessoas|qtd\.?|quantidade|telefone|whatsapp|celular|contato)$/i.test(c))) return null;
+  let nome='', pessoas=1, tel='';
+  const resto=[];
+  for (const c of cels) {
+    const dig=c.replace(/\D/g,'');
+    if (!tel && dig.length>=8 && dig.length<=13 && /^[\d\s()+.-]+$/.test(c)) { tel=c; continue; }
+    if (/^\d{1,2}$/.test(c) && resto.length) { pessoas=Math.min(20,Math.max(1,parseInt(c))); continue; }
+    resto.push(c);
+  }
+  nome = resto.join(' ');
+  const mTel = nome.match(/\(?\d{2}\)?\s?9?\s?\d{4}[-\s.]?\d{4}/); if (!tel && mTel) { tel=mTel[0]; nome=nome.replace(mTel[0],' '); }
+  const mQt = nome.match(/(?:\+\s?(\d{1,2})|\((\d{1,2})\s*(?:pessoas?|p)?\)|\s(\d{1,2})\s*(?:pessoas?)?)\s*$/i);
+  if (mQt) { const v=parseInt(mQt[1]||mQt[2]||mQt[3]); pessoas = mQt[1] ? v+1 : v; nome=nome.slice(0,mQt.index); }
+  nome = nome.replace(/^\s*\d{1,4}\s*[-.)º°]?\s+/,'').replace(/[;,|\t-]+\s*$/,'').replace(/\s+/g,' ').trim();
+  if (!nome || nome.length<2 || /^(nomes?|convidados?|lista( de convidados)?|qtd|quantidade|telefone|pessoas)$/i.test(nome)) return null;
+  if (!/[a-zà-ú]/i.test(nome)) return null;
+  return `${nome} ; ${pessoas}${tel?' ; '+tel:''}`;
+}
+async function linhasPDF(f){
+  await loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({data: await f.arrayBuffer()}).promise;
+  const out=[];
+  for (let p=1; p<=pdf.numPages; p++){
+    const tc = await (await pdf.getPage(p)).getTextContent();
+    const rows=[];
+    for (const it of tc.items){ if(!it.str.trim()) continue; const y=it.transform[5], x=it.transform[4];
+      let r=rows.find(r=>Math.abs(r.y-y)<3); if(!r){ r={y,items:[]}; rows.push(r); } r.items.push({x,w:it.width,s:it.str}); }
+    rows.sort((a,b)=>b.y-a.y);
+    for (const r of rows){ r.items.sort((a,b)=>a.x-b.x); const cels=[]; let last=null;
+      for (const it of r.items){ const gap = last ? it.x-(last.x+last.w) : 0;
+        if (!last || gap > 14) cels.push(it.s); else cels[cels.length-1] += (gap>1?' ':'') + it.s;
+        last=it; }
+      out.push(cels.filter(Boolean)); }
+  }
+  return out;
+}
+async function importarArquivo(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const info=$('#arqInfo'); info.innerHTML=`<span class="row"><span class="spin dark"></span> Lendo "${esc(f.name)}"…</span>`;
+  try {
+    let rows;
+    if (/\.pdf$/i.test(f.name) || f.type==='application/pdf') rows = await linhasPDF(f);
+    else if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
+      await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+      rows = wb.SheetNames.flatMap(n=>XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''}));
+    } else rows = (await f.text()).split(/\r?\n/).map(l=>l.split(/;|\t|,(?=\s*\d)|\s{2,}/));
+    const lista=[...new Set(rows.map(interpretaLinha).filter(Boolean))];
+    if(!lista.length){ info.innerHTML='<span style="color:var(--bad)">Não encontrei nomes nesse arquivo. Se for um PDF escaneado (foto), digite ou cole os nomes abaixo.</span>'; return; }
+    const ta=$('#lista'); ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+lista.join('\n');
+    info.innerHTML=`<span class="pill ok" style="font-size:14px;padding:6px 12px">${ic('check')} ${lista.length} convidado(s) encontrados</span><br><span class="small muted">Confira a lista abaixo e toque em <b>Adicionar à lista</b>.</span>`;
+    ta.scrollIntoView({behavior:'smooth',block:'center'});
+  } catch(e){ info.innerHTML=`<span style="color:var(--bad)">Não consegui ler o arquivo: ${esc(e.message)}</span>`; }
+  ev.target.value='';
+}
 async function adicionar(){
   const linhas=$('#lista').value.split('\n').map(l=>l.trim()).filter(Boolean);
   if(!linhas.length) return toast('Digite pelo menos um nome');
@@ -419,87 +865,63 @@ async function adicionar(){
   const lista=todos.filter(g=>g.nome && !ja.has(g.nome.toLowerCase()) && ja.add(g.nome.toLowerCase()));
   const rep=todos.length-lista.length;
   if(!lista.length) return toast('Esses nomes já estão na lista');
-  if(rep) toast(`${rep} nome(s) repetido(s) ignorado(s)`);
-  $('#add').disabled=true;
-  try { const n=await rpc('cas_admin_adicionar',{p_pin:A.pin,p_lista:lista}); $('#lista').value=''; toast(`${n} convidado(s) adicionado(s)`); await carregar(); }
-  catch(e){ toast(e.message); }
-  $('#add').disabled=false;
+  const b=$('#add'); b.disabled=true;
+  try { const n=await rpc('cas_admin_adicionar',{p_pin:A.pin,p_lista:lista}); $('#lista').value=''; $('#arqInfo').innerHTML=''; await carregar();
+    toast(`${n} convidado(s) adicionado(s)${rep?` • ${rep} repetido(s) ignorado(s)`:''}`); location.hash='#admin'; }
+  catch(e){ toast(e.message); b.disabled=false; }
 }
-async function importarArquivo(ev){
-  const f = ev.target.files[0]; if(!f) return;
-  const info = $('#arqInfo'); info.textContent = 'Lendo arquivo…';
-  try {
-    let rows;
-    if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
-      await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
-      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-    } else {
-      const txt = await f.text();
-      rows = txt.split(/\r?\n/).map(l => l.split(/[;\t,]/));
-    }
-    const lista = [];
-    for (const r of rows) {
-      const cel = r.map(c => String(c ?? '').trim());
-      const nome = cel[0];
-      if (!nome || /^nomes?$|^convidados?$/i.test(nome)) continue;
-      let pessoas = 1, tel = '';
-      for (const c of cel.slice(1)) {
-        const dig = c.replace(/\D/g,'');
-        if (!c) continue;
-        if (dig.length >= 8) tel = tel || c;
-        else if (/^\d{1,2}$/.test(c)) pessoas = parseInt(c);
-      }
-      lista.push(`${nome} ; ${pessoas}${tel?' ; '+tel:''}`);
-    }
-    if (!lista.length) { info.textContent = 'Não encontrei nomes nesse arquivo.'; return; }
-    const atual = $('#lista').value.trim();
-    $('#lista').value = (atual ? atual+'\n' : '') + lista.join('\n');
-    info.innerHTML = `<b style="color:var(--ok)">${lista.length} convidado(s) encontrados.</b> Confira abaixo e toque em <b>Adicionar à lista</b>.`;
-    $('#lista').scrollIntoView({behavior:'smooth', block:'center'});
-  } catch(e) { info.textContent = 'Não consegui ler o arquivo: ' + e.message; }
-  ev.target.value = '';
-}
-function modal(html){ const m=document.createElement('div'); m.className='modal'; m.innerHTML=`<div class="card">${html}</div>`; m.onclick=e=>{ if(e.target===m) m.remove(); }; document.body.appendChild(m); return m; }
-function modalConvidado(g){
-  const link=linkConvite(g.token), img=qrImg(link,6);
-  const m=modal(`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(g.nome)}</h2><button class="btn ghost sm" data-x>✕</button></div>
-    <div style="text-align:center;margin:12px 0"><img src="${img}" style="width:180px;image-rendering:pixelated;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff"></div>
-    <div class="row" style="flex-wrap:wrap"><button class="btn ghost sm" data-cp>Copiar link</button><a class="btn ghost sm" href="${link}" target="_blank">Abrir convite</a><a class="btn ghost sm" download="qr-${esc(g.nome)}.png" href="${img}">Baixar QR</a></div>
-    <div class="divider">editar</div>
-    <label>Nome</label><input data-n value="${esc(g.nome)}">
-    <div class="row"><div style="flex:1"><label>Pessoas</label><input data-p type="number" min="1" max="20" value="${g.pessoas}"></div><div style="flex:2"><label>Telefone (WhatsApp)</label><input data-t inputmode="tel" value="${esc(g.telefone||'')}"></div></div>
-    <label>Mensagem só para este convidado (opcional)</label><textarea data-msg style="min-height:80px" placeholder="Ex.: Você está na mesa 5. Que alegria ter você!">${esc(g.mensagem||'')}</textarea>
-    <button class="btn full" data-s style="margin-top:12px">Salvar</button>
-    ${g.entrou_em?`<button class="btn ghost full" data-u style="margin-top:8px">↩️ Desfazer entrada (${hora(g.entrou_em)})</button>`:''}
-    <button class="btn red full" data-r style="margin-top:8px">Remover convidado</button>`);
-  m.querySelector('[data-x]').onclick=()=>m.remove();
-  m.querySelector('[data-cp]').onclick=()=>copiar(link);
-  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:m.querySelector('[data-n]').value,p_pessoas:parseInt(m.querySelector('[data-p]').value)||1,p_telefone:m.querySelector('[data-t]').value,p_mensagem:m.querySelector('[data-msg]').value}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
-  const u=m.querySelector('[data-u]'); if(u) u.onclick=async()=>{ if(!confirm('Desfazer a entrada? O QR volta a valer.')) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
-  m.querySelector('[data-r]').onclick=async()=>{ if(!confirm(`Remover ${g.nome}? O QR deixa de funcionar.`)) return; await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
-}
-function modalConfig(){
-  const c=A.data.config;
-  const m=modal(`<div class="row" style="justify-content:space-between"><h2 style="margin:0">Dados do evento</h2><button class="btn ghost sm" data-x>✕</button></div>
-    <label>Título (aparece no convite)</label><input data-ti value="${esc(c.titulo)}" placeholder="Casamento de Ana & Pedro">
-    <label>Data / horário</label><input data-d value="${esc(c.data||'')}" placeholder="14 de novembro de 2026 • 19h">
-    <label>Local</label><input data-l value="${esc(c.local||'')}" placeholder="Nome do salão, endereço">
-    <label>Mensagem para todos os convidados (aparece junto do QR Code)</label><textarea data-m style="min-height:90px" placeholder="Ex.: Traje esporte fino. Contamos com sua presença! Cerimônia às 19h.">${esc(c.mensagem||'')}</textarea>
-    <label>Senha do porteiro</label><input data-pp autocomplete="off" autocapitalize="none" value="${esc(c.pin_portaria)}">
-    <label>Nova senha do painel (deixe vazio para manter)</label><input data-na autocomplete="off" autocapitalize="none" placeholder="Opcional">
-    <button class="btn full" data-s style="margin-top:14px">Salvar</button>`);
-  m.querySelector('[data-x]').onclick=()=>m.remove();
-  m.querySelector('[data-s]').onclick=async()=>{ try{
-    await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim(),p_mensagem:m.querySelector('[data-m]').value});
-    const na=m.querySelector('[data-na]').value.trim();
-    if(na){ await rpc('cas_admin_senha',{p_pin:A.pin,p_nova:na}); A.pin=na; store.set('cas_pin_admin',na); }
-    m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
-}
-function exportar(){
-  const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Entrou','Horário','Manual','Link']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Sim':'Não',hora(g.entrou_em),g.entrada_manual?'Sim':'',linkConvite(g.token)]));
-  const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='convidados-casamento.csv'; a.click();
+
+/* --- evento --- */
+function telaEvento(){
+  const c=A.data.config, portLink=BASE+'#portaria';
+  const tg=(id,tit,desc,on)=>`<label class="toggle" for="${id}"><div class="tx"><b>${tit}</b><span>${desc}</span></div><span class="sw"><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></span></label>`;
+  $('#body').innerHTML = `
+    <div class="section-title">Os noivos</div>
+    <div class="card">
+      <div class="grid2"><div><label class="f" for="n1" style="margin-top:0">Noivo(a)</label><input class="in" id="n1" value="${esc(c.noivo1||'')}" placeholder="Ana"></div>
+      <div><label class="f" for="n2" style="margin-top:0">Noivo(a)</label><input class="in" id="n2" value="${esc(c.noivo2||'')}" placeholder="Pedro"></div></div>
+      <div class="preview3d stage3d" aria-label="Pré-visualização do nome"><span class="sway" id="prev"></span></div>
+      ${tg('t3d','Nome em 3D no convite','Nomes em dourado com profundidade e movimento',c.nome3d!==false)}
+      ${tg('tbg','Nome em 3D como plano de fundo','Nomes e alianças ao fundo do convite e do aplicativo',c.fundo3d!==false)}
+    </div>
+    <div class="section-title">Dados do evento</div>
+    <div class="card">
+      <label class="f" for="ti" style="margin-top:0">Título</label><input class="in" id="ti" value="${esc(c.titulo&&c.titulo!=='Nosso Casamento'?c.titulo:'')}" placeholder="Casamento de Ana & Pedro">
+      <p class="hint">Se ficar em branco, usamos "Casamento de" + o nome dos noivos.</p>
+      <label class="f" for="dt">Data e horário</label><input class="in" id="dt" value="${esc(c.data||'')}" placeholder="Sábado, 14 de novembro de 2026 • 19h">
+      <label class="f" for="lc">Local</label><input class="in" id="lc" value="${esc(c.local||'')}" placeholder="Nome do espaço, endereço">
+      <label class="f" for="mg">Mensagem para todos os convidados</label><textarea class="in" id="mg" placeholder="Ex.: Traje passeio completo. Sua presença tornará este dia ainda mais especial.">${esc(c.mensagem||'')}</textarea>
+      <p class="hint">Aparece abaixo do QR Code em todos os convites.</p>
+    </div>
+    <div class="section-title">Portaria</div>
+    <div class="card">
+      <label class="f" for="pp" style="margin-top:0">Senha do porteiro</label><input class="in" id="pp" autocomplete="off" autocapitalize="none" value="${esc(c.pin_portaria||'')}">
+      <div class="grid2" style="margin-top:12px"><button class="btn line sm" id="cpP">${ic('link')} Copiar link</button><button class="btn wa sm" id="waP">${ic('wa')} Enviar</button></div>
+      <p class="hint">Envie o link e a senha para quem vai cuidar da entrada.</p>
+    </div>
+    <div class="section-title">Sua senha</div>
+    <div class="card"><label class="f" for="na" style="margin-top:0">Nova senha do painel</label><input class="in" id="na" autocomplete="off" autocapitalize="none" placeholder="Deixe em branco para manter a atual"></div>
+    <button class="btn primary full" id="salvar" style="margin-top:20px">${ic('check')} Salvar configurações</button>
+    <div class="section-title" style="color:var(--bad)">Zona de cuidado</div>
+    <div class="card" style="display:grid;gap:10px">
+      <button class="btn line full" id="zerar">${ic('undo')} Zerar entradas (após testes)</button>
+      <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
+    </div>`;
+  const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
+  ['n1','n2'].forEach(i=>$('#'+i).oninput=prev); $('#t3d').onchange=prev; prev();
+  $('#cpP').onclick=()=>copiar(portLink);
+  $('#waP').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Portaria — ${tituloEvento(c)}\n\nLink: ${portLink}\nSenha: ${$('#pp').value.trim()}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado.\n🟢 Verde: liberar\n🟡 Amarelo: convite já utilizado\n🔴 Vermelho: não está na lista`),'_blank');
+  $('#salvar').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
+    try {
+      await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:{titulo:$('#ti').value.trim()||'Nosso Casamento',data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()}});
+      const na=$('#na').value.trim(); if(na){ await rpc('cas_admin_senha',{p_pin:A.pin,p_nova:na}); A.pin=na; store.set('cas_pin_admin',na); $('#na').value=''; }
+      await carregar(); await evento(true); pintaFundo(EV); toast('Configurações salvas');
+      { const cc=A.data.config; $('.appbar .ttl span').textContent = temNomes(cc)?[cc.noivo1,cc.noivo2].filter(Boolean).join(' & '):'Painel dos noivos'; }
+    } catch(er){ toast(er.message); } b.disabled=false; };
+  $('#zerar').onclick=async()=>{ if(!await confirmar({titulo:'Zerar todas as entradas?', texto:'Todos os convidados voltam para "Aguardando" e os QR Codes voltam a valer. Use após os testes.', ok:'Zerar entradas', icone:'undo'})) return;
+    try { const n=await rpc('cas_admin_zerar_entradas',{p_pin:A.pin}); await carregar(); toast(`${n} entrada(s) zerada(s)`); } catch(e){ toast(e.message); } };
+  $('#apagar').onclick=async()=>{ if(!await confirmar({titulo:'Excluir TODOS os convidados?', texto:'Todos os convites deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir tudo', perigo:true, digitar:'EXCLUIR'})) return;
+    try { const n=await rpc('cas_admin_excluir_todos',{p_pin:A.pin}); await carregar(); toast(`${n} convidado(s) excluído(s)`); } catch(e){ toast(e.message); } };
 }
 
 route();
