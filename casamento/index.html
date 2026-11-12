@@ -246,7 +246,7 @@ function mostraResultado(r, cb){
     ok:      ['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas>1?`${r.pessoas} pessoas`:'1 pessoa'],
     ja_entrou:['warn','⚠','JÁ ENTROU', r.nome, `QR usado às ${horaCurta(r.entrou_em)} — não liberar novamente`],
     invalido:['bad','✕','QR INVÁLIDO','', 'Este código não está na lista de convidados'],
-    pin_invalido:['bad','✕','PIN INVÁLIDO','','Saia e entre novamente'],
+    pin_invalido:['bad','✕','SENHA INVÁLIDA','','Saia e entre novamente'],
     erro:    ['bad','!','SEM CONEXÃO','', 'Verifique a internet e tente de novo']
   }[r.status] || ['bad','!','ERRO','',''];
   beep(r.status==='ok');
@@ -307,7 +307,7 @@ async function viewAdmin(pin){
 }
 async function carregar(){
   try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); }
-  catch(e){ toast(e.message); if(/PIN/.test(e.message)) sair('admin'); return; }
+  catch(e){ toast(e.message); if(/Senha inv/.test(e.message)) sair('admin'); return; }
   const c=A.data.config, L=A.data.convidados;
   $('#aTit').textContent=c.titulo; $('#pinP').textContent=c.pin_portaria;
   const pes=L.reduce((s,g)=>s+g.pessoas,0), pin_=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
