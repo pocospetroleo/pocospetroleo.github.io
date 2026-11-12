@@ -191,6 +191,11 @@ input.in:focus,textarea.in:focus{outline:none;border-color:var(--gold2);box-shad
 .inv .foto{width:150px;height:150px;margin:0 auto;border-radius:50%;padding:5px;background:var(--goldgrad);box-shadow:0 10px 24px rgba(40,30,15,.22);transform:translateZ(30px)}
 .inv .foto img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:3px solid #fff}
 .tabbar a span{font-size:11.5px}
+.pwbox{position:relative}
+.pwbox .in{padding-right:56px}
+.in.mask{-webkit-text-security:disc;text-security:disc}
+.olho{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:10px}
+input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:manipulation}
 /* home */
 .hero{text-align:center;padding:40px 10px 10px}
 .hero .names{font-size:clamp(52px,16vw,84px);margin:14px 0 4px}
@@ -528,9 +533,9 @@ async function gerarCartao(ev, cv, token){
 const campo = (id, ph, extra='') => `<input class="in" id="${id}" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>`;
 const PERGUNTAS = ['Cidade onde nos conhecemos?','Nome do primeiro animal de estimação?','Data do nosso primeiro encontro?','Nome da rua onde cresceu?','Comida preferida do casal?'];
 const selPergunta = (id, atual='') => `<select class="in" id="${id}" style="appearance:auto">${PERGUNTAS.map(p=>`<option ${p===atual?'selected':''}>${esc(p)}</option>`).join('')}${atual&&!PERGUNTAS.includes(atual)?`<option selected>${esc(atual)}</option>`:''}</select>`;
-const olho = id => `<button type="button" class="iconbtn" data-olho="${id}" aria-label="Mostrar ou ocultar senha" style="position:absolute;right:4px;top:3px;border:0;box-shadow:none;background:none">${ic('eye')}</button>`;
-const campoSenha = (id, ph, extra='') => `<div style="position:relative"><input class="in" id="${id}" type="password" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" style="padding-right:52px" ${extra}>${olho(id)}</div>`;
-function ligaOlhos(root=document){ $$('[data-olho]',root).forEach(b=>b.onclick=()=>{ const i=$('#'+b.dataset.olho); i.type = i.type==='password'?'text':'password'; i.focus(); }); }
+const olho = id => `<button type="button" class="olho" data-olho="${id}" aria-label="Mostrar ou ocultar senha">${ic('eye')}</button>`;
+const campoSenha = (id, ph, extra='') => `<div class="pwbox"><input class="in mask" id="${id}" name="${id}" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>${olho(id)}</div>`;
+function ligaOlhos(root=document){ $$('[data-olho]',root).forEach(b=>b.onclick=e=>{ e.preventDefault(); const i=$('#'+b.dataset.olho, root.nodeType===1?root:document) || $('#'+b.dataset.olho); i.classList.toggle('mask'); }); }
 
 function viewSetup(){
   app.innerHTML = appbar({title:'Primeiro acesso', sub:'Perfil dos noivos', back:''}) + `<div class="page"><div class="card section">
@@ -558,7 +563,7 @@ function viewLogin(papel, onOk){
     <div style="width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522">${ic(adm?'heart':'qr')}</div>
     <h1 style="text-align:center">${adm?'Perfil dos Noivos':'Perfil da Portaria'}</h1>
     <p class="muted" style="text-align:center;margin-top:4px">Digite a senha para entrar</p>
-    <label class="f" for="pin">Senha</label>${campoSenha('pin','Sua senha','enterkeyhint="go" style="padding-right:52px;font-size:18px"')}
+    <label class="f" for="pin">Senha</label>${campoSenha('pin','Sua senha','enterkeyhint="go" style="font-size:18px"')}
     <button class="btn primary full" id="entrar" style="margin-top:16px">Entrar</button>
     <button class="btn line full" id="esqueci" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
     <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p></div></div>`;
@@ -573,7 +578,7 @@ function viewLogin(papel, onOk){
     } catch(e){ $('#err').textContent = e.message; }
     finally { const b=$('#entrar'); if(b) b.disabled=false; }
   };
-  $('#entrar').onclick = go; $('#pin').onkeydown = e => e.key==='Enter' && go(); setTimeout(()=>$('#pin')?.focus(),100);
+  $('#entrar').onclick = go; $('#pin').onkeydown = e => { if (e.key==='Enter') go(); };
   $('#esqueci').onclick = () => adm ? esqueciNoivos() : esqueciPortaria();
 }
 function esqueciPortaria(){
