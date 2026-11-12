@@ -175,6 +175,18 @@ input.in:focus,textarea.in:focus{outline:none;border-color:var(--gold2);box-shad
   box-shadow:0 2px 4px rgba(40,30,15,.06),0 20px 40px rgba(40,30,15,.12),0 50px 80px -20px rgba(40,30,15,.25)}
 .inv .paper:before{content:"";position:absolute;inset:10px;border-radius:15px;border:1.5px solid transparent;background:var(--goldgrad) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .inv .paper:after{content:"";position:absolute;inset:16px;border-radius:11px;border:1px solid rgba(201,164,100,.35);pointer-events:none}
+.inv .paper.m-floral:before,.inv .paper.m-floral:after,.inv .paper.m-deco:before,.inv .paper.m-deco:after,.inv .paper.m-minimal:before,.inv .paper.m-minimal:after,
+.inv .paper.m-folhas:before,.inv .paper.m-folhas:after,.inv .paper.m-aquarela:before,.inv .paper.m-aquarela:after,.inv .paper.m-noite:before,.inv .paper.m-noite:after{display:none}
+.inv .paper.m-floral,.inv .paper.m-deco,.inv .paper.m-folhas{padding-top:64px;padding-bottom:48px}
+.inv .paper.m-noite{color:#F3EBDD}
+.inv .paper.m-noite h1,.inv .paper.m-noite .ttl-flat,.inv .paper.m-noite .guest{color:#FBF5EA}
+.inv .paper.m-noite .muted,.inv .paper.m-noite .info,.inv .paper.m-noite .quote,.inv .paper.m-noite p,.inv .paper.m-noite [style*="color"]{color:#DCD3C2 !important}
+.inv .paper.m-noite .eyebrow{color:#E6CC92 !important}
+.inv .paper.m-noite .note{background:rgba(255,255,255,.08);border-color:rgba(230,204,146,.35);color:#F3EBDD}
+.molds{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
+.mold{border:2px solid var(--line);border-radius:14px;padding:6px;background:#fff;cursor:pointer;text-align:center;font-size:12.5px;font-weight:600;color:var(--navy)}
+.mold i{display:block;aspect-ratio:3/4;border-radius:9px;background-size:100% 100%;margin-bottom:6px;box-shadow:0 2px 8px rgba(40,30,15,.12)}
+.mold[aria-pressed="true"]{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(201,164,100,.35)}
 .inv .shine{position:absolute;inset:0;border-radius:22px;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);background-size:250% 100%;background-position:var(--sx,120%) 0;mix-blend-mode:soft-light}
 .inv .names{font-size:clamp(46px,14vw,66px);margin:8px 0 4px;transform:translateZ(40px)}
 .inv .ttl-flat{font:600 34px/1.15 'Cormorant Garamond',serif;color:var(--navy);margin:8px 0}
@@ -278,7 +290,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r12";
+const VERSAO = "2026-11-12-r14";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -373,6 +385,72 @@ function nomes3D(ev, flat=false){
 const temNomes = ev => !!((ev.noivo1||'').trim() || (ev.noivo2||'').trim());
 function tituloEvento(ev){ return ev.titulo && ev.titulo!=='Nosso Casamento' ? ev.titulo : (temNomes(ev) ? `Casamento de ${[ev.noivo1,ev.noivo2].filter(Boolean).join(' & ')}` : (ev.titulo||'Nosso Casamento')); }
 
+/* =================== MOLDURAS DO CONVITE =================== */
+const MOLDURAS = { classica:{nome:'Clássica dourada'}, floral:{nome:'Floral rosé'}, deco:{nome:'Art déco'}, minimal:{nome:'Minimalista'},
+  folhas:{nome:'Folhagens'}, aquarela:{nome:'Aquarela'}, noite:{nome:'Noite estrelada', escura:true} };
+const idMoldura = id => MOLDURAS[id] ? id : 'classica';
+function molduraSVG(id, W, H){
+  const u = Math.min(W, H) / 440, n = v => +(v*u).toFixed(2);
+  let defs = `<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8F6B34"/><stop offset=".35" stop-color="#D9B877"/><stop offset=".55" stop-color="#FBEFCB"/><stop offset=".8" stop-color="#C9A464"/><stop offset="1" stop-color="#7E5D2B"/></linearGradient>`;
+  let bg = '', body = '';
+  const quatro = g => `<g>${g}</g><g transform="translate(${W},0) scale(-1,1)">${g}</g><g transform="translate(0,${H}) scale(1,-1)">${g}</g><g transform="translate(${W},${H}) scale(-1,-1)">${g}</g>`;
+  const borda = (ins, cor, lw, rx=0) => `<rect x="${n(ins)}" y="${n(ins)}" width="${W-2*n(ins)}" height="${H-2*n(ins)}" rx="${n(rx)}" fill="none" stroke="${cor}" stroke-width="${n(lw)}"/>`;
+  const folha = (x, y, len, ang, cor) => `<path transform="translate(${n(x)},${n(y)}) rotate(${ang})" d="M0 0 Q${n(len/2)} ${n(-len/3.2)} ${n(len)} 0 Q${n(len/2)} ${n(len/3.2)} 0 0Z" fill="${cor}"/>`;
+  const flor = (x, y, r, c1, c2) => { let p=''; for(let i=0;i<6;i++) p+=`<ellipse cx="0" cy="${n(-r*.55)}" rx="${n(r*.42)}" ry="${n(r*.6)}" fill="${c1}" transform="rotate(${i*60})"/>`;
+    return `<g transform="translate(${n(x)},${n(y)})">${p}<circle r="${n(r*.45)}" fill="${c2}"/><path d="M${n(-r*.2)} 0 a${n(r*.2)} ${n(r*.2)} 0 1 1 ${n(r*.3)} ${n(r*.1)}" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="${n(1.4)}"/></g>`; };
+  switch (id) {
+    case 'floral': {
+      bg = `<rect width="${W}" height="${H}" fill="#FFFCF8"/>`;
+      const c = folha(22,96,58,-62,'#9DB08B') + folha(96,22,58,-28,'#9DB08B') + folha(40,64,46,-80,'#B7C6A6') + folha(64,40,46,-10,'#B7C6A6') + folha(12,130,40,-95,'#8CA37A') + folha(130,12,40,5,'#8CA37A')
+        + flor(52,52,30,'#EDBFC3','#D98E98') + flor(100,30,17,'#F4D5D2','#E3A7AC') + flor(30,100,17,'#F4D5D2','#E3A7AC') + flor(86,78,10,'#F8E3DE','#EBB8B9');
+      body = borda(16,'url(#g)',1.6,12) + quatro(`<g transform="scale(1.2)">${c}</g>`); break; }
+    case 'deco': {
+      bg = `<rect width="${W}" height="${H}" fill="#FFFDF7"/>`;
+      const c = `<path d="M${n(14)} ${n(84)} V${n(14)} H${n(84)} M${n(26)} ${n(64)} V${n(26)} H${n(64)} M${n(38)} ${n(50)} V${n(38)} H${n(50)}" fill="none" stroke="url(#g)" stroke-width="${n(2.2)}"/><rect x="${n(30)}" y="${n(30)}" width="${n(6)}" height="${n(6)}" fill="url(#g)" transform="rotate(45 ${n(33)} ${n(33)})"/>`;
+      let fan = ''; for (let i=0;i<=8;i++){ const a=Math.PI*(i/8); fan += `<line x1="${W/2}" y1="${n(14)}" x2="${(W/2+Math.cos(a)*n(46)).toFixed(1)}" y2="${(n(14)+Math.sin(a)*n(46)).toFixed(1)}" stroke="url(#g)" stroke-width="${n(1.4)}"/>`; }
+      fan += `<path d="M${W/2-n(46)} ${n(14)} A${n(46)} ${n(46)} 0 0 0 ${W/2+n(46)} ${n(14)}" fill="none" stroke="url(#g)" stroke-width="${n(2)}"/>`;
+      body = borda(14,'url(#g)',2.4) + borda(22,'url(#g)',1) + quatro(`<g transform="scale(1.1)">${c}</g>`) + fan + `<g transform="translate(0,${H}) scale(1,-1)">${fan}</g>`; break; }
+    case 'minimal': {
+      bg = `<rect width="${W}" height="${H}" fill="#FFFFFF"/>`;
+      const d = (y) => `<rect x="${W/2-n(6)}" y="${y-n(6)}" width="${n(12)}" height="${n(12)}" fill="#fff" stroke="#2B2B2B" stroke-width="${n(1.2)}" transform="rotate(45 ${W/2} ${y})"/>`;
+      body = borda(18,'#2B2B2B',1.2) + d(n(18)) + d(H-n(18)); break; }
+    case 'folhas': {
+      bg = `<rect width="${W}" height="${H}" fill="#FBFAF5"/>`;
+      let ramo = `<path d="M${n(-4)} ${n(190)} Q${n(26)} ${n(26)} ${n(190)} ${n(-4)}" fill="none" stroke="#6E8B69" stroke-width="${n(2.6)}"/>`;
+      for (let i=1;i<=9;i++){ const t=i/10, x=(1-t)*(1-t)*-4+2*(1-t)*t*26+t*t*190, y=(1-t)*(1-t)*190+2*(1-t)*t*26+t*t*-4;
+        const ang = -90 + t*90; ramo += folha(x,y,34-i,ang-(i%2?55:-55)+(i%2?0:180),i%3?'#7F9C79':'#9DB693'); }
+      ramo = `<g transform="scale(1.15)">${ramo}</g>`;
+      body = borda(16,'#A9B8A0',1.4,10) + ramo + `<g transform="translate(${W},${H}) scale(-1,-1)">${ramo}</g>`; break; }
+    case 'aquarela': {
+      bg = `<rect width="${W}" height="${H}" fill="#FFFFFF"/>`;
+      const bl = (id2, cor) => `<radialGradient id="${id2}"><stop offset="0" stop-color="${cor}" stop-opacity=".95"/><stop offset=".55" stop-color="${cor}" stop-opacity=".45"/><stop offset="1" stop-color="${cor}" stop-opacity="0"/></radialGradient>`;
+      defs += bl('a1','#F6C9B5') + bl('a2','#CDBEE8') + bl('a3','#F2B8C6') + bl('a4','#BFE0DA');
+      const b = (x,y,r,f) => `<circle cx="${x}" cy="${y}" r="${n(r)}" fill="url(#${f})"/>`;
+      let lados=''; const passo=n(260); for (let y=n(220), k=0; y<H-n(180); y+=passo, k++) lados += b(k%2?W+n(10):-n(10), y, 95, ['a4','a1','a2','a3'][k%4]);
+      body = b(n(20),n(20),190,'a1') + b(n(150),n(-20),110,'a3') + b(W-n(20),n(30),180,'a2') + b(n(20),H-n(30),180,'a2') + b(W-n(20),H-n(20),190,'a3') + b(W-n(150),H+n(20),110,'a4') + lados + borda(16,'url(#g)',1.2,12); break; }
+    case 'noite': {
+      defs += `<linearGradient id="nb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22304A"/><stop offset="1" stop-color="#0F1522"/></linearGradient>`;
+      bg = `<rect width="${W}" height="${H}" fill="url(#nb)"/>`;
+      let st=''; let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+      const qt = Math.round(W*H/ (6000*u*u)); for (let i=0;i<qt;i++) st += `<circle cx="${(rnd()*W).toFixed(1)}" cy="${(rnd()*H).toFixed(1)}" r="${(n(0.6)+rnd()*n(1.4)).toFixed(2)}" fill="#F6E7BE" opacity="${(0.25+rnd()*0.55).toFixed(2)}"/>`;
+      body = st + borda(14,'url(#g)',2.4,14) + borda(22,'url(#g)',1,10); break; }
+    default: return '';
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>${defs}</defs>${bg}${body}</svg>`;
+}
+function miniMoldura(id){ const W=120, H=160;
+  if (idMoldura(id)==='classica') return svgURL(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8F6B34"/><stop offset=".5" stop-color="#F6E7BE"/><stop offset="1" stop-color="#8F6B34"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFEFB"/><stop offset="1" stop-color="#F5ECDC"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#b)"/><rect x="5" y="5" width="${W-10}" height="${H-10}" rx="5" fill="none" stroke="url(#g)" stroke-width="1.6"/><rect x="9" y="9" width="${W-18}" height="${H-18}" rx="3" fill="none" stroke="#C9A464" stroke-opacity=".5" stroke-width=".8"/></svg>`);
+  return svgURL(molduraSVG(id, W, H)); }
+const svgURL = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+function aplicaMoldura(el, id){
+  if (!el) return; id = idMoldura(id);
+  [...el.classList].filter(c=>c.startsWith('m-')).forEach(c=>el.classList.remove(c)); el.classList.add('m-'+id);
+  if (id === 'classica') { el.style.background=''; return; }
+  const pinta = () => { const w=el.offsetWidth, h=el.offsetHeight; if (w && h) el.style.background = `url("${svgURL(molduraSVG(id,w,h))}") 0 0/100% 100% no-repeat`; };
+  pinta();
+  if (window.ResizeObserver) { const ro = new ResizeObserver(pinta); ro.observe(el); limpar.push(()=>ro.disconnect()); }
+}
+
 /* fundo */
 let EV = null;
 async function evento(force){ if(!EV || force){ try{ EV = await rpc('cas_evento') || {}; }catch(e){ EV = EV || {}; } } return EV; }
@@ -428,7 +506,8 @@ async function route(){
   if (p.get('c')) return viewConvite(p.get('c'));
   const [r, sub] = location.hash.replace('#','').split('/');
   if (r === 'dono') return viewDono();
-  if (!EVC) return viewSemAcesso();
+  const veioPorLink = new URLSearchParams(location.search).get('e') !== null;
+  if (!veioPorLink && !(EVC && (r === 'admin' || r === 'portaria'))) return viewDono();
   if (r === 'admin') return entrarAdmin(sub || 'lista');
   if (r === 'portaria') return entrarPortaria(sub || 'scan');
   return viewHome();
@@ -513,34 +592,90 @@ function formEvento(senha, ev){
 }
 
 /* =================== PAINEL DO DONO (aprovar / bloquear / excluir eventos) =================== */
+const DONO = { get(){ try{ return sessionStorage.getItem('cas_dono') || localStorage.getItem('cas_dono'); }catch(e){ return null; } },
+  set(v, manter){ try{ sessionStorage.setItem('cas_dono', v); manter ? localStorage.setItem('cas_dono', v) : localStorage.removeItem('cas_dono'); }catch(e){} },
+  troca(v){ try{ sessionStorage.setItem('cas_dono', v); if (localStorage.getItem('cas_dono')) localStorage.setItem('cas_dono', v); }catch(e){} },
+  sair(){ try{ sessionStorage.removeItem('cas_dono'); localStorage.removeItem('cas_dono'); }catch(e){} } };
+function telaDono(html){ pintaFundo({fundo3d:true}); app.innerHTML = `<div class="page"><section class="hero" style="padding-top:28px">
+    <img src="/meuconvite/logo.svg" alt="" width="92" height="92" style="border-radius:22px;box-shadow:0 14px 30px rgba(28,37,54,.25)">
+    <h1 style="margin:14px 0 2px">Meu Convite</h1><div class="eyebrow">Área do administrador</div></section>
+    <div class="card section" style="margin-top:20px">${html}</div></div>`; ligaOlhos(); }
+function loginDono(){
+  telaDono(`<label class="f" for="du" style="margin-top:0">Usuário</label>${campo('du','Seu usuário','autocomplete="username"')}
+    <label class="f" for="ds">Senha</label>${campoSenha('ds','Sua senha','enterkeyhint="go"')}
+    <label class="row" style="gap:10px;margin-top:14px;cursor:pointer"><input type="checkbox" id="dm" checked style="width:20px;height:20px"><span>Manter conectado neste aparelho</span></label>
+    <button class="btn primary full" id="dsOk" style="margin-top:16px">Entrar</button>
+    <button class="btn line full" id="dEsq" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
+    <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p>`);
+  const go=async()=>{ const u=$('#du').value.trim(), v=$('#ds').value; if(!v) return; $('#dsOk').disabled=true; $('#err').textContent='';
+    try { const r=await rpc('cas_dono_entrar',{p_usuario:u,p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; }
+      DONO.set(v, $('#dm').checked); if (!r.configurado) return configDono(v, r, true); viewDono(); }
+    catch(e){ $('#err').textContent=e.message; } finally { const b=$('#dsOk'); if(b) b.disabled=false; } };
+  $('#dsOk').onclick=go; $('#ds').onkeydown=e=>{ if(e.key==='Enter') go(); };
+  $('#dEsq').onclick=()=>esqueciDono($('#du').value.trim());
+}
+function configDono(senha, atual, primeira){
+  const html = `${primeira?`<h2 style="text-align:center">Configure seu acesso</h2><p class="muted small" style="text-align:center;margin-top:4px">Crie seu usuário, uma senha só sua e a pergunta para recuperar a senha.</p>`:''}
+    <label class="f" for="cu" ${primeira?'':'style="margin-top:0"'}>Usuário</label>${campo('cu','Ex.: lucas',`value="${esc(atual.usuario||'')}"`)}
+    <label class="f" for="cn">${primeira?'Nova senha':'Nova senha (deixe em branco para manter)'}</label>${campoSenha('cn','Mínimo 8 caracteres')}
+    <label class="f" for="cc">Repita a nova senha</label>${campoSenha('cc','Digite novamente')}
+    <label class="f" for="cq">Pergunta de segurança</label>${selPergunta('cq', atual.pergunta||'')}
+    <label class="f" for="cr">Resposta</label>${campo('cr', atual.pergunta?'Digite para trocar a resposta':'Sua resposta')}
+    <button class="btn gold full" data-salvar style="margin-top:18px">${ic('lock')} Salvar acesso</button>
+    <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p>`;
+  let root;
+  if (primeira) { telaDono(html); root=app; } else { root=sheet('Meu acesso', `<div class="card">${html}</div>`); ligaOlhos(root); }
+  $('[data-salvar]',root).onclick=async e=>{ const b=e.currentTarget, er=$('[data-e]',root); er.textContent='';
+    const n=$('#cn',root).value; if (primeira && !n) { er.textContent='Crie uma nova senha'; return; }
+    if (n!==$('#cc',root).value) { er.textContent='As senhas não são iguais'; return; }
+    b.disabled=true;
+    try { const x=await rpc('cas_dono_config_acesso',{p_senha:senha,p_usuario:$('#cu',root).value,p_nova:n,p_pergunta:$('#cq',root).value,p_resposta:$('#cr',root).value});
+      if (x.erro) { er.textContent=x.erro; return; }
+      if (n) DONO.troca(n); toast('Acesso salvo'); if (primeira) viewDono(); else root.fechar(); }
+    catch(x){ er.textContent=x.message; } finally { b.disabled=false; } };
+}
+async function esqueciDono(u){
+  telaDono(`<h2 style="text-align:center">Esqueci a senha</h2>
+    <label class="f" for="eu">Usuário</label>${campo('eu','Seu usuário',`value="${esc(u||'')}"`)}
+    <button class="btn primary full" id="eGo" style="margin-top:14px">Continuar</button>
+    <div id="eP" class="hidden">
+      <label class="f">Pergunta</label><div id="eQ" style="font:600 20px 'Cormorant Garamond',serif;color:var(--navy)"></div>
+      <label class="f" for="er">Resposta</label>${campo('er','Sua resposta')}
+      <label class="f" for="en">Nova senha</label>${campoSenha('en','Mínimo 8 caracteres')}
+      <label class="f" for="ec">Repita a nova senha</label>${campoSenha('ec','Digite novamente')}
+      <button class="btn gold full" id="eSalvar" style="margin-top:16px">${ic('lock')} Redefinir senha</button></div>
+    <p id="err" role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p>
+    <button class="btn line full" id="eVolta" style="margin-top:8px;border:0;box-shadow:none;background:none;color:var(--gold3)">Voltar para o login</button>`);
+  $('#eVolta').onclick=loginDono;
+  $('#eGo').onclick=async()=>{ $('#err').textContent=''; let q=null; try { q=await rpc('cas_dono_recup_pergunta',{p_usuario:$('#eu').value}); } catch(e){}
+    if (!q) { $('#err').textContent='Usuário não encontrado ou recuperação não configurada.'; return; }
+    $('#eQ').textContent=q; $('#eP').classList.remove('hidden'); $('#eGo').classList.add('hidden'); $('#eu').readOnly=true; };
+  $('#eSalvar').onclick=async e=>{ const b=e.currentTarget; $('#err').textContent='';
+    const n=$('#en').value; if(n!==$('#ec').value){ $('#err').textContent='As senhas não são iguais'; return; }
+    b.disabled=true;
+    try { const x=await rpc('cas_dono_recuperar',{p_usuario:$('#eu').value,p_resposta:$('#er').value,p_nova:n});
+      if (x.erro) { $('#err').textContent=x.erro; return; }
+      toast('Senha redefinida. Entre com a nova senha.'); loginDono(); }
+    catch(x){ $('#err').textContent=x.message; } finally { b.disabled=false; } };
+}
 async function viewDono(){
-  pintaFundo({fundo3d:false});
-  const senha = sessionStorage.getItem('cas_dono');
-  if (!senha) {
-    app.innerHTML = appbar({title:'Administração', sub:'Meu Convite', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
-      <h1 style="text-align:center">Painel do administrador</h1>
-      <label class="f" for="ds">Senha</label>${campoSenha('ds','Senha do administrador','enterkeyhint="go"')}
-      <button class="btn primary full" id="dsOk" style="margin-top:16px">Entrar</button>
-      <p id="err" role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div></div>`;
-    ligaVoltar(); ligaOlhos();
-    const go=async()=>{ const v=$('#ds').value; if(!v) return; $('#dsOk').disabled=true;
-      try { const r=await rpc('cas_dono_listar',{p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; } sessionStorage.setItem('cas_dono',v); viewDono(); }
-      catch(e){ $('#err').textContent=e.message; } finally { const b=$('#dsOk'); if(b) b.disabled=false; } };
-    $('#dsOk').onclick=go; $('#ds').onkeydown=e=>{ if(e.key==='Enter') go(); };
-    return;
-  }
+  const senha = DONO.get();
+  if (!senha) return loginDono();
   app.innerHTML = `<div class="loading"><div class="spin dark"></div>Carregando…</div>`;
   let r; try { r = await rpc('cas_dono_listar',{p_senha:senha}); } catch(e){ app.innerHTML=`<div class="page"><div class="empty">${esc(e.message)}</div></div>`; return; }
-  if (r.erro) { sessionStorage.removeItem('cas_dono'); toast(r.erro); return viewDono(); }
+  if (r.erro) { DONO.sair(); toast(r.erro==='Senha incorreta'?'Entre novamente':r.erro); return loginDono(); }
+  if (r.acesso && !r.acesso.configurado) return configDono(senha, r.acesso, true);
+  pintaFundo({fundo3d:false});
   const L = r.casamentos, pend = L.filter(c=>c.status==='pendente').length;
   const pill = st => st==='aprovado'?'<span class="pill ok">Liberado</span>':st==='pendente'?'<span class="pill wait">Aguardando</span>':'<span class="pill" style="background:#FDECEC;color:var(--bad)">Bloqueado</span>';
   const tel = t => { const d=String(t||'').replace(/\D/g,''); return d ? (d.length<=11?'55'+d:d) : ''; };
-  app.innerHTML = appbar({title:'Eventos', sub:'Administração', back:'', right:'<button class="btn line sm" id="dSair" style="min-height:44px">Sair</button>'}) + `<div class="page wide">
+  app.innerHTML = appbar({title:'Meu Convite', sub:'Administração', right:'<button class="btn line sm" id="dSair" style="min-height:44px">Sair</button>'}) + `<div class="page wide">
+    <button class="btn gold full" id="dNovo" style="margin-top:6px;min-height:64px;font-size:19px">${ic('plus')} Cadastrar evento</button>
+    <div class="section-title">Eventos cadastrados</div>
     <div class="stats" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat"><b>${L.length}</b><span>Eventos</span></div>
       <div class="stat"><b style="color:var(--gold3)">${pend}</b><span>Aguardando</span></div>
       <div class="stat"><b>${L.reduce((s,c)=>s+c.convites,0)}</b><span>Convites</span></div></div>
-    <button class="btn gold full" id="dNovo" style="margin-top:16px;min-height:56px">${ic('plus')} Cadastrar evento</button>
     <div class="glist" style="margin-top:16px">${L.map(c=>`<div class="card" style="margin-bottom:12px">
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><b style="font:600 21px 'Cormorant Garamond',serif">${esc(c.titulo||[c.noivo1,c.noivo2].filter(Boolean).join(' & '))}</b>
         <div class="small muted">${esc(c.data||'Sem data')} · código <b>${esc(c.slug)}</b></div>
@@ -553,9 +688,9 @@ async function viewDono(){
         <a class="btn line sm" href="${linkEvento('',c.slug)}" target="_blank" rel="noopener">${ic('link')} Abrir</a>
         <button class="btn danger sm" data-del="${c.id}" data-nm="${esc(c.slug)}">${ic('trash')} Excluir</button>
       </div></div>`).join('') || '<div class="empty">Nenhum evento ainda</div>'}</div>
-    <button class="btn line full" id="dSenha" style="margin-top:10px">${ic('lock')} Trocar senha do administrador</button>
+    <button class="btn line full" id="dSenha" style="margin-top:10px">${ic('lock')} Meu acesso (usuário, senha e recuperação)</button>
   </div>`;
-  $('#dSair').onclick=()=>{ sessionStorage.removeItem('cas_dono'); ir(''); };
+  $('#dSair').onclick=async()=>{ if(await confirmar({titulo:'Sair da administração?', texto:'Será preciso entrar com usuário e senha novamente.', ok:'Sair', icone:'logout'})) { DONO.sair(); loginDono(); } };
   $$('[data-st]').forEach(b=>b.onclick=async()=>{ const st=b.dataset.st;
     if (st==='bloqueado' && !await confirmar({titulo:'Bloquear este evento?', texto:'Os noivos, a portaria e os convites param de funcionar até você liberar de novo.', ok:'Bloquear', perigo:true, icone:'lock'})) return;
     const x=await rpc('cas_dono_status',{p_senha:senha,p_id:+b.dataset.id,p_status:st}); if(x.erro) return toast(x.erro); toast(st==='aprovado'?'Evento liberado':'Evento bloqueado'); viewDono(); });
@@ -564,9 +699,7 @@ async function viewDono(){
     const x=await rpc('cas_dono_excluir',{p_senha:senha,p_id:+b.dataset.del}); if(x.erro) return toast(x.erro); toast('Evento excluído'); viewDono(); });
   $('#dNovo').onclick=()=>formEvento(senha, null);
   $$('[data-ed]').forEach(b=>b.onclick=async()=>{ const x=await rpc('cas_dono_obter',{p_senha:senha,p_id:+b.dataset.ed}); if(!x||x.erro) return toast(x?x.erro:'Evento não encontrado'); formEvento(senha, x); });
-  $('#dSenha').onclick=()=>{ const s=sheet('Trocar senha', `<div class="card"><label class="f" for="dn" style="margin-top:0">Nova senha</label>${campoSenha('dn','Mínimo 10 caracteres')}
-      <button class="btn gold full" data-ok style="margin-top:16px">Salvar</button><p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`); ligaOlhos(s);
-    $('[data-ok]',s).onclick=async()=>{ const n=$('#dn',s).value; const x=await rpc('cas_dono_senha',{p_senha:senha,p_nova:n}); if(x.erro){ $('[data-e]',s).textContent=x.erro; return; } sessionStorage.setItem('cas_dono',n); s.fechar(); toast('Senha alterada'); }; };
+  $('#dSenha').onclick=()=>configDono(senha, r.acesso||{}, false);
 }
 
 /* =================== LOCALIZAÇÃO =================== */
@@ -623,6 +756,7 @@ async function viewConvite(token){
   $('#salvar').onclick = async e => { const b=e.currentTarget; b.disabled=true;
     try { const blob = await gerarCartao(ev, cv, token); await compartilharOuBaixar(blob, `convite-${cv.nome.replace(/\s+/g,'-')}.png`); }
     catch(er){ toast('Não foi possível gerar a imagem'); } b.disabled=false; };
+  aplicaMoldura($('#inv .paper'), ev.moldura);
   tilt($('#inv'));
 }
 function tilt(el){
@@ -647,12 +781,20 @@ async function compartilharOuBaixar(blob, nome, texto){
 }
 /* gera a imagem do convite: foto, sigla ao fundo, nomes 3D e QR Code */
 async function gerarCartao(ev, cv, token){
+  try { const b = await gerarCartaoM(ev, cv, token); if (b) return b; } catch(e){}
+  return await gerarCartaoM({...ev, moldura:'classica'}, cv, token);
+}
+async function gerarCartaoM(ev, cv, token){
+  const mid = idMoldura(ev.moldura), escura = !!MOLDURAS[mid].escura;
+  const CORES = {'#1C2536':'#FBF5EA','#2E3B54':'#E8DCC0','#625B53':'#CFC6B4','#1F1B17':'#F3EBDD','#8F6B34':'#E6CC92'};
+  const C = c => escura ? (CORES[c]||c) : c;
   await Promise.all([document.fonts.load('80px "Great Vibes"'), document.fonts.load('600 40px "Cormorant Garamond"'), document.fonts.load('italic 500 30px "Cormorant Garamond"')]).catch(()=>{});
   const W=1080, M=110, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
   const [q, foto] = await Promise.all([carregaImg(qrImg(linkConvite(token), 10)), carregaImg(ev.foto)]);
   const nomes = temNomes(ev) ? [ev.noivo1,ev.noivo2].filter(Boolean).join(' & ') : '';
-  const B=[]; const T=(t,font,color,lh)=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>B.push({l,font,color,lh})); }; const G=h=>B.push({gap:h});
-  G(70);
+  const B=[]; const T=(t,font,color,lh)=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>B.push({l,font,color:C(color),lh})); }; const G=h=>B.push({gap:h});
+  const enfeite = ['floral','deco','folhas'].includes(mid);
+  G(mid==='floral'?210:enfeite?170:70);
   const FD=360; if (foto) { B.push({foto:true,lh:FD+40}); } else G(10);
   T('TEMOS A HONRA DE CONVIDAR PARA O CASAMENTO DE','600 22px Inter, sans-serif','#8F6B34',40);
   if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>B.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
@@ -668,19 +810,20 @@ async function gerarCartao(ev, cv, token){
   T('Apresente este QR Code na recepção','600 26px Inter, sans-serif','#1C2536',38);
   if (ev.mensagem){ G(10); T(ev.mensagem,'italic 500 36px "Cormorant Garamond", serif','#2E3B54',48); }
   G(8); T('Pessoal e intransferível — válido para uma única entrada.','22px Inter, sans-serif','#625B53',34);
-  G(80);
+  G(mid==='floral'?210:enfeite?170:80);
   c.height = B.reduce((s,b)=>s+(b.gap||b.lh),0);
   const H=c.height;
-  const bg=x.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#FFFEFB'); bg.addColorStop(1,'#F5ECDC'); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  if (mid === 'classica') {  const bg=x.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#FFFEFB'); bg.addColorStop(1,'#F5ECDC'); x.fillStyle=bg; x.fillRect(0,0,W,H);}
+  else { const fr = await carregaImg(svgURL(molduraSVG(mid, W, H))); if (fr) x.drawImage(fr, 0, 0, W, H); else { x.fillStyle = escura ? '#1C2536' : '#FFFEFB'; x.fillRect(0,0,W,H); } }
   /* sigla do casal ao fundo */
   const sg = sigla(ev);
   if (sg) { x.save(); x.textAlign='center'; x.textBaseline='middle'; x.globalAlpha=.09; x.fillStyle='#8F6B34';
     let fs=Math.min(760, H*.5); x.font=`${fs}px "Great Vibes"`; while (x.measureText(sg).width > W*1.05 && fs>200){ fs-=20; x.font=`${fs}px "Great Vibes"`; }
     x.translate(W/2, H*.52); x.rotate(-0.12); x.fillText(sg,0,0); x.restore(); }
   /* padrão de pontos */
-  x.fillStyle='rgba(143,107,52,.07)'; for(let yy=40; yy<H; yy+=34) for(let xx=40; xx<W; xx+=34) x.fillRect(xx,yy,2,2);
+  if (mid==='classica') x.fillStyle='rgba(143,107,52,.07)'; if (mid==='classica') for(let yy=40; yy<H; yy+=34) for(let xx=40; xx<W; xx+=34) x.fillRect(xx,yy,2,2);
   const gold=x.createLinearGradient(0,0,W,H); gold.addColorStop(0,'#7E5D2B'); gold.addColorStop(.3,'#C9A464'); gold.addColorStop(.5,'#F6E7BE'); gold.addColorStop(.7,'#C9A464'); gold.addColorStop(1,'#8F6B34');
-  x.strokeStyle=gold; x.lineWidth=6; x.strokeRect(30,30,W-60,H-60); x.lineWidth=1.5; x.strokeStyle='rgba(201,164,100,.6)'; x.strokeRect(48,48,W-96,H-96);
+  if (mid==='classica') { x.strokeStyle=gold; x.lineWidth=6; x.strokeRect(30,30,W-60,H-60); x.lineWidth=1.5; x.strokeStyle='rgba(201,164,100,.6)'; x.strokeRect(48,48,W-96,H-96); }
   x.textAlign='center'; x.textBaseline='alphabetic'; let y=0;
   for (const b of B){
     if (b.gap){ y+=b.gap; continue; }
@@ -1279,6 +1422,10 @@ function telaAjustes(){
       </div>
     </div>
     <p class="hint" style="margin:6px 4px 0">A foto aparece no convite online e na imagem enviada pelo WhatsApp.</p>
+    <div class="section-title">Moldura do convite</div>
+    <div class="card"><div class="molds" role="group" aria-label="Escolha a moldura">${Object.entries(MOLDURAS).map(([k,m])=>`<button class="mold" data-mold="${k}" aria-pressed="${idMoldura(c.moldura)===k}"><i style="background-image:url('${miniMoldura(k)}')"></i>${esc(m.nome)}</button>`).join('')}</div>
+      ${A.data.convidados.length?`<button class="btn line sm full" id="verConv" style="margin-top:14px">${ic('eye')} Ver como fica o convite</button>`:''}
+      <p class="hint">Vale para o convite online e para a imagem enviada pelo WhatsApp.</p></div>
     <div class="section-title">Dados do evento</div>
     <div class="card">
       <label class="f" for="ti" style="margin-top:0">Título</label><input class="in" id="ti" value="${esc(c.titulo&&c.titulo!=='Nosso Casamento'?c.titulo:'')}" placeholder="Casamento de Ana & Pedro">
@@ -1327,6 +1474,10 @@ function telaAjustes(){
       <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
     </div>`;
   ligaOlhos();
+  $$('[data-mold]').forEach(b=>b.onclick=async()=>{ const k=b.dataset.mold;
+    try { await rpc('cas_salvar_moldura',{p_pin:A.pin,p_moldura:k}); A.data.config.moldura=k; if(EV) EV.moldura=k;
+      $$('[data-mold]').forEach(x=>x.setAttribute('aria-pressed', x===b)); toast('Moldura "'+MOLDURAS[k].nome+'" escolhida'); } catch(er){ toast(er.message); } });
+  if ($('#verConv')) $('#verConv').onclick=()=>window.open(linkConvite(A.data.convidados[0].token),'_blank');
   $('#cpEv').onclick=()=>copiar(linkEvento('#admin', c.slug||EVC)); $('#cpPort').onclick=()=>copiar(portLink);
   const mapPrev=()=>{ const L=local({local:$('#lc').value, mapa:$('#mp').value}); $('#mapPrev').innerHTML = L&&L.embed ? blocoMapa(L,200) : `<div class="empty" style="padding:20px;border:2px dashed var(--line);border-radius:16px">${ic('pin')}<br>Nenhum local definido</div>`; };
   mapPrev(); $('#mp').onchange=mapPrev; $('#lc').onchange=mapPrev;
