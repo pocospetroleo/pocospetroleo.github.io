@@ -331,7 +331,7 @@ const horaCurta = iso => iso ? new Date(iso).toLocaleTimeString('pt-BR',{hour:'2
 const iniciais = n => String(n||'?').trim().split(/\s+/).filter(w=>w.length>2||/^[A-ZÀ-Ú]/.test(w)).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '?';
 const linkConvite = t => `${BASE}?c=${t}`;
 
-const SEM_EV = ['cas_convite','cas_criar','cas_dono_listar','cas_dono_status','cas_dono_excluir','cas_dono_senha'];
+const SEM_EV = ['cas_conta_criar','cas_conta_entrar','cas_convite','cas_criar','cas_dono_listar','cas_dono_status','cas_dono_excluir','cas_dono_senha'];
 async function rpc(fn, args = {}) {
   if (EVC && fn.startsWith('cas_') && !fn.startsWith('cas_dono_') && !SEM_EV.includes(fn) && !('p_ev' in args)) args = {...args, p_ev: EVC};
   const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json' }, body: JSON.stringify(args) });
@@ -505,6 +505,7 @@ async function route(){
   const p = new URLSearchParams(location.search);
   if (p.get('c')) return viewConvite(p.get('c'));
   const [r, sub] = location.hash.replace('#','').split('/');
+  if (r === 'criar-conta') return criarConta();
   if (r === 'dono') return viewDono();
   const veioPorLink = new URLSearchParams(location.search).get('e') !== null;
   if (!veioPorLink && !(EVC && (r === 'admin' || r === 'portaria'))) return viewDono();
@@ -598,22 +599,57 @@ const DONO = { get(){ try{ return sessionStorage.getItem('cas_dono') || localSto
   sair(){ try{ sessionStorage.removeItem('cas_dono'); localStorage.removeItem('cas_dono'); }catch(e){} } };
 function telaDono(html){ pintaFundo({fundo3d:true}); app.innerHTML = `<div class="page"><section class="hero" style="padding-top:28px">
     <img src="/meuconvite/logo.svg" alt="" width="92" height="92" style="border-radius:22px;box-shadow:0 14px 30px rgba(28,37,54,.25)">
-    <h1 style="margin:14px 0 2px">Meu Convite</h1><div class="eyebrow">Área do administrador</div></section>
+    <h1 style="margin:14px 0 2px">Meu Convite</h1><div class="eyebrow">Acesse sua conta</div></section>
     <div class="card section" style="margin-top:20px">${html}</div></div>`; ligaOlhos(); }
 function loginDono(){
-  telaDono(`<label class="f" for="du" style="margin-top:0">Usuário</label>${campo('du','Seu usuário','autocomplete="username"')}
+  telaDono(`<label class="f" for="du" style="margin-top:0">E-mail ou usuário</label>${campo('du','Seu usuário','autocomplete="username"')}
     <label class="f" for="ds">Senha</label>${campoSenha('ds','Sua senha','enterkeyhint="go"')}
     <label class="row" style="gap:10px;margin-top:14px;cursor:pointer"><input type="checkbox" id="dm" checked style="width:20px;height:20px"><span>Manter conectado neste aparelho</span></label>
     <button class="btn primary full" id="dsOk" style="margin-top:16px">Entrar</button>
     <button class="btn line full" id="dEsq" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
+    <a class="btn line full" href="#criar-conta" style="margin-top:10px">Criar uma conta</a>
     <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p>`);
   const go=async()=>{ const u=$('#du').value.trim(), v=$('#ds').value; if(!v) return; $('#dsOk').disabled=true; $('#err').textContent='';
-    try { const r=await rpc('cas_dono_entrar',{p_usuario:u,p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; }
+    try { const r=await rpc('cas_conta_entrar',{p_usuario:u,p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; }
+      if(r.papel==='organizador'){ DONO.sair(); trocaEvento(r.slug); store.set('cas_pin_admin',r.pin); location.href=linkEvento('#admin',r.slug); return; }
       DONO.set(v, $('#dm').checked); if (!r.configurado) return configDono(v, r, true); viewDono(); }
     catch(e){ $('#err').textContent=e.message; } finally { const b=$('#dsOk'); if(b) b.disabled=false; } };
   $('#dsOk').onclick=go; $('#ds').onkeydown=e=>{ if(e.key==='Enter') go(); };
   $('#dEsq').onclick=()=>esqueciDono($('#du').value.trim());
 }
+
+function criarConta(){
+  telaDono(`<h2 style="text-align:center">Criar uma conta</h2>
+    <p class="muted small">Cadastre seu acesso de organizador. O administrador libera seu evento após o cadastro.</p>
+    <form id="contaForm">
+      <label class="f" for="ce">E-mail</label><input class="in" id="ce" type="email" autocomplete="email" required maxlength="254">
+      <label class="f" for="cs">Senha</label>${campoSenha('cs','De 8 a 72 caracteres','minlength="8" maxlength="72" required')}
+      <label class="f" for="ccs">Confirmar senha</label>${campoSenha('ccs','Repita a senha','required')}
+      <label class="f" for="cno1">Nome do primeiro noivo ou organizador</label><input class="in" id="cno1" required maxlength="60">
+      <label class="f" for="cno2">Nome do segundo noivo ou evento</label><input class="in" id="cno2" required maxlength="60">
+      <label class="f" for="cwh">WhatsApp com DDD</label><input class="in" id="cwh" type="tel" required maxlength="40">
+      <label class="f" for="cpq">Pergunta de recuperação do evento</label>${selPergunta('cpq','')}
+      <label class="f" for="cra">Resposta</label><input class="in" id="cra" required minlength="2">
+      <p id="contaErro" role="alert" style="color:var(--bad);margin-top:12px"></p>
+      <button class="btn primary full" id="contaSalvar" type="submit" style="margin-top:18px">Criar conta</button>
+    </form>
+    <a class="btn line full" href="#dono" style="margin-top:12px">Voltar para o login</a>`);
+  $('#contaForm').onsubmit=async e=>{
+    e.preventDefault(); const b=$('#contaSalvar'),er=$('#contaErro'),senha=$('#cs').value;
+    er.textContent='';
+    if(senha!==$('#ccs').value){er.textContent='As senhas não são iguais';return;}
+    b.disabled=true;
+    try{
+      const r=await rpc('cas_conta_criar',{p_email:$('#ce').value.trim().toLowerCase(),p_senha:senha,p_dados:{
+        noivo1:$('#cno1').value.trim(),noivo2:$('#cno2').value.trim(),contato:$('#cwh').value.replace(/\D/g,''),
+        pergunta:$('#cpq').value,resposta:$('#cra').value
+      }});
+      if(r.erro){er.textContent=r.erro;return;}
+      telaDono(`<h2>Conta criada</h2><p class="muted" style="margin-top:12px">Seu evento aguarda a liberação do administrador. Use seu e-mail e sua senha para acompanhar o acesso.</p><a class="btn primary full" href="#dono" style="margin-top:18px">Voltar para o login</a>`);
+    }catch(x){er.textContent=x.message;}finally{b.disabled=false;}
+  };
+}
+
 function configDono(senha, atual, primeira){
   const html = `${primeira?`<h2 style="text-align:center">Configure seu acesso</h2><p class="muted small" style="text-align:center;margin-top:4px">Crie seu usuário, uma senha só sua e a pergunta para recuperar a senha.</p>`:''}
     <label class="f" for="cu" ${primeira?'':'style="margin-top:0"'}>Usuário</label>${campo('cu','Ex.: lucas',`value="${esc(atual.usuario||'')}"`)}
@@ -850,7 +886,7 @@ const campo = (id, ph, extra='') => `<input class="in" id="${id}" type="text" au
 const PERGUNTAS = ['Cidade onde nos conhecemos?','Nome do primeiro animal de estimação?','Data do nosso primeiro encontro?','Nome da rua onde cresceu?','Comida preferida do casal?'];
 const selPergunta = (id, atual='') => `<select class="in" id="${id}" style="appearance:auto">${PERGUNTAS.map(p=>`<option ${p===atual?'selected':''}>${esc(p)}</option>`).join('')}${atual&&!PERGUNTAS.includes(atual)?`<option selected>${esc(atual)}</option>`:''}</select>`;
 const olho = id => `<button type="button" class="olho" data-olho="${id}" aria-label="Mostrar ou ocultar senha">${ic('eye')}</button>`;
-const campoSenha = (id, ph, extra='') => `<div class="pwbox"><input class="in" id="${id}" name="${id}" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>${olho(id)}</div>`;
+const campoSenha = (id, ph, extra='') => `<div class="pwbox"><input class="in" id="${id}" name="${id}" type="password" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>${olho(id)}</div>`;
 function ligaOlhos(root=document){ $$('[data-olho]',root).forEach(b=>b.onclick=e=>{ e.preventDefault(); const i=$('#'+b.dataset.olho, root.nodeType===1?root:document) || $('#'+b.dataset.olho); i.classList.toggle('mask'); }); }
 
 function viewSetup(){
