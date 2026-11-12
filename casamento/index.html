@@ -154,22 +154,38 @@ async function viewConvite(token){
 }
 
 /* ---------------- LOGIN ---------------- */
-function viewLogin(papel){
+const campoSenha = (id, ph) => `<input id="${id}" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" style="margin:6px 0 10px;font-size:20px;text-align:center">`;
+async function viewSetup(){
+  app.innerHTML = `<div class="wrap"><div class="card" style="margin-top:30px">
+    <h1 style="margin-bottom:4px">Primeiro acesso</h1>
+    <p class="muted">Crie as duas senhas do sistema (mínimo 4 letras ou números).</p>
+    <label>Sua senha (painel dos noivos)</label>${campoSenha('sa','Ex.: lucas2026')}
+    <label>Senha do porteiro</label>${campoSenha('sp','Ex.: portaria14')}
+    <button class="btn gold full" id="criar" style="margin-top:6px">Criar senhas e entrar</button>
+    <p id="err" class="muted" style="color:var(--bad);margin-top:10px"></p></div></div>`;
+  $('#criar').onclick = async () => {
+    const a=$('#sa').value.trim(), p=$('#sp').value.trim();
+    try { await rpc('cas_setup',{p_admin:a,p_portaria:p}); store.set('cas_pin_admin',a); toast('Senhas criadas!'); viewAdmin(a); }
+    catch(e){ $('#err').textContent=e.message; }
+  };
+}
+async function viewLogin(papel){
   stopScanner();
   const saved = store.get('cas_pin_'+papel);
   if (saved) return papel==='admin' ? viewAdmin(saved) : viewPortaria(saved);
+  if (papel==='admin') { try { if (!(await rpc('cas_configurado'))) return viewSetup(); } catch(e){} }
   app.innerHTML = `<div class="wrap"><div class="card" style="margin-top:40px">
     <a href="#" class="muted" style="text-decoration:none">← voltar</a>
     <h1 style="margin:12px 0 4px">${papel==='admin'?'Administração':'Portaria'}</h1>
-    <p class="muted">Digite o PIN de acesso</p>
-    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="margin:16px 0;font-size:22px;text-align:center;letter-spacing:6px">
+    <p class="muted">Digite a senha de acesso</p>
+    ${campoSenha('pin','Senha')}
     <button class="btn full" id="entrar">Entrar</button>
     <p id="err" class="muted" style="color:var(--bad);margin-top:10px"></p></div></div>`;
   const go = async () => {
     const pin = $('#pin').value.trim();
     try {
       const r = await rpc('cas_login',{p_pin:pin});
-      if (!r || (papel==='admin' && r!=='admin')) { $('#err').textContent='PIN incorreto'; return; }
+      if (!r || (papel==='admin' && r!=='admin')) { $('#err').textContent='Senha incorreta'; return; }
       store.set('cas_pin_'+papel, pin);
       papel==='admin' ? viewAdmin(pin) : viewPortaria(pin);
     } catch(e){ $('#err').textContent = e.message; }
@@ -268,7 +284,7 @@ async function viewAdmin(pin){
         <button class="btn full" id="add" style="margin-top:10px">Adicionar à lista</button>
         <div class="divider">✦</div>
         <h2>Link da portaria</h2>
-        <p class="muted" style="font-size:13px">Envie para o porteiro abrir no celular. PIN da portaria: <b id="pinP"></b></p>
+        <p class="muted" style="font-size:13px">Envie para o porteiro abrir no celular. Senha do porteiro: <b id="pinP"></b></p>
         <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="cpPort">Copiar link</button><button class="btn wa sm" id="waPort">Enviar no WhatsApp</button></div>
       </div>
       <div class="card" style="grid-column:span 2;min-width:0">
@@ -286,7 +302,7 @@ async function viewAdmin(pin){
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b)); A.filtro=b.dataset.f; renderLista(); });
   const portLink = BASE+'#portaria';
   $('#cpPort').onclick=()=>copiar(portLink);
-  $('#waPort').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Link da portaria do casamento: ${portLink}\nPIN: ${A.data?.config?.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado. Verde = liberado, amarelo = já entrou, vermelho = inválido.`));
+  $('#waPort').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Link da portaria do casamento: ${portLink}\nSenha: ${A.data?.config?.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado. Verde = liberado, amarelo = já entrou, vermelho = inválido.`));
   await carregar(); clearInterval(adminTimer); adminTimer=setInterval(()=>{ if(location.hash==='#admin' && !document.querySelector('.modal')) carregar(); else if(location.hash!=='#admin') clearInterval(adminTimer); }, 10000);
 }
 async function carregar(){
@@ -352,10 +368,15 @@ function modalConfig(){
     <label>Título (aparece no convite)</label><input data-ti value="${esc(c.titulo)}" placeholder="Casamento de Ana & Pedro">
     <label>Data / horário</label><input data-d value="${esc(c.data||'')}" placeholder="14 de novembro de 2026 • 19h">
     <label>Local</label><input data-l value="${esc(c.local||'')}" placeholder="Nome do salão, endereço">
-    <label>PIN da portaria</label><input data-pp inputmode="numeric" value="${esc(c.pin_portaria)}">
+    <label>Senha do porteiro</label><input data-pp autocomplete="off" autocapitalize="none" value="${esc(c.pin_portaria)}">
+    <label>Nova senha do painel (deixe vazio para manter)</label><input data-na autocomplete="off" autocapitalize="none" placeholder="Opcional">
     <button class="btn full" data-s style="margin-top:14px">Salvar</button>`);
   m.querySelector('[data-x]').onclick=()=>m.remove();
-  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim()}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
+  m.querySelector('[data-s]').onclick=async()=>{ try{
+    await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim()});
+    const na=m.querySelector('[data-na]').value.trim();
+    if(na){ await rpc('cas_admin_senha',{p_pin:A.pin,p_nova:na}); A.pin=na; store.set('cas_pin_admin',na); }
+    m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
 }
 function exportar(){
   const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Entrou','Horário','Manual','Link']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Sim':'Não',hora(g.entrou_em),g.entrada_manual?'Sim':'',linkConvite(g.token)]));
