@@ -270,7 +270,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r7";
+const VERSAO = "2026-11-12-r9";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -590,7 +590,7 @@ function viewSetup(){
 }
 function viewLogin(papel, onOk){
   const adm = papel==='admin';
-  app.innerHTML = appbar({title: adm?'Noivos':'Portaria', sub:'Entrar', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
+  app.innerHTML = appbar({title: adm?'Noivos':'Portaria', sub:'Entrar', back:(!adm&&store.get('cas_pin_admin'))?'#admin':'', backLabel:(!adm&&store.get('cas_pin_admin'))?'Painel':'Voltar'}) + `<div class="page"><div class="card section" style="margin-top:30px">
     <div style="width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522">${ic(adm?'heart':'qr')}</div>
     <h1 style="text-align:center">${adm?'Perfil dos Noivos':'Perfil da Portaria'}</h1>
     <p class="muted" style="text-align:center;margin-top:4px">Digite a senha para entrar</p>
@@ -652,10 +652,35 @@ function ligaPerfil(atual){
     const s=sheet('Trocar perfil', `<div style="padding-top:4px">
       ${op('admin','heart','Noivos','Resumo, convidados, envio e ajustes')}
       ${op('portaria','qr','Portaria','Ler QR Code e liberar entrada')}
-      <button class="btn danger full" data-sair style="margin-top:8px">${ic('logout')} Sair do aplicativo</button></div>`);
+      <button class="btn line full" data-senha style="margin-top:8px">${ic('lock')} Alterar senha</button>
+      <button class="btn danger full" data-sair style="margin-top:10px">${ic('logout')} Sair do aplicativo</button></div>`);
+    $('[data-senha]',s).onclick=()=>{ s.fechar(); alterarSenha(atual); };
     $$('[data-p]',s).forEach(x=>x.onclick=()=>{ s.fechar(); if(x.dataset.p!==atual) location.hash = x.dataset.p==='admin' ? '#admin' : '#portaria'; });
     $('[data-sair]',s).onclick=async()=>{ s.fechar(); if(await confirmar({titulo:'Sair do aplicativo?', texto:'Será preciso digitar a senha novamente para entrar.', ok:'Sair', icone:'logout'})) { pararCam && pararCam(); store.del('cas_pin_admin'); store.del('cas_pin_portaria'); A.data=null; location.hash=''; } };
   };
+}
+function alterarSenha(atual){
+  const s=sheet('Alterar senha', `<div class="card">
+    <label class="f" style="margin-top:0">Qual senha deseja alterar?</label>
+    <div class="seg" role="tablist" style="margin:6px 0 4px">
+      <button role="tab" data-q="admin" aria-selected="${atual==='admin'}">${ic('heart')} Noivos</button>
+      <button role="tab" data-q="portaria" aria-selected="${atual!=='admin'}">${ic('qr')} Portaria</button></div>
+    <label class="f" for="s_a" id="s_al"></label>${campoSenha('s_a','Senha atual')}
+    <label class="f" for="s_n">Nova senha</label>${campoSenha('s_n','Mínimo 4 letras ou números')}
+    <label class="f" for="s_c">Repita a nova senha</label>${campoSenha('s_c','Digite novamente')}
+    <button class="btn gold full" data-ok style="margin-top:18px">${ic('lock')} Salvar nova senha</button>
+    <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
+  let perfil = atual==='admin' ? 'admin' : 'portaria';
+  const rot=()=>{ $('#s_al',s).textContent = perfil==='admin' ? 'Senha atual dos noivos' : 'Senha atual da portaria (ou a senha dos noivos)'; };
+  $$('[data-q]',s).forEach(b=>b.onclick=()=>{ perfil=b.dataset.q; $$('[data-q]',s).forEach(x=>x.setAttribute('aria-selected',x===b)); rot(); }); rot(); ligaOlhos(s);
+  $('[data-ok]',s).onclick=async e=>{ const b=e.currentTarget, er=$('[data-e]',s); er.textContent='';
+    const n=$('#s_n',s).value.trim(); if(n!==$('#s_c',s).value.trim()) { er.textContent='As novas senhas não são iguais'; return; }
+    b.disabled=true;
+    try { await rpc('cas_trocar_senha',{p_perfil:perfil,p_atual:$('#s_a',s).value,p_nova:n});
+      if (perfil==='admin') { if (store.get('cas_pin_admin')) { store.set('cas_pin_admin',n); A.pin=n; } }
+      else { if (store.get('cas_pin_portaria')) { store.set('cas_pin_portaria',n); P.pin=n; } }
+      A.data && await carregar(); s.fechar(); toast('Senha alterada com sucesso'); }
+    catch(x){ er.textContent=x.message; } b.disabled=false; };
 }
 function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=null; location.hash=''; }
 
@@ -663,14 +688,13 @@ function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=nu
 const P = { pin:null, lista:[], filtro:'todos', ultimo:null, busy:false, scanner:null };
 async function entrarPortaria(sub){
   const ev = await evento(); pintaFundo(ev);
-  const pp = store.get('cas_pin_portaria'), pa = store.get('cas_pin_admin');
-  const pin = pp || pa;
+  const pin = store.get('cas_pin_portaria');
   if (!pin) return viewLogin('portaria', () => route());
-  P.pin = pin; P.noivos = !pp && !!pa; viewPortaria(sub);
+  P.pin = pin; P.noivos = !!store.get('cas_pin_admin'); viewPortaria(sub);
 }
 function viewPortaria(sub){
   const scan = sub !== 'lista';
-  app.innerHTML = appbar({title:'Portaria', sub:P.noivos?'Modo noivos':'Recepção', back:P.noivos?'#admin':'', backLabel:P.noivos?'Painel':'Voltar', right:btnPerfil()}) + `<div class="page">
+  app.innerHTML = appbar({title:'Portaria', sub:'Recepção', back:P.noivos?'#admin':'', backLabel:P.noivos?'Painel':'Voltar', right:btnPerfil()}) + `<div class="page">
     <div class="stat hl section"><div class="row" style="justify-content:space-between;align-items:flex-end">
       <div><b id="pIn">–</b><span>pessoas já entraram</span></div><div style="text-align:right"><b id="pTot" style="color:#fff;opacity:.85">–</b><span>esperadas</span></div></div>
       <div class="prog"><i id="pBar" style="width:0"></i></div></div>
