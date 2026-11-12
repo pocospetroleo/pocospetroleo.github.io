@@ -268,6 +268,18 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
+const VERSAO = "2026-11-12-r5";
+(async function autoAtualiza(){
+  try {
+    const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
+    const t = await r.text(); const m = t.match(/const VERSAO = "([^"]+)"/);
+    if (m && m[1] !== VERSAO) {
+      const k = 'cas_upd_' + m[1];
+      if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1');
+      const u = new URL(location.href); u.searchParams.set('v', m[1]); location.replace(u.toString());
+    }
+  } catch(e) {}
+})();
 const SB_URL = "https://xvnkejsnqzbmcmgpfflq.supabase.co";
 const SB_KEY = "sb_publishable_XuXZ7vFDXxN_HVlIu0Y1hw_azroc6Gr";
 const BASE = location.origin + location.pathname;
@@ -534,7 +546,7 @@ const campo = (id, ph, extra='') => `<input class="in" id="${id}" type="text" au
 const PERGUNTAS = ['Cidade onde nos conhecemos?','Nome do primeiro animal de estimação?','Data do nosso primeiro encontro?','Nome da rua onde cresceu?','Comida preferida do casal?'];
 const selPergunta = (id, atual='') => `<select class="in" id="${id}" style="appearance:auto">${PERGUNTAS.map(p=>`<option ${p===atual?'selected':''}>${esc(p)}</option>`).join('')}${atual&&!PERGUNTAS.includes(atual)?`<option selected>${esc(atual)}</option>`:''}</select>`;
 const olho = id => `<button type="button" class="olho" data-olho="${id}" aria-label="Mostrar ou ocultar senha">${ic('eye')}</button>`;
-const campoSenha = (id, ph, extra='') => `<div class="pwbox"><input class="in mask" id="${id}" name="${id}" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>${olho(id)}</div>`;
+const campoSenha = (id, ph, extra='') => `<div class="pwbox"><input class="in" id="${id}" name="${id}" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>${olho(id)}</div>`;
 function ligaOlhos(root=document){ $$('[data-olho]',root).forEach(b=>b.onclick=e=>{ e.preventDefault(); const i=$('#'+b.dataset.olho, root.nodeType===1?root:document) || $('#'+b.dataset.olho); i.classList.toggle('mask'); }); }
 
 function viewSetup(){
