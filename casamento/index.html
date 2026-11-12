@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Convite • Casamento</title>
+<meta name="theme-color" content="#f7f2ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+:root{--bg:#f7f2ea;--card:#fffdf9;--ink:#2b2622;--muted:#8a8178;--gold:#b08d57;--gold2:#8c6d3d;--line:#e8dfd2;--ok:#1f8a4c;--bad:#c0392b;--warn:#d68910}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 60px}
+.wide{max-width:960px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 2px 14px rgba(80,60,30,.06)}
+h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1}
+h2{font-size:15px;font-weight:600;margin-bottom:12px}
+.muted{color:var(--muted);font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;padding:12px 16px;font:600 15px Inter;cursor:pointer;background:var(--ink);color:#fff;text-decoration:none}
+.btn.gold{background:var(--gold)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:7px 10px;font-size:13px;border-radius:9px}
+.btn.wa{background:#25a35a}
+.btn.red{background:var(--bad)}
+.btn:disabled{opacity:.5}
+.full{width:100%}
+input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font:15px Inter;background:#fff;color:var(--ink)}
+textarea{min-height:120px;resize:vertical}
+label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px}
+.row{display:flex;gap:8px;align-items:center}
+.grid{display:grid;gap:12px}
+.hidden{display:none!important}
+.divider{display:flex;align-items:center;gap:12px;color:var(--gold);margin:14px 0}
+.divider:before,.divider:after{content:"";flex:1;height:1px;background:var(--line)}
+/* convite */
+.invite{text-align:center;padding:34px 22px}
+.invite .qr{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:inline-block;margin:18px 0 10px}
+.invite .qr img{display:block;width:240px;height:240px;image-rendering:pixelated}
+.badge{display:inline-block;padding:5px 12px;border-radius:99px;font-size:13px;font-weight:600}
+.badge.ok{background:#e3f4ea;color:var(--ok)}
+.badge.pend{background:#f6efe3;color:var(--gold2)}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:26px}
+.stat span{font-size:12px;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
+/* lista */
+.guest{display:flex;gap:10px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
+.guest:last-child{border-bottom:0}
+.guest .info{flex:1;min-width:0}
+.guest .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.guest .meta{font-size:12px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
+.dot.in{background:var(--ok)}
+.acts{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.tabs{display:flex;gap:6px;margin:12px 0;overflow-x:auto}
+.tab{padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:#fff;font:500 13px Inter;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* portaria */
+#reader{width:100%;border-radius:16px;overflow:hidden;background:#000;min-height:280px}
+#reader video{border-radius:16px}
+.result{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;z-index:50}
+.result.ok{background:var(--ok)}.result.bad{background:var(--bad)}.result.warn{background:var(--warn)}
+.result .ic{font-size:90px;line-height:1}
+.result .t{font-size:30px;font-weight:700;margin:14px 0 6px}
+.result .n{font-size:26px;font-weight:600}
+.result .s{font-size:17px;opacity:.9;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(30,25,20,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:40}
+.modal .card{width:100%;max-width:420px;max-height:90vh;overflow:auto}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:60}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const SB_URL = "https://xvnkejsnqzbmcmgpfflq.supabase.co";
+const SB_KEY = "sb_publishable_XuXZ7vFDXxN_HVlIu0Y1hw_azroc6Gr";
+const BASE = location.origin + location.pathname;
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}} };
+
+async function rpc(fn, args = {}) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args)
+  });
+  const t = await r.text();
+  const d = t ? JSON.parse(t) : null;
+  if (!r.ok) throw new Error(d?.message || 'Erro de conexão');
+  return d;
+}
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function qrImg(text, size=8){ const q=qrcode(0,'M'); q.addData(text); q.make(); return q.createDataURL(size, 2); }
+const linkConvite = token => `${BASE}?c=${token}`;
+const hora = iso => iso ? new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+const horaCurta = iso => iso ? new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+
+/* ---------------- ROTEAMENTO ---------------- */
+function route(){
+  const p = new URLSearchParams(location.search);
+  if (p.get('c')) return viewConvite(p.get('c'));
+  const h = location.hash.replace('#','');
+  if (h === 'admin') return viewLogin('admin');
+  if (h === 'portaria') return viewLogin('portaria');
+  return viewHome();
+}
+window.addEventListener('hashchange', route);
+
+/* ---------------- HOME ---------------- */
+async function viewHome(){
+  let ev = {}; try { ev = await rpc('cas_evento') || {}; } catch(e){}
+  app.innerHTML = `<div class="wrap"><div class="card invite">
+    <div class="muted" style="letter-spacing:3px;font-size:12px">CONTROLE DE ENTRADA</div>
+    <h1 style="margin:10px 0">${esc(ev.titulo||'Casamento')}</h1>
+    <div class="muted">${esc(ev.data||'')}</div>
+    <div class="divider">✦</div>
+    <div class="grid">
+      <a class="btn full" href="#portaria">📷 Portaria (ler QR Code)</a>
+      <a class="btn ghost full" href="#admin">⚙️ Administração</a>
+    </div></div></div>`;
+}
+
+/* ---------------- CONVITE (convidado) ---------------- */
+async function viewConvite(token){
+  app.innerHTML = `<div class="wrap"><div class="card invite"><div class="muted">Carregando convite…</div></div></div>`;
+  let ev={}, cv=null;
+  try { [ev, cv] = await Promise.all([rpc('cas_evento'), rpc('cas_convite',{p_token:token})]); } catch(e){}
+  if (!cv) { app.innerHTML = `<div class="wrap"><div class="card invite"><h1>Convite não encontrado</h1><p class="muted" style="margin-top:10px">Verifique o link recebido ou fale com os noivos.</p></div></div>`; return; }
+  const img = qrImg(linkConvite(token), 8);
+  app.innerHTML = `<div class="wrap"><div class="card invite">
+    <div class="muted" style="letter-spacing:3px;font-size:12px">VOCÊ ESTÁ CONVIDADO(A)</div>
+    <h1 style="margin:10px 0 4px">${esc(ev.titulo)}</h1>
+    <div class="serif" style="font-size:20px;font-style:italic;color:var(--gold2)">${esc(ev.data)}</div>
+    ${ev.local?`<div class="muted" style="margin-top:4px">📍 ${esc(ev.local)}</div>`:''}
+    <div class="divider">✦</div>
+    <div class="muted">Convidado(a)</div>
+    <div style="font-size:22px;font-weight:600;margin-top:2px">${esc(cv.nome)}</div>
+    <div class="muted">${cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Válido para 1 pessoa'}</div>
+    <div class="qr"><img id="qrimg" src="${img}" alt="QR Code"></div>
+    <div>${cv.entrou_em?`<span class="badge ok">✓ Entrada registrada às ${horaCurta(cv.entrou_em)}</span>`:`<span class="badge pend">Apresente este QR Code na entrada</span>`}</div>
+    <p class="muted" style="margin:16px 0 14px;font-size:13px">O QR Code é pessoal e só pode ser usado uma vez. Dica: tire um print ou salve a imagem para não depender de internet na portaria.</p>
+    <a class="btn gold full" download="convite-${esc(cv.nome).replace(/\s+/g,'-')}.png" href="${img}">⬇️ Salvar QR Code</a>
+  </div></div>`;
+}
+
+/* ---------------- LOGIN ---------------- */
+function viewLogin(papel){
+  stopScanner();
+  const saved = store.get('cas_pin_'+papel);
+  if (saved) return papel==='admin' ? viewAdmin(saved) : viewPortaria(saved);
+  app.innerHTML = `<div class="wrap"><div class="card" style="margin-top:40px">
+    <a href="#" class="muted" style="text-decoration:none">← voltar</a>
+    <h1 style="margin:12px 0 4px">${papel==='admin'?'Administração':'Portaria'}</h1>
+    <p class="muted">Digite o PIN de acesso</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="margin:16px 0;font-size:22px;text-align:center;letter-spacing:6px">
+    <button class="btn full" id="entrar">Entrar</button>
+    <p id="err" class="muted" style="color:var(--bad);margin-top:10px"></p></div></div>`;
+  const go = async () => {
+    const pin = $('#pin').value.trim();
+    try {
+      const r = await rpc('cas_login',{p_pin:pin});
+      if (!r || (papel==='admin' && r!=='admin')) { $('#err').textContent='PIN incorreto'; return; }
+      store.set('cas_pin_'+papel, pin);
+      papel==='admin' ? viewAdmin(pin) : viewPortaria(pin);
+    } catch(e){ $('#err').textContent = e.message; }
+  };
+  $('#entrar').onclick = go; $('#pin').onkeydown = e => e.key==='Enter' && go(); $('#pin').focus();
+}
+function sair(papel){ store.del('cas_pin_'+papel); stopScanner(); location.hash=''; route(); }
+
+/* ---------------- PORTARIA ---------------- */
+let scanner=null, busy=false, resumoTimer=null;
+function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector(`script[src="${src}"]`)) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+function stopScanner(){ clearInterval(resumoTimer); if(scanner){ try{scanner.stop().catch(()=>{})}catch(e){} scanner=null; } }
+
+async function viewPortaria(pin){
+  app.innerHTML = `<div class="wrap">
+    <div class="top"><div><h1 style="font-size:28px">Portaria</h1></div>
+      <button class="btn ghost sm" id="sair">Sair</button></div>
+    <div class="stat"><div class="row" style="justify-content:space-between"><div><b id="pIn">–</b><span>pessoas entraram</span></div><div style="text-align:right"><b id="pTot" style="color:var(--muted)">–</b><span>esperadas</span></div></div><div class="bar"><i id="pBar" style="width:0"></i></div></div>
+    <div class="tabs"><button class="tab on" data-t="scan">📷 Ler QR</button><button class="tab" data-t="busca">🔎 Buscar nome</button></div>
+    <div id="tScan"><div id="reader"></div><p class="muted" style="text-align:center;margin-top:10px">Aponte a câmera para o QR Code do convidado</p></div>
+    <div id="tBusca" class="hidden"><input id="q" placeholder="Digite o nome do convidado…"><div id="res" class="card" style="margin-top:10px;padding:8px 14px"></div></div>
+  </div>`;
+  $('#sair').onclick = () => sair('portaria');
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+    const scan = b.dataset.t==='scan';
+    $('#tScan').classList.toggle('hidden',!scan); $('#tBusca').classList.toggle('hidden',scan);
+    if (scan) startScan(pin); else { stopCam(); $('#q').focus(); }
+  });
+  let qt; $('#q').oninput = () => { clearTimeout(qt); qt=setTimeout(()=>buscar(pin),300); };
+  const atualiza = async () => { try { const r = await rpc('cas_resumo',{p_pin:pin}); if(!r){ sair('portaria'); return; }
+    $('#pIn').textContent=r.pessoas_entraram; $('#pTot').textContent=r.pessoas; $('#pBar').style.width=(r.pessoas?100*r.pessoas_entraram/r.pessoas:0)+'%'; } catch(e){} };
+  atualiza(); resumoTimer = setInterval(atualiza, 8000);
+  startScan(pin);
+}
+function stopCam(){ if(scanner){ try{scanner.stop().catch(()=>{})}catch(e){} scanner=null; } }
+async function startScan(pin){
+  try { await loadScript('https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'); }
+  catch(e){ $('#reader').innerHTML='<p style="color:#fff;padding:20px">Não foi possível carregar o leitor. Verifique a internet.</p>'; return; }
+  if (scanner) return;
+  scanner = new Html5Qrcode('reader');
+  try {
+    await scanner.start({facingMode:'environment'}, {fps:10, qrbox:{width:240,height:240}}, txt => onScan(pin, txt), ()=>{});
+  } catch(e){ scanner=null; $('#reader').innerHTML=`<p style="color:#fff;padding:20px">Sem acesso à câmera. Permita o uso da câmera no navegador e recarregue a página.<br><br><small>${esc(e?.message||e)}</small></p>`; }
+}
+function extraiToken(txt){ try { const u=new URL(txt); return u.searchParams.get('c'); } catch(e){ return /^[a-z0-9]{8,20}$/i.test(txt)?txt:null; } }
+async function onScan(pin, txt){
+  if (busy) return; busy = true;
+  const token = extraiToken(txt);
+  let r;
+  try { r = token ? await rpc('cas_validar',{p_pin:pin,p_token:token}) : {status:'invalido'}; }
+  catch(e){ r = {status:'erro', msg:e.message}; }
+  mostraResultado(r);
+}
+function beep(ok){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(); const g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=ok?880:220; g.gain.value=.2; o.start(); o.stop(c.currentTime+(ok?.18:.5)); }catch(e){} try{navigator.vibrate&&navigator.vibrate(ok?120:[200,100,200])}catch(e){} }
+function mostraResultado(r, cb){
+  const m = {
+    ok:      ['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas>1?`${r.pessoas} pessoas`:'1 pessoa'],
+    ja_entrou:['warn','⚠','JÁ ENTROU', r.nome, `QR usado às ${horaCurta(r.entrou_em)} — não liberar novamente`],
+    invalido:['bad','✕','QR INVÁLIDO','', 'Este código não está na lista de convidados'],
+    pin_invalido:['bad','✕','PIN INVÁLIDO','','Saia e entre novamente'],
+    erro:    ['bad','!','SEM CONEXÃO','', 'Verifique a internet e tente de novo']
+  }[r.status] || ['bad','!','ERRO','',''];
+  beep(r.status==='ok');
+  const d=document.createElement('div'); d.className='result '+m[0];
+  d.innerHTML=`<div class="ic">${m[1]}</div><div class="t">${m[2]}</div><div class="n">${esc(m[3])}</div><div class="s">${esc(m[4])}</div><div class="s" style="margin-top:30px;font-size:14px">Toque para continuar</div>`;
+  document.body.appendChild(d);
+  const fechar=()=>{ d.remove(); busy=false; cb&&cb(); };
+  d.onclick=fechar; setTimeout(()=>d.isConnected&&fechar(), r.status==='ok'?2500:5000);
+}
+async function buscar(pin){
+  const q=$('#q').value.trim(); const box=$('#res');
+  if (q.length<2){ box.innerHTML='<p class="muted" style="padding:10px 0">Digite pelo menos 2 letras</p>'; return; }
+  const l = await rpc('cas_buscar',{p_pin:pin,p_termo:q});
+  box.innerHTML = l.length ? l.map(g=>`<div class="guest"><span class="dot ${g.entrou_em?'in':''}"></span><div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s) ${g.entrou_em?'• entrou às '+horaCurta(g.entrou_em):''}</div></div>
+    ${g.entrou_em?'<span class="badge ok">Entrou</span>':`<button class="btn sm" data-id="${g.id}">Liberar</button>`}</div>`).join('') : '<p class="muted" style="padding:10px 0">Ninguém encontrado com esse nome</p>';
+  box.querySelectorAll('button[data-id]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Confirmar entrada manual deste convidado?')) return;
+    const r = await rpc('cas_entrada_manual',{p_pin:pin,p_id:b.dataset.id}); mostraResultado(r, ()=>buscar(pin));
+  });
+}
+
+/* ---------------- ADMIN ---------------- */
+let A = { pin:null, data:null, filtro:'todos', busca:'' }, adminTimer=null;
+async function viewAdmin(pin){
+  A.pin = pin;
+  app.innerHTML = `<div class="wrap wide">
+    <div class="top"><div><div class="muted" style="font-size:12px;letter-spacing:2px">ADMINISTRAÇÃO</div><h1 id="aTit" style="font-size:30px">…</h1></div>
+      <div class="row"><button class="btn ghost sm" id="cfg">⚙️ Evento</button><button class="btn ghost sm" id="sair">Sair</button></div></div>
+    <div class="stats" id="stats"></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start">
+      <div class="card">
+        <h2>➕ Adicionar convidados</h2>
+        <p class="muted" style="font-size:13px">Um por linha. Formato: <b>Nome ; pessoas ; telefone</b> (pessoas e telefone são opcionais)</p>
+        <textarea id="lista" placeholder="Maria Silva ; 2 ; 82999998888&#10;João Souza ; 1&#10;Família Santos ; 4"></textarea>
+        <button class="btn full" id="add" style="margin-top:10px">Adicionar à lista</button>
+        <div class="divider">✦</div>
+        <h2>Link da portaria</h2>
+        <p class="muted" style="font-size:13px">Envie para o porteiro abrir no celular. PIN da portaria: <b id="pinP"></b></p>
+        <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="cpPort">Copiar link</button><button class="btn wa sm" id="waPort">Enviar no WhatsApp</button></div>
+      </div>
+      <div class="card" style="grid-column:span 2;min-width:0">
+        <div class="row" style="justify-content:space-between"><h2 style="margin:0">Convidados</h2><button class="btn ghost sm" id="csv">⬇️ Exportar</button></div>
+        <input id="busca" placeholder="Buscar nome…" style="margin-top:10px">
+        <div class="tabs"><button class="tab on" data-f="todos">Todos</button><button class="tab" data-f="dentro">Entraram</button><button class="tab" data-f="fora">Faltam</button></div>
+        <div id="lst"></div>
+      </div>
+    </div></div>`;
+  $('#sair').onclick=()=>{ clearInterval(adminTimer); sair('admin'); };
+  $('#cfg').onclick=modalConfig;
+  $('#add').onclick=adicionar;
+  $('#csv').onclick=exportar;
+  $('#busca').oninput=e=>{ A.busca=e.target.value.toLowerCase(); renderLista(); };
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b)); A.filtro=b.dataset.f; renderLista(); });
+  const portLink = BASE+'#portaria';
+  $('#cpPort').onclick=()=>copiar(portLink);
+  $('#waPort').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Link da portaria do casamento: ${portLink}\nPIN: ${A.data?.config?.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado. Verde = liberado, amarelo = já entrou, vermelho = inválido.`));
+  await carregar(); clearInterval(adminTimer); adminTimer=setInterval(()=>{ if(location.hash==='#admin' && !document.querySelector('.modal')) carregar(); else if(location.hash!=='#admin') clearInterval(adminTimer); }, 10000);
+}
+async function carregar(){
+  try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); }
+  catch(e){ toast(e.message); if(/PIN/.test(e.message)) sair('admin'); return; }
+  const c=A.data.config, L=A.data.convidados;
+  $('#aTit').textContent=c.titulo; $('#pinP').textContent=c.pin_portaria;
+  const pes=L.reduce((s,g)=>s+g.pessoas,0), pin_=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
+  $('#stats').innerHTML=`
+    <div class="stat"><b>${L.length}</b><span>convites</span></div>
+    <div class="stat"><b>${pes}</b><span>pessoas esperadas</span></div>
+    <div class="stat"><b style="color:var(--ok)">${pin_}</b><span>pessoas já entraram</span><div class="bar"><i style="width:${pes?100*pin_/pes:0}%"></i></div></div>
+    <div class="stat"><b>${pes-pin_}</b><span>ainda faltam</span></div>`;
+  renderLista();
+}
+function renderLista(){
+  let L=A.data.convidados;
+  if(A.filtro==='dentro') L=L.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em));
+  if(A.filtro==='fora') L=L.filter(g=>!g.entrou_em);
+  if(A.busca) L=L.filter(g=>g.nome.toLowerCase().includes(A.busca));
+  $('#lst').innerHTML = L.length ? L.map(g=>`<div class="guest">
+    <span class="dot ${g.entrou_em?'in':''}"></span>
+    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s)${g.telefone?' • '+esc(g.telefone):''}${g.entrou_em?` • <b style="color:var(--ok)">entrou ${hora(g.entrou_em)}</b>${g.entrada_manual?' (manual)':''}`:''}</div></div>
+    <div class="acts">
+      <button class="btn wa sm" data-a="wa" data-id="${g.id}" title="Enviar convite">WhatsApp</button>
+      <button class="btn ghost sm" data-a="mais" data-id="${g.id}">⋯</button>
+    </div></div>`).join('') : '<p class="muted" style="padding:16px 0">Nenhum convidado aqui ainda.</p>';
+  $('#lst').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const g=A.data.convidados.find(x=>x.id===b.dataset.id); b.dataset.a==='wa'?enviarWa(g):modalConvidado(g); });
+}
+function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nVocê está convidado(a) para ${c.titulo}${c.data?' – '+c.data:''}${c.local?'\n📍 '+c.local:''}.\n\nAbra seu convite e apresente o QR Code na entrada:\n${linkConvite(g.token)}\n\n${g.pessoas>1?`Seu convite é válido para ${g.pessoas} pessoas. `:''}O QR Code é pessoal e vale uma única entrada.`; }
+function enviarWa(g){ const tel=(g.telefone||'').replace(/\D/g,''); const num = tel ? (tel.length<=11?'55'+tel:tel) : ''; window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgConvite(g))}`); }
+async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast('Copiado!'); }catch(e){ prompt('Copie:',t); } }
+async function adicionar(){
+  const linhas=$('#lista').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!linhas.length) return toast('Digite pelo menos um nome');
+  const lista=linhas.map(l=>{ const [nome,p,tel]=l.split(/[;\t]/).map(x=>(x||'').trim()); return {nome, pessoas:parseInt(p)||1, telefone:tel||''}; });
+  $('#add').disabled=true;
+  try { const n=await rpc('cas_admin_adicionar',{p_pin:A.pin,p_lista:lista}); $('#lista').value=''; toast(`${n} convidado(s) adicionado(s)`); await carregar(); }
+  catch(e){ toast(e.message); }
+  $('#add').disabled=false;
+}
+function modal(html){ const m=document.createElement('div'); m.className='modal'; m.innerHTML=`<div class="card">${html}</div>`; m.onclick=e=>{ if(e.target===m) m.remove(); }; document.body.appendChild(m); return m; }
+function modalConvidado(g){
+  const link=linkConvite(g.token), img=qrImg(link,6);
+  const m=modal(`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(g.nome)}</h2><button class="btn ghost sm" data-x>✕</button></div>
+    <div style="text-align:center;margin:12px 0"><img src="${img}" style="width:180px;image-rendering:pixelated;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff"></div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn ghost sm" data-cp>Copiar link</button><a class="btn ghost sm" href="${link}" target="_blank">Abrir convite</a><a class="btn ghost sm" download="qr-${esc(g.nome)}.png" href="${img}">Baixar QR</a></div>
+    <div class="divider">editar</div>
+    <label>Nome</label><input data-n value="${esc(g.nome)}">
+    <div class="row"><div style="flex:1"><label>Pessoas</label><input data-p type="number" min="1" max="20" value="${g.pessoas}"></div><div style="flex:2"><label>Telefone (WhatsApp)</label><input data-t inputmode="tel" value="${esc(g.telefone||'')}"></div></div>
+    <button class="btn full" data-s style="margin-top:12px">Salvar</button>
+    ${g.entrou_em?`<button class="btn ghost full" data-u style="margin-top:8px">↩️ Desfazer entrada (${hora(g.entrou_em)})</button>`:''}
+    <button class="btn red full" data-r style="margin-top:8px">Remover convidado</button>`);
+  m.querySelector('[data-x]').onclick=()=>m.remove();
+  m.querySelector('[data-cp]').onclick=()=>copiar(link);
+  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:m.querySelector('[data-n]').value,p_pessoas:parseInt(m.querySelector('[data-p]').value)||1,p_telefone:m.querySelector('[data-t]').value}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
+  const u=m.querySelector('[data-u]'); if(u) u.onclick=async()=>{ if(!confirm('Desfazer a entrada? O QR volta a valer.')) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
+  m.querySelector('[data-r]').onclick=async()=>{ if(!confirm(`Remover ${g.nome}? O QR deixa de funcionar.`)) return; await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
+}
+function modalConfig(){
+  const c=A.data.config;
+  const m=modal(`<div class="row" style="justify-content:space-between"><h2 style="margin:0">Dados do evento</h2><button class="btn ghost sm" data-x>✕</button></div>
+    <label>Título (aparece no convite)</label><input data-ti value="${esc(c.titulo)}" placeholder="Casamento de Ana & Pedro">
+    <label>Data / horário</label><input data-d value="${esc(c.data||'')}" placeholder="14 de novembro de 2026 • 19h">
+    <label>Local</label><input data-l value="${esc(c.local||'')}" placeholder="Nome do salão, endereço">
+    <label>PIN da portaria</label><input data-pp inputmode="numeric" value="${esc(c.pin_portaria)}">
+    <button class="btn full" data-s style="margin-top:14px">Salvar</button>`);
+  m.querySelector('[data-x]').onclick=()=>m.remove();
+  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim()}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
+}
+function exportar(){
+  const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Entrou','Horário','Manual','Link']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Sim':'Não',hora(g.entrou_em),g.entrada_manual?'Sim':'',linkConvite(g.token)]));
+  const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='convidados-casamento.csv'; a.click();
+}
+
+route();
+</script>
+</body>
+</html>
