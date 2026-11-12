@@ -278,7 +278,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r11";
+const VERSAO = "2026-11-12-r12";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -427,10 +427,8 @@ async function route(){
   const p = new URLSearchParams(location.search);
   if (p.get('c')) return viewConvite(p.get('c'));
   const [r, sub] = location.hash.replace('#','').split('/');
-  if (r === 'criar') return viewCriar();
   if (r === 'dono') return viewDono();
-  if (r === 'entrar') return viewEntrar(sub ? '#'+sub : '');
-  if (!EVC) return (r === 'admin' || r === 'portaria') ? viewEntrar('#'+r) : viewLanding();
+  if (!EVC) return viewSemAcesso();
   if (r === 'admin') return entrarAdmin(sub || 'lista');
   if (r === 'portaria') return entrarPortaria(sub || 'scan');
   return viewHome();
@@ -442,7 +440,7 @@ async function viewHome(){
   app.innerHTML = `<div class="loading"><div class="spin dark"></div></div>`;
   const ev = await evento(true); pintaFundo(ev);
   if (!ev.slug) { let chk; try { chk = await rpc('cas_evento'); } catch(e){ chk = undefined; }
-    if (chk === null) { trocaEvento(''); toast('Evento não encontrado ou bloqueado'); return viewEntrar(''); } }
+    if (chk === null) { trocaEvento(''); return viewSemAcesso('Este evento não está disponível.'); } }
   app.innerHTML = `<div class="page">
     <section class="hero">
       ${rings()}
@@ -455,92 +453,29 @@ async function viewHome(){
       <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Noivos</b><span>Acesso completo: convidados, envio e resumo</span></div></a>
     </nav>
     <p class="muted small" style="text-align:center;margin-top:28px">Acesso restrito por senha</p>
-    <p style="text-align:center;margin-top:6px"><button class="btn line sm" id="outroEv" style="border:0;box-shadow:none;background:none;color:var(--gold3)">Não é o seu evento? Ir para o início</button></p>
-  </div>`;
-  $('#outroEv').onclick = () => { trocaEvento(''); viewLanding(); };
-}
-
-/* =================== PÁGINA PÚBLICA =================== */
-function viewLanding(){
-  pintaFundo({fundo3d:true});
-  const it=(icon,t,d)=>`<div class="tile" style="cursor:default"><span class="ti">${ic(icon)}</span><div><b>${t}</b><span>${d}</span></div></div>`;
-  app.innerHTML = `<div class="page">
-    <section class="hero" style="padding-top:26px">
-      <img src="/meuconvite/logo.svg" alt="" width="112" height="112" style="border-radius:26px;box-shadow:0 14px 30px rgba(28,37,54,.25)">
-      <h1 style="margin:18px 0 6px">Meu Convite</h1>
-      <div class="serif" style="font-size:21px;font-style:italic;color:var(--gold3)">Convites com QR Code e controle de entrada para o seu evento</div>
-    </section>
-    <div style="display:grid;gap:12px;margin-top:26px">
-      <a class="btn gold full" href="#criar" style="min-height:58px;font-size:18px">${ic('heart')} Criar meu evento</a>
-      <a class="btn line full" href="#entrar">${ic('lock')} Já tenho um evento — entrar</a>
-    </div>
-    <div class="section-title">Como funciona</div>
-    <div style="display:grid;gap:12px">
-      ${it('users','Monte a lista de convidados','Digite, cole ou importe a lista pronta')}
-      ${it('wa','Envie pelo WhatsApp','Cada convidado recebe um convite com QR Code pessoal')}
-      ${it('qr','Controle a entrada','A portaria lê o QR Code no celular e libera na hora')}
-      ${it('home','Acompanhe em tempo real','Veja quem já chegou e quem falta')}
-    </div>
-    <p class="muted small" style="text-align:center;margin-top:28px">© 2026 Meu Convite · Todos os direitos reservados</p>
   </div>`;
 }
-function viewEntrar(depois){
-  pintaFundo({fundo3d:true});
-  app.innerHTML = appbar({title:'Entrar', sub:'Meu Convite', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
-    <h1 style="text-align:center">Qual é o seu evento?</h1>
-    <p class="muted" style="text-align:center;margin-top:4px">Digite o código do evento. Ele aparece no link que os noivos receberam ao criar o evento (depois de <b>?e=</b>).</p>
-    <label class="f" for="cod">Código do evento</label>${campo('cod','ex.: ana-pedro','enterkeyhint="go" style="font-size:18px"')}
-    <button class="btn primary full" id="ir" style="margin-top:16px">Continuar</button>
-    <p id="err" role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p>
-    <p class="muted small" style="text-align:center;margin-top:14px">Ainda não tem? <a href="#criar" style="color:var(--gold3)">Criar meu evento</a></p></div></div>`;
-  ligaVoltar();
-  const go = async () => { const c=$('#cod').value.trim().toLowerCase().replace(/^.*[?&]e=/,'').replace(/[#&].*$/,''); if(!c) return;
-    $('#ir').disabled=true; $('#err').textContent='';
-    try { const ev = await rpc('cas_evento',{p_ev:c}); if(!ev||!ev.slug){ $('#err').textContent='Evento não encontrado. Confira o código.'; return; }
-      trocaEvento(ev.slug); EV=ev; ir(depois||''); }
-    catch(e){ $('#err').textContent=e.message; } finally { const b=$('#ir'); if(b) b.disabled=false; } };
-  $('#ir').onclick=go; $('#cod').onkeydown=e=>{ if(e.key==='Enter') go(); };
-}
-function viewCriar(){
-  pintaFundo({fundo3d:true});
-  app.innerHTML = appbar({title:'Criar meu evento', sub:'Meu Convite', back:''}) + `<div class="page"><div class="card section">
-    <div class="section-title" style="margin-top:0">Os noivos</div>
-    <div class="grid2"><div><label class="f" for="c1" style="margin-top:0">Noivo(a)</label><input class="in" id="c1" placeholder="Ana" autocomplete="off"></div>
-      <div><label class="f" for="c2" style="margin-top:0">Noivo(a)</label><input class="in" id="c2" placeholder="Pedro" autocomplete="off"></div></div>
-    <label class="f" for="cd">Data e horário</label><input class="in" id="cd" placeholder="Sábado, 20 de março de 2027 • 19h">
-    <label class="f" for="cl">Local</label><input class="in" id="cl" placeholder="Nome do espaço, endereço">
-    <label class="f" for="cw">Seu WhatsApp</label><input class="in" id="cw" inputmode="tel" placeholder="(82) 99999-9999">
-    <p class="hint">Usado só para falarmos com vocês sobre a liberação do evento.</p>
-    <div class="section-title">Senhas de acesso</div>
-    <label class="f" for="pa" style="margin-top:0">Senha dos noivos</label>${campoSenha('pa','Mínimo 6 letras ou números')}
-    <label class="f" for="pp2">Senha da portaria</label>${campoSenha('pp2','Diferente da senha dos noivos')}
-    <div class="section-title">Se esquecer a senha</div>
-    <label class="f" for="rq" style="margin-top:0">Pergunta de segurança</label>${selPergunta('rq')}
-    <label class="f" for="rr">Resposta</label>${campo('rr','Sua resposta')}
-    <button class="btn gold full" id="criarEv" style="margin-top:20px;min-height:56px">${ic('heart')} Criar evento</button>
-    <p id="err" role="alert" style="color:var(--bad);margin-top:12px;text-align:center"></p>
-    <p class="muted small" style="text-align:center;margin-top:8px">Vocês já podem montar a lista e preparar os convites. Os convites e a portaria passam a valer depois que o evento for liberado.</p>
-  </div></div>`;
-  ligaVoltar(); ligaOlhos();
-  $('#criarEv').onclick = async e => { const b=e.currentTarget; b.disabled=true; $('#err').textContent='';
-    const pa=$('#pa').value.trim();
-    try {
-      const r = await rpc('cas_criar',{p_dados:{noivo1:$('#c1').value,noivo2:$('#c2').value,data:$('#cd').value,local:$('#cl').value,contato:$('#cw').value,
-        pin_admin:pa,pin_portaria:$('#pp2').value.trim(),pergunta:$('#rq').value,resposta:$('#rr').value}});
-      trocaEvento(r.slug); store.set('cas_pin_admin', pa);
-      const s = sheet('Evento criado!', `<div class="card" style="text-align:center">${rings()}
-        <h2 style="margin-top:12px">Tudo pronto para começar</h2>
-        <p class="muted" style="margin-top:6px">Guarde o link do seu evento. É por ele que vocês e a portaria entram.</p>
-        <label class="f">Código do evento</label><div style="font:600 24px 'Cormorant Garamond',serif;color:var(--navy)">${esc(r.slug)}</div>
-        <button class="btn line full" data-cp style="margin-top:14px">${ic('link')} Copiar link do evento</button>
-        <p class="pill wait" style="margin-top:14px;display:inline-flex">Aguardando liberação</p>
-        <button class="btn gold full" data-ok style="margin-top:16px">Montar meu evento</button></div>`);
-      $('[data-cp]',s).onclick=()=>copiar(linkEvento());
-      $('[data-ok]',s).onclick=()=>{ s.fechar(); location.hash='#admin/ajustes'; };
-    } catch(er){ $('#err').textContent=er.message; }
-    b.disabled=false; };
-}
 
+/* =================== SEM LINK DE ACESSO =================== */
+function viewSemAcesso(msg){
+  pintaFundo({fundo3d:true});
+  app.innerHTML = `<div class="page"><section class="hero" style="padding-top:40px">
+    <img src="/meuconvite/logo.svg" alt="" width="104" height="104" style="border-radius:24px;box-shadow:0 14px 30px rgba(28,37,54,.25)">
+    <h1 style="margin:18px 0 8px">Meu Convite</h1>
+    <p class="muted" style="max-width:320px;margin:0 auto">${esc(msg||'Para entrar, use o link de acesso que você recebeu do organizador do evento.')}</p>
+  </section></div>`;
+}
+function msgNoivos(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n${ev.titulo||''}\n\nAcesso dos noivos (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}`; }
+function msgPortaria(ev){ return `Acesso da portaria — ${ev.titulo||''}\n\nLink: ${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado.\n🟢 Verde: liberar\n🟡 Amarelo: convite já usado\n🔴 Vermelho: não está na lista`; }
+function blocoAcessos(ev){ const L=(t,icon,link,senha,k)=>`<div class="card" style="margin-top:12px;text-align:left">
+    <div class="row"><span class="av" style="width:40px;height:40px">${ic(icon)}</span><div style="flex:1"><b>${t}</b><div class="small muted">Senha: <b>${esc(senha||'')}</b></div></div></div>
+    <div style="font-size:13px;word-break:break-all;background:var(--soft);border-radius:10px;padding:8px 10px;margin-top:10px">${esc(link)}</div>
+    <div class="grid2" style="margin-top:10px"><button class="btn line sm" data-cp-${k}>${ic('link')} Copiar</button><button class="btn gold sm" data-wa-${k}>${ic('wa')} WhatsApp</button></div></div>`;
+  return L('Acesso dos noivos','heart',linkEvento('#admin',ev.slug),ev.pin_admin,'n') + L('Acesso da portaria','qr',linkEvento('#portaria',ev.slug),ev.pin_portaria,'p'); }
+function ligaAcessos(root, ev){
+  $('[data-cp-n]',root).onclick=()=>copiar(linkEvento('#admin',ev.slug)); $('[data-cp-p]',root).onclick=()=>copiar(linkEvento('#portaria',ev.slug));
+  $('[data-wa-n]',root).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgNoivos(ev)),'_blank');
+  $('[data-wa-p]',root).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgPortaria(ev)),'_blank'); }
 function msgCliente(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n\n${ev.titulo||''}\n\n👰 Organizador (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}\n\n🚪 Portaria (leitura do QR Code na entrada):\n${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}`; }
 function formEvento(senha, ev){
   const novo = !ev; ev = ev || {status:'aprovado'};
@@ -558,28 +493,22 @@ function formEvento(senha, ev){
     <label class="f" for="e_pp">Senha da portaria</label>${campoSenha('e_pp','Diferente da senha do organizador',`value="${v('pin_portaria')}"`)}
     <label class="f" for="e_st">Situação</label><select class="in" id="e_st" style="appearance:auto">
       <option value="aprovado" ${ev.status==='aprovado'?'selected':''}>Liberado</option><option value="pendente" ${ev.status==='pendente'?'selected':''}>Aguardando</option><option value="bloqueado" ${ev.status==='bloqueado'?'selected':''}>Bloqueado</option></select>
-    ${novo?'':`<div class="small muted" style="margin-top:12px">Código: <b>${v('slug')}</b></div>
-      <div class="grid2" style="margin-top:10px"><button class="btn line sm" data-cpa>${ic('link')} Link organizador</button><button class="btn line sm" data-cpp>${ic('qr')} Link portaria</button></div>
-      <button class="btn line sm full" data-wa style="margin-top:10px">${ic('wa')} Enviar acesso ao cliente</button>`}
+    ${novo?'':`<div class="section-title">Acesso ao evento</div><div id="e_ac">${blocoAcessos(ev)}</div>`}
     <button class="btn gold full" data-ok style="margin-top:18px">${ic('check')} ${novo?'Cadastrar evento':'Salvar alterações'}</button>
     <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
   ligaOlhos(s);
   const dados = () => ({titulo:$('#e_ti',s).value, noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
     contato:$('#e_ct',s).value, pin_admin:$('#e_pa',s).value.trim(), pin_portaria:$('#e_pp',s).value.trim(), status:$('#e_st',s).value});
-  if (!novo) { $('[data-cpa]',s).onclick=()=>copiar(linkEvento('#admin',ev.slug)); $('[data-cpp]',s).onclick=()=>copiar(linkEvento('#portaria',ev.slug));
-    $('[data-wa]',s).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgCliente({...ev,...dados()})),'_blank'); }
+  if (!novo) ligaAcessos(s, ev);
   $('[data-ok]',s).onclick = async e => { const b=e.currentTarget, er=$('[data-e]',s); b.disabled=true; er.textContent='';
     try { const d=dados();
       const x = novo ? await rpc('cas_dono_criar',{p_senha:senha,p_dados:d}) : await rpc('cas_dono_editar',{p_senha:senha,p_id:ev.id,p_dados:d});
       if (x.erro) { er.textContent=x.erro; return; }
       s.fechar(); toast(novo?'Evento cadastrado':'Alterações salvas'); await viewDono();
       if (novo) { const t={...d, slug:x.slug, titulo:d.titulo||[d.noivo1,d.noivo2].filter(Boolean).join(' e ')};
-        const s2 = sheet('Evento cadastrado', `<div class="card" style="text-align:center">${rings()}<h2 style="margin-top:12px">${esc(t.titulo)}</h2>
-          <div class="small muted" style="margin-top:6px">Código: <b>${esc(x.slug)}</b></div>
-          <button class="btn gold full" data-wa style="margin-top:16px">${ic('wa')} Enviar acesso ao cliente</button>
-          <button class="btn line full" data-cp style="margin-top:10px">${ic('link')} Copiar link do organizador</button></div>`);
-        $('[data-wa]',s2).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgCliente(t)),'_blank');
-        $('[data-cp]',s2).onclick=()=>copiar(linkEvento('#admin',x.slug)); }
+        const s2 = sheet('Acesso ao evento', `<div style="text-align:center">${rings()}<h2 style="margin-top:12px">${esc(t.titulo)}</h2>
+          <p class="muted small" style="margin-top:4px">Evento cadastrado. Envie cada acesso para quem vai usar.</p>${blocoAcessos(t)}</div>`);
+        ligaAcessos(s2, t); }
     } catch(x){ er.textContent=x.message; } finally { b.disabled=false; } };
 }
 
