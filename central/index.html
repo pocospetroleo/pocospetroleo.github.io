@@ -267,7 +267,7 @@ const SQL_SVC = "select public.gpcc_services_status() as d";
 const AI = {"ia-claude":{name:"Claude", full:"Claude (Anthropic)", color:"#e8835f", site:"https://claude.ai", pos:[-4.5, 8.5, -5]},
             "ia-chatgpt":{name:"ChatGPT", full:"ChatGPT (OpenAI)", color:"#10a37f", site:"https://chatgpt.com", pos:[4.5, 8.5, -5]}};
 const PARENT = {"gestao-pocos-operacional":"db-gp","bdo-operacional":"db-gp","sonolog":"db-gp","calculos-petroleo":"db-gp",
-  "treino":"db-gp","modo-criador":"db-gp","central":"db-gp","sondabm":"db-gp"};
+  "treino":"db-gp","modo-criador":"db-gp","central":"db-gp","sondabm":"db-gp","casamento":"db-sbm"};
 const HOME_NAMES = {"gestao-pocos":"Gestão de Poços","fitcore":"FitCore 3D","sonolog":"Sonolog","calculations":"Cálculos","sondabm":"BM Sonda","*":"Admin (todos)"};
 const COLORS = {ok:"#34d399",slow:"#fbbf24",down:"#f43f5e",none:"#64748b",db:"#a78bfa",core:"#22d3ee"};
 
@@ -377,7 +377,7 @@ function digestEvents(rt) {
 function demoTick() {
   const names = [["gestao-pocos-operacional","Gestão de Poços"],["bdo-operacional","BDO Operacional"],["sondabm","BM Sonda"],["sonolog","Sonolog"],
     ["calculos-petroleo","Cálculos de Petróleo"],["mapa","Mapa dos Poços"],["conferencia","Gestão de Tempos Operacionais"],["portal","Aplicativos realizados"],
-    ["treino","Treino em 3D"],["modo-criador","Modo Criador"],["central","Central de Aplicativos"]];
+    ["treino","Treino em 3D"],["modo-criador","Modo Criador"],["central","Central de Aplicativos"],["casamento","Convites de Casamento"]];
   const now = Date.now();
   const prev = S.gp ? Object.fromEntries(S.gp.apps.map(a => [a.id, a])) : {};
   const apps = names.map(([id, name], i) => {
