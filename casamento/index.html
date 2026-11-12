@@ -187,6 +187,10 @@ input.in:focus,textarea.in:focus{outline:none;border-color:var(--gold2);box-shad
 .note{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 16px;white-space:pre-line;font-size:15px;color:var(--ink);text-align:left;margin-top:14px}
 .quote{font:italic 500 21px/1.35 'Cormorant Garamond',serif;color:var(--navy2);white-space:pre-line;margin:6px 4px 4px}
 
+.inv .mono{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Great Vibes',cursive;font-size:min(80vw,330px);color:var(--gold2);opacity:.09;transform:rotate(-7deg);pointer-events:none;overflow:hidden;border-radius:22px;white-space:nowrap}
+.inv .foto{width:150px;height:150px;margin:0 auto;border-radius:50%;padding:5px;background:var(--goldgrad);box-shadow:0 10px 24px rgba(40,30,15,.22);transform:translateZ(30px)}
+.inv .foto img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:3px solid #fff}
+.tabbar a span{font-size:11.5px}
 /* home */
 .hero{text-align:center;padding:40px 10px 10px}
 .hero .names{font-size:clamp(52px,16vw,84px);margin:14px 0 4px}
@@ -308,6 +312,8 @@ const ICONS = {
   door:'<path d="M3 21h18"/><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17"/><path d="M15 12h.01"/>',
   heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
   select:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'
 };
 const ic = (n, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
@@ -389,19 +395,20 @@ async function viewHome(){
   app.innerHTML = `<div class="page">
     <section class="hero">
       ${rings()}
-      <div class="eyebrow" style="margin-top:14px">Controle de convidados</div>
+      <div class="eyebrow" style="margin-top:14px">Escolha seu perfil para entrar</div>
       ${temNomes(ev) ? `<div class="names stage3d"><span class="sway">${nomes3D(ev, ev.nome3d===false)}</span></div>` : `<h1 style="margin:14px 0 6px">${esc(tituloEvento(ev))}</h1>`}
       ${ev.data?`<div class="serif" style="font-size:21px;font-style:italic;color:var(--gold3)">${esc(ev.data)}</div>`:''}
     </section>
     <nav class="section" style="display:grid;gap:12px;margin-top:28px" aria-label="Áreas do aplicativo">
       <a class="tile" href="#portaria"><span class="ti">${ic('qr')}</span><div><b>Portaria</b><span>Ler o QR Code e liberar a entrada</span></div></a>
-      <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Painel dos Noivos</b><span>Convidados, convites e evento</span></div></a>
+      <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Noivos</b><span>Acesso completo: convidados, envio e resumo</span></div></a>
     </nav>
     <p class="muted small" style="text-align:center;margin-top:28px">Acesso restrito por senha</p>
   </div>`;
 }
 
 /* =================== CONVITE =================== */
+const sigla = ev => { const a=(ev.noivo1||'').trim()[0]||'', b=(ev.noivo2||'').trim()[0]||''; return a&&b ? `${a}&${b}` : (a||b); };
 async function viewConvite(token){
   app.innerHTML = `<div class="loading"><div class="spin dark"></div>Abrindo seu convite…</div>`;
   let ev={}, cv=null;
@@ -412,8 +419,9 @@ async function viewConvite(token){
   const mapa = ev.local ? `https://maps.google.com/?q=${encodeURIComponent(ev.local)}` : '';
   app.innerHTML = `<div class="inv-wrap"><article class="inv" id="inv" aria-label="Convite de ${esc(cv.nome)}">
     <div class="paper">
+      ${sigla(ev)?`<div class="mono" aria-hidden="true">${esc(sigla(ev))}</div>`:''}
       <div class="shine"></div>
-      ${rings()}
+      ${ev.foto?`<div class="foto"><img src="${ev.foto}" alt="Foto dos noivos"></div>`:rings()}
       <div class="eyebrow" style="margin-top:12px">Temos a honra de convidar para o casamento de</div>
       ${temNomes(ev) ? `<div class="names stage3d" role="heading" aria-level="1" aria-label="${esc([ev.noivo1,ev.noivo2].filter(Boolean).join(' e '))}">${nomes3D(ev, ev.nome3d===false)}</div>` : `<h1 class="ttl-flat">${esc(tituloEvento(ev))}</h1>`}
       <div class="info">
@@ -423,7 +431,7 @@ async function viewConvite(token){
       <div class="orn">✦</div>
       <div class="eyebrow" style="color:var(--muted)">Convidado(a)</div>
       <div class="guest">${esc(cv.nome)}</div>
-      <div class="muted small">${cv.pessoas>1?`Convite válido para ${cv.pessoas} pessoas`:'Convite individual'}</div>
+      <div class="muted small">${cv.pessoas==2?'Convite para o casal (2 pessoas)':cv.pessoas>2?`Convite válido para ${cv.pessoas} pessoas`:'Convite individual'}</div>
       ${cv.mensagem?`<div class="note">${esc(cv.mensagem)}</div>`:''}
       <div class="qrplate"><i></i><i></i><i></i><i></i><img src="${img}" alt="QR Code de entrada de ${esc(cv.nome)}"></div>
       <div>${cv.entrou_em?`<span class="pill ok">${ic('check')} Entrada registrada às ${horaCurta(cv.entrou_em)}</span>`:`<span class="pill wait">Apresente este QR Code na recepção</span>`}</div>
@@ -434,102 +442,127 @@ async function viewConvite(token){
         ${mapa?`<a class="btn line full" href="${mapa}" target="_blank" rel="noopener">${ic('pin')} Como chegar</a>`:''}
       </div>
     </div></article></div>`;
-  $('#salvar').onclick = e => salvarCartao(ev, cv, img, e.currentTarget);
+  $('#salvar').onclick = async e => { const b=e.currentTarget; b.disabled=true;
+    try { const blob = await gerarCartao(ev, cv, token); await compartilharOuBaixar(blob, `convite-${cv.nome.replace(/\s+/g,'-')}.png`); }
+    catch(er){ toast('Não foi possível gerar a imagem'); } b.disabled=false; };
   tilt($('#inv'));
 }
 function tilt(el){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const shine = $('.shine', el);
   const set = (rx, ry) => { el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`; shine && shine.style.setProperty('--sx', `${50 - ry*6}%`); };
-  const mv = e => { const p = e.touches ? e.touches[0] : e; const r = el.getBoundingClientRect(); const x=(p.clientX-r.left)/r.width-.5, y=(p.clientY-r.top)/r.height-.5; set(-y*8, x*10); };
-  const out = () => set(0,0);
-  el.addEventListener('pointermove', mv); el.addEventListener('pointerleave', out);
+  const mv = e => { const r = el.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5; set(-y*8, x*10); };
+  el.addEventListener('pointermove', mv); el.addEventListener('pointerleave', () => set(0,0));
   const ori = e => { if(e.beta==null) return; set(Math.max(-8,Math.min(8,(e.beta-45)/4)), Math.max(-10,Math.min(10,e.gamma/3))); };
-  window.addEventListener('deviceorientation', ori);
-  limpar.push(()=>window.removeEventListener('deviceorientation', ori));
-  let t=0; const idle=()=>{ if(!el.isConnected) return; if(!el.matches(':hover')) set(Math.sin(t)*2, Math.cos(t*.8)*3); t+=.02; requestAnimationFrame(idle); };
-  if (!('ondeviceorientation' in window)) idle();
+  window.addEventListener('deviceorientation', ori); limpar.push(()=>window.removeEventListener('deviceorientation', ori));
 }
 function quebra(ctx, txt, max){ const out=[]; for (const par of String(txt||'').split('\n')) { let l=''; for (const w of par.split(' ')) { const t=l?l+' '+w:w; if (ctx.measureText(t).width>max && l) { out.push(l); l=w; } else l=t; } out.push(l); } return out; }
-async function salvarCartao(ev, cv, img, btn){
-  btn.disabled = true;
-  try {
-    await Promise.all([document.fonts.load('80px "Great Vibes"'), document.fonts.load('600 40px "Cormorant Garamond"'), document.fonts.load('italic 500 30px "Cormorant Garamond"')]).catch(()=>{});
-    const W=1080, M=110, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
-    const q=new Image(); q.src=img; await q.decode().catch(()=>{});
-    const nomes = temNomes(ev) ? [ev.noivo1,ev.noivo2].filter(Boolean).join(' & ') : '';
-    const blocos=[]; const T=(t,font,color,lh,extra={})=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>blocos.push({l,font,color,lh,...extra})); };
-    const G=h=>blocos.push({gap:h});
-    G(40); T('TEMOS A HONRA DE CONVIDAR PARA O CASAMENTO DE','600 22px Inter, sans-serif','#8F6B34',40);
-    if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>blocos.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
-    else T(tituloEvento(ev),'600 64px "Cormorant Garamond", serif','#1C2536',76);
-    if (ev.data) T(ev.data,'italic 500 38px "Cormorant Garamond", serif','#2E3B54',52);
-    if (ev.local) T(ev.local,'26px Inter, sans-serif','#625B53',38);
-    G(30); blocos.push({orn:true,lh:30}); G(24);
-    T('CONVIDADO(A)','600 20px Inter, sans-serif','#625B53',34);
-    T(cv.nome,'600 54px "Cormorant Garamond", serif','#1C2536',64);
-    T(cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Convite individual','26px Inter, sans-serif','#625B53',40);
-    if (cv.mensagem){ G(16); T(cv.mensagem,'28px Inter, sans-serif','#1F1B17',40); }
-    G(30); const QR=520; blocos.push({qr:true,lh:QR+40}); G(20);
-    if (ev.mensagem){ T(ev.mensagem,'italic 500 36px "Cormorant Garamond", serif','#2E3B54',48); G(16); }
-    T('QR Code pessoal e intransferível — válido para uma única entrada.','22px Inter, sans-serif','#625B53',34);
-    G(70);
-    c.height = blocos.reduce((s,b)=>s+(b.gap||b.lh),0);
-    const bgG=x.createLinearGradient(0,0,0,c.height); bgG.addColorStop(0,'#FFFEFB'); bgG.addColorStop(1,'#F7EFE1'); x.fillStyle=bgG; x.fillRect(0,0,W,c.height);
-    const gold=x.createLinearGradient(0,0,W,c.height); gold.addColorStop(0,'#7E5D2B'); gold.addColorStop(.3,'#C9A464'); gold.addColorStop(.5,'#F6E7BE'); gold.addColorStop(.7,'#C9A464'); gold.addColorStop(1,'#8F6B34');
-    x.strokeStyle=gold; x.lineWidth=5; x.strokeRect(30,30,W-60,c.height-60); x.lineWidth=1.5; x.strokeStyle='rgba(201,164,100,.6)'; x.strokeRect(46,46,W-92,c.height-92);
-    x.textAlign='center'; x.textBaseline='alphabetic'; let y=0;
-    for (const b of blocos){
-      if (b.gap){ y+=b.gap; continue; }
-      if (b.orn){ x.fillStyle='#C9A464'; x.font='28px serif'; x.fillText('✦',W/2,y+24); x.fillRect(W/2-170,y+14,120,1.5); x.fillRect(W/2+50,y+14,120,1.5); y+=b.lh; continue; }
-      if (b.qr){ const qx=(W-QR)/2; x.shadowColor='rgba(40,30,15,.18)'; x.shadowBlur=30; x.shadowOffsetY=12; x.fillStyle='#fff'; x.fillRect(qx-22,y,QR+44,QR+44); x.shadowColor='transparent'; x.imageSmoothingEnabled=false; x.drawImage(q,qx,y+22,QR,QR); y+=b.lh+22; continue; }
-      if (b.nome){
-        x.font=b.font; const by=y+b.lh-34;
-        if (ev.nome3d!==false){ for(let i=7;i>=1;i--){ x.fillStyle=`rgb(${96+i*3},${70+i*2},${30+i})`; x.fillText(b.l,W/2+i,by+i); } x.shadowColor='rgba(40,25,5,.3)'; x.shadowBlur=18; x.shadowOffsetY=10; }
-        const g2=x.createLinearGradient(W/2-350,0,W/2+350,0); g2.addColorStop(0,'#8F6B34'); g2.addColorStop(.3,'#D9B877'); g2.addColorStop(.5,'#FBEFCB'); g2.addColorStop(.7,'#C9A464'); g2.addColorStop(1,'#8F6B34');
-        x.fillStyle=g2; x.fillText(b.l,W/2,by); x.shadowColor='transparent'; y+=b.lh; continue;
-      }
-      x.font=b.font; x.fillStyle=b.color; y+=b.lh; x.fillText(b.l,W/2,y-12);
-    }
-    const blob = await new Promise(r=>c.toBlob(r,'image/png'));
-    const nome = `convite-${cv.nome.replace(/\s+/g,'-')}.png`;
-    const f = new File([blob], nome, {type:'image/png'});
-    if (navigator.canShare && navigator.canShare({files:[f]})) { try { await navigator.share({files:[f], title:'Meu convite'}); return; } catch(e){ if(e.name==='AbortError') return; } }
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove();
-    toast('Convite salvo');
-  } catch(e){ toast('Não foi possível gerar a imagem'); }
-  finally { btn.disabled = false; }
+const carregaImg = src => new Promise(res => { if(!src) return res(null); const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; });
+async function compartilharOuBaixar(blob, nome, texto){
+  const f = new File([blob], nome, {type:'image/png'});
+  if (navigator.canShare && navigator.canShare({files:[f]})) {
+    try { await navigator.share(texto ? {files:[f], text:texto} : {files:[f]}); return 'share'; }
+    catch(e){ if (e.name==='AbortError') return 'cancel'; }
+  }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+  return 'download';
+}
+/* gera a imagem do convite: foto, sigla ao fundo, nomes 3D e QR Code */
+async function gerarCartao(ev, cv, token){
+  await Promise.all([document.fonts.load('80px "Great Vibes"'), document.fonts.load('600 40px "Cormorant Garamond"'), document.fonts.load('italic 500 30px "Cormorant Garamond"')]).catch(()=>{});
+  const W=1080, M=110, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
+  const [q, foto] = await Promise.all([carregaImg(qrImg(linkConvite(token), 10)), carregaImg(ev.foto)]);
+  const nomes = temNomes(ev) ? [ev.noivo1,ev.noivo2].filter(Boolean).join(' & ') : '';
+  const B=[]; const T=(t,font,color,lh)=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>B.push({l,font,color,lh})); }; const G=h=>B.push({gap:h});
+  G(70);
+  const FD=360; if (foto) { B.push({foto:true,lh:FD+40}); } else G(10);
+  T('TEMOS A HONRA DE CONVIDAR PARA O CASAMENTO DE','600 22px Inter, sans-serif','#8F6B34',40);
+  if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>B.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
+  else T(tituloEvento(ev),'600 64px "Cormorant Garamond", serif','#1C2536',76);
+  if (ev.data) T(ev.data,'italic 500 38px "Cormorant Garamond", serif','#2E3B54',52);
+  if (ev.local) T(ev.local,'26px Inter, sans-serif','#625B53',38);
+  G(26); B.push({orn:true,lh:30}); G(22);
+  T('CONVIDADO(A)','600 20px Inter, sans-serif','#625B53',34);
+  T(cv.nome,'600 56px "Cormorant Garamond", serif','#1C2536',66);
+  T(cv.pessoas==2?'Convite para o casal (2 pessoas)':cv.pessoas>2?`Válido para ${cv.pessoas} pessoas`:'Convite individual','26px Inter, sans-serif','#625B53',40);
+  if (cv.mensagem){ G(14); T(cv.mensagem,'28px Inter, sans-serif','#1F1B17',40); }
+  G(30); const QR=500; B.push({qr:true,lh:QR+44}); G(26);
+  T('Apresente este QR Code na recepção','600 26px Inter, sans-serif','#1C2536',38);
+  if (ev.mensagem){ G(10); T(ev.mensagem,'italic 500 36px "Cormorant Garamond", serif','#2E3B54',48); }
+  G(8); T('Pessoal e intransferível — válido para uma única entrada.','22px Inter, sans-serif','#625B53',34);
+  G(80);
+  c.height = B.reduce((s,b)=>s+(b.gap||b.lh),0);
+  const H=c.height;
+  const bg=x.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#FFFEFB'); bg.addColorStop(1,'#F5ECDC'); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  /* sigla do casal ao fundo */
+  const sg = sigla(ev);
+  if (sg) { x.save(); x.textAlign='center'; x.textBaseline='middle'; x.globalAlpha=.09; x.fillStyle='#8F6B34';
+    let fs=Math.min(760, H*.5); x.font=`${fs}px "Great Vibes"`; while (x.measureText(sg).width > W*1.05 && fs>200){ fs-=20; x.font=`${fs}px "Great Vibes"`; }
+    x.translate(W/2, H*.52); x.rotate(-0.12); x.fillText(sg,0,0); x.restore(); }
+  /* padrão de pontos */
+  x.fillStyle='rgba(143,107,52,.07)'; for(let yy=40; yy<H; yy+=34) for(let xx=40; xx<W; xx+=34) x.fillRect(xx,yy,2,2);
+  const gold=x.createLinearGradient(0,0,W,H); gold.addColorStop(0,'#7E5D2B'); gold.addColorStop(.3,'#C9A464'); gold.addColorStop(.5,'#F6E7BE'); gold.addColorStop(.7,'#C9A464'); gold.addColorStop(1,'#8F6B34');
+  x.strokeStyle=gold; x.lineWidth=6; x.strokeRect(30,30,W-60,H-60); x.lineWidth=1.5; x.strokeStyle='rgba(201,164,100,.6)'; x.strokeRect(48,48,W-96,H-96);
+  x.textAlign='center'; x.textBaseline='alphabetic'; let y=0;
+  for (const b of B){
+    if (b.gap){ y+=b.gap; continue; }
+    if (b.foto){ const cx=W/2, cy=y+FD/2, r=FD/2;
+      x.save(); x.shadowColor='rgba(40,30,15,.25)'; x.shadowBlur=30; x.shadowOffsetY=10; x.beginPath(); x.arc(cx,cy,r+10,0,Math.PI*2); x.fillStyle=gold; x.fill(); x.restore();
+      x.save(); x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.clip();
+      const s=Math.max(FD/foto.width, FD/foto.height); x.drawImage(foto, cx-foto.width*s/2, cy-foto.height*s/2, foto.width*s, foto.height*s); x.restore();
+      y+=b.lh; continue; }
+    if (b.orn){ x.fillStyle='#C9A464'; x.font='28px serif'; x.fillText('✦',W/2,y+24); x.fillRect(W/2-170,y+14,120,1.5); x.fillRect(W/2+50,y+14,120,1.5); y+=b.lh; continue; }
+    if (b.qr){ const qx=(W-QR)/2; x.save(); x.shadowColor='rgba(40,30,15,.18)'; x.shadowBlur=30; x.shadowOffsetY=12; x.fillStyle='#fff'; x.fillRect(qx-24,y,QR+48,QR+48); x.restore();
+      x.strokeStyle='#C9A464'; x.lineWidth=5; const k=36, p=10; [[qx-24+p,y+p,1,1],[qx+QR+24-p,y+p,-1,1],[qx-24+p,y+QR+48-p,1,-1],[qx+QR+24-p,y+QR+48-p,-1,-1]].forEach(([a,bb,sx,sy])=>{ x.beginPath(); x.moveTo(a,bb+sy*k); x.lineTo(a,bb); x.lineTo(a+sx*k,bb); x.stroke(); });
+      x.imageSmoothingEnabled=false; if(q) x.drawImage(q,qx,y+24,QR,QR); x.imageSmoothingEnabled=true; y+=b.lh; continue; }
+    if (b.nome){ x.font=b.font; const by=y+b.lh-34;
+      if (ev.nome3d!==false){ for(let i=7;i>=1;i--){ x.fillStyle=`rgb(${96+i*3},${70+i*2},${30+i})`; x.fillText(b.l,W/2+i,by+i); } x.shadowColor='rgba(40,25,5,.3)'; x.shadowBlur=18; x.shadowOffsetY=10; }
+      const g2=x.createLinearGradient(W/2-350,0,W/2+350,0); g2.addColorStop(0,'#8F6B34'); g2.addColorStop(.3,'#D9B877'); g2.addColorStop(.5,'#FBEFCB'); g2.addColorStop(.7,'#C9A464'); g2.addColorStop(1,'#8F6B34');
+      x.fillStyle=g2; x.fillText(b.l,W/2,by); x.shadowColor='transparent'; x.shadowBlur=0; x.shadowOffsetY=0; y+=b.lh; continue; }
+    x.font=b.font; x.fillStyle=b.color; y+=b.lh; x.fillText(b.l,W/2,y-12);
+  }
+  return await new Promise(r=>c.toBlob(r,'image/png'));
 }
 
-/* =================== LOGIN / PRIMEIRO ACESSO =================== */
+/* =================== LOGIN / PRIMEIRO ACESSO / RECUPERAÇÃO =================== */
 const campo = (id, ph, extra='') => `<input class="in" id="${id}" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" ${extra}>`;
+const PERGUNTAS = ['Cidade onde nos conhecemos?','Nome do primeiro animal de estimação?','Data do nosso primeiro encontro?','Nome da rua onde cresceu?','Comida preferida do casal?'];
+const selPergunta = (id, atual='') => `<select class="in" id="${id}" style="appearance:auto">${PERGUNTAS.map(p=>`<option ${p===atual?'selected':''}>${esc(p)}</option>`).join('')}${atual&&!PERGUNTAS.includes(atual)?`<option selected>${esc(atual)}</option>`:''}</select>`;
+const olho = id => `<button type="button" class="iconbtn" data-olho="${id}" aria-label="Mostrar ou ocultar senha" style="position:absolute;right:4px;top:3px;border:0;box-shadow:none;background:none">${ic('eye')}</button>`;
+const campoSenha = (id, ph, extra='') => `<div style="position:relative"><input class="in" id="${id}" type="password" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="${ph}" style="padding-right:52px" ${extra}>${olho(id)}</div>`;
+function ligaOlhos(root=document){ $$('[data-olho]',root).forEach(b=>b.onclick=()=>{ const i=$('#'+b.dataset.olho); i.type = i.type==='password'?'text':'password'; i.focus(); }); }
+
 function viewSetup(){
-  app.innerHTML = appbar({title:'Primeiro acesso', sub:'Painel dos noivos', back:''}) + `<div class="page"><div class="card section">
+  app.innerHTML = appbar({title:'Primeiro acesso', sub:'Perfil dos noivos', back:''}) + `<div class="page"><div class="card section">
     ${rings()}
     <h1 style="text-align:center;margin-top:12px">Bem-vindos</h1>
-    <p class="muted" style="text-align:center;margin-top:6px">Crie as duas senhas do sistema. Use pelo menos 4 letras ou números.</p>
-    <label class="f" for="sa">Sua senha (Painel dos Noivos)</label>${campo('sa','Ex.: ana2026')}
-    <label class="f" for="sp">Senha do porteiro</label>${campo('sp','Ex.: portaria14')}
-    <p class="hint">As senhas precisam ser diferentes. Você poderá alterá-las depois em "Evento".</p>
-    <button class="btn gold full" id="criar" style="margin-top:20px">${ic('lock')} Criar senhas e entrar</button>
+    <p class="muted" style="text-align:center;margin-top:6px">Crie as senhas dos dois perfis do aplicativo.</p>
+    <label class="f" for="sa">Senha dos noivos</label>${campoSenha('sa','Mínimo 4 letras ou números')}
+    <label class="f" for="sp">Senha da portaria</label>${campoSenha('sp','Diferente da senha dos noivos')}
+    <div class="section-title" style="font-size:19px;margin:22px 0 4px">Se esquecer a senha</div>
+    <p class="hint" style="margin-top:0">Escolha uma pergunta que só vocês sabem responder.</p>
+    <label class="f" for="rq">Pergunta de segurança</label>${selPergunta('rq')}
+    <label class="f" for="rr">Resposta</label>${campo('rr','Sua resposta')}
+    <button class="btn gold full" id="criar" style="margin-top:20px">${ic('lock')} Criar e entrar</button>
     <p id="err" role="alert" style="color:var(--bad);margin-top:12px;text-align:center"></p></div></div>`;
-  ligaVoltar();
+  ligaVoltar(); ligaOlhos();
   $('#criar').onclick = async () => {
     const a=$('#sa').value.trim(), p=$('#sp').value.trim();
-    try { await rpc('cas_setup',{p_admin:a,p_portaria:p}); store.set('cas_pin_admin',a); toast('Senhas criadas com sucesso'); A.data=null; location.hash='#admin/evento'; }
+    try { await rpc('cas_setup2',{p_admin:a,p_portaria:p,p_pergunta:$('#rq').value,p_resposta:$('#rr').value}); store.set('cas_pin_admin',a); A.data=null; toast('Tudo pronto! Bem-vindos.'); location.hash='#admin/ajustes'; }
     catch(e){ $('#err').textContent=e.message; }
   };
 }
 function viewLogin(papel, onOk){
   const adm = papel==='admin';
-  app.innerHTML = appbar({title: adm?'Painel dos Noivos':'Portaria', sub:'Acesso restrito', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
+  app.innerHTML = appbar({title: adm?'Noivos':'Portaria', sub:'Entrar', back:''}) + `<div class="page"><div class="card section" style="margin-top:30px">
     <div style="width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522">${ic(adm?'heart':'qr')}</div>
-    <h1 style="text-align:center">${adm?'Painel dos Noivos':'Portaria'}</h1>
-    <p class="muted" style="text-align:center;margin-top:4px">Digite a senha de acesso</p>
-    <label class="f sr" for="pin">Senha</label>${campo('pin','Senha','style="text-align:center;font-size:20px;margin-top:18px" enterkeyhint="go"')}
+    <h1 style="text-align:center">${adm?'Perfil dos Noivos':'Perfil da Portaria'}</h1>
+    <p class="muted" style="text-align:center;margin-top:4px">Digite a senha para entrar</p>
+    <label class="f" for="pin">Senha</label>${campoSenha('pin','Sua senha','enterkeyhint="go" style="padding-right:52px;font-size:18px"')}
     <button class="btn primary full" id="entrar" style="margin-top:16px">Entrar</button>
-    <p id="err" role="alert" style="color:var(--bad);margin-top:12px;text-align:center"></p></div></div>`;
-  ligaVoltar();
+    <button class="btn line full" id="esqueci" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
+    <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p></div></div>`;
+  ligaVoltar(); ligaOlhos();
   const go = async () => {
     const pin = $('#pin').value.trim(); if(!pin) return;
     $('#entrar').disabled = true;
@@ -541,6 +574,38 @@ function viewLogin(papel, onOk){
     finally { const b=$('#entrar'); if(b) b.disabled=false; }
   };
   $('#entrar').onclick = go; $('#pin').onkeydown = e => e.key==='Enter' && go(); setTimeout(()=>$('#pin')?.focus(),100);
+  $('#esqueci').onclick = () => adm ? esqueciNoivos() : esqueciPortaria();
+}
+function esqueciPortaria(){
+  const s = sheet('Esqueci a senha', `<div class="card" style="text-align:center">
+    <div class="dialog" style="box-shadow:none;padding:0;width:100%;animation:none"><div class="dic info">${ic('lock')}</div></div>
+    <h2>Fale com os noivos</h2><p class="muted" style="margin-top:6px">A senha da portaria é definida pelos noivos. Eles podem ver ou trocar a senha em <b>Ajustes → Perfis de acesso</b> e enviar para você pelo WhatsApp.</p>
+    <button class="btn primary full" data-ok style="margin-top:18px">Entendi</button></div>`);
+  $('[data-ok]',s).onclick = s.fechar;
+}
+async function esqueciNoivos(){
+  let perg=null; try { perg = await rpc('cas_recup_pergunta'); } catch(e){}
+  if (!perg) {
+    const s = sheet('Esqueci a senha', `<div class="card" style="text-align:center"><h2>Recuperação não configurada</h2>
+      <p class="muted" style="margin-top:6px">A pergunta de segurança ainda não foi cadastrada. Peça ajuda a quem configurou o aplicativo para redefinir a senha.</p>
+      <button class="btn primary full" data-ok style="margin-top:18px">Entendi</button></div>`);
+    $('[data-ok]',s).onclick = s.fechar; return;
+  }
+  const s = sheet('Esqueci a senha', `<div class="card">
+    <p class="muted" style="margin-top:0">Responda à pergunta de segurança para criar uma nova senha.</p>
+    <label class="f">Pergunta</label><div style="font:600 20px 'Cormorant Garamond',serif;color:var(--navy)">${esc(perg)}</div>
+    <label class="f" for="r_r">Resposta</label>${campo('r_r','Sua resposta')}
+    <label class="f" for="r_n">Nova senha</label>${campoSenha('r_n','Mínimo 4 letras ou números')}
+    <button class="btn gold full" data-s style="margin-top:18px">${ic('lock')} Redefinir senha</button>
+    <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
+  ligaOlhos(s);
+  $('[data-s]',s).onclick = async e => { const b=e.currentTarget; b.disabled=true; $('[data-e]',s).textContent='';
+    try {
+      const ok = await rpc('cas_recuperar',{p_resposta:$('#r_r',s).value, p_nova:$('#r_n',s).value});
+      if (!ok) { $('[data-e]',s).textContent='Resposta incorreta. Verifique e tente de novo.'; }
+      else { const n=$('#r_n',s).value.trim(); store.set('cas_pin_admin',n); s.fechar(); toast('Senha redefinida com sucesso'); A.data=null; route(); }
+    } catch(er){ $('[data-e]',s).textContent=er.message; }
+    b.disabled=false; };
 }
 function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=null; location.hash=''; }
 
@@ -548,13 +613,14 @@ function sair(papel){ store.del('cas_pin_'+papel); if(papel==='admin') A.data=nu
 const P = { pin:null, lista:[], filtro:'todos', ultimo:null, busy:false, scanner:null };
 async function entrarPortaria(sub){
   const ev = await evento(); pintaFundo(ev);
-  const pin = store.get('cas_pin_portaria');
+  const pp = store.get('cas_pin_portaria'), pa = store.get('cas_pin_admin');
+  const pin = pp || pa;
   if (!pin) return viewLogin('portaria', () => route());
-  P.pin = pin; viewPortaria(sub);
+  P.pin = pin; P.noivos = !pp && !!pa; viewPortaria(sub);
 }
 function viewPortaria(sub){
   const scan = sub !== 'lista';
-  app.innerHTML = appbar({title:'Portaria', sub:'Recepção', back:'', right:`<button class="iconbtn" id="sair" aria-label="Sair da portaria">${ic('logout')}</button>`}) + `<div class="page">
+  app.innerHTML = appbar({title:'Portaria', sub:P.noivos?'Modo noivos':'Recepção', back:P.noivos?'#admin':'', backLabel:P.noivos?'Painel':'Voltar', right:P.noivos?'':`<button class="iconbtn" id="sair" aria-label="Sair da portaria">${ic('logout')}</button>`}) + `<div class="page">
     <div class="stat hl section"><div class="row" style="justify-content:space-between;align-items:flex-end">
       <div><b id="pIn">–</b><span>pessoas já entraram</span></div><div style="text-align:right"><b id="pTot" style="color:#fff;opacity:.85">–</b><span>esperadas</span></div></div>
       <div class="prog"><i id="pBar" style="width:0"></i></div></div>
@@ -568,7 +634,7 @@ function viewPortaria(sub){
       <div class="glist" id="res"></div>`}
   </div>`;
   ligaVoltar();
-  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair da portaria?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) { pararCam(); sair('portaria'); } };
+  if ($('#sair')) $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair da portaria?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) { pararCam(); sair('portaria'); } };
   $$('[data-go]').forEach(b => b.onclick = () => { location.hash = b.dataset.go; });
   $$('[data-pf]').forEach(b => b.onclick = () => { P.filtro=b.dataset.pf; $$('[data-pf]').forEach(x=>x.setAttribute('aria-pressed', x===b)); renderPLista(); });
   if ($('#q')) $('#q').oninput = renderPLista;
@@ -626,7 +692,7 @@ async function lido(txt){
 function som(ok){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.value=ok?880:240; g.gain.value=.25; o.start(); if(ok){ o.frequency.setValueAtTime(1320,c.currentTime+.12); } o.stop(c.currentTime+(ok?.25:.55)); }catch(e){} try{ navigator.vibrate && navigator.vibrate(ok?120:[220,100,220]); }catch(e){} }
 function resultado(r, cb){
   const m = {
-    ok:['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas>1?`Liberar ${r.pessoas} pessoas`:'Liberar 1 pessoa'],
+    ok:['ok','✓','ENTRADA LIBERADA', r.nome, r.pessoas==2?'Casal — liberar 2 pessoas':r.pessoas>2?`Liberar ${r.pessoas} pessoas`:'Liberar 1 pessoa'],
     ja_entrou:['warn','!','CONVITE JÁ UTILIZADO', r.nome, `Entrada registrada às ${horaCurta(r.entrou_em)}. Não liberar novamente.`],
     invalido:['bad','✕','QR CODE INVÁLIDO','', 'Este código não pertence à lista de convidados.'],
     pin_invalido:['bad','✕','SENHA INVÁLIDA','', 'Saia e entre novamente na portaria.'],
@@ -640,8 +706,8 @@ function resultado(r, cb){
   d.onclick=fim; setTimeout(fim, r.status==='ok'?2600:5000);
 }
 
-/* =================== PAINEL DOS NOIVOS =================== */
-const A = { pin:null, data:null, filtro:'todos', busca:'', sel:null };
+/* =================== PERFIL DOS NOIVOS =================== */
+const A = { pin:null, data:null, filtro:'todos', busca:'', sel:null, resumo:'fora', envFiltro:'pend' };
 async function entrarAdmin(sub){
   const ev = await evento(); pintaFundo(ev);
   const pin = store.get('cas_pin_admin');
@@ -658,39 +724,79 @@ async function carregar(){
   try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); return true; }
   catch(e){ if (/Senha inv/.test(e.message)) { toast('Sessão expirada. Entre novamente.'); sair('admin'); } else toast(e.message); return false; }
 }
+const nomesCasal = c => temNomes(c) ? [c.noivo1,c.noivo2].filter(Boolean).join(' & ') : 'Perfil dos noivos';
 function tabbar(sub){
-  const t=(k,href,icon,label)=>`<a href="${href}" ${sub===k?'aria-current="page"':''}>${ic(icon)}<span>${label}</span></a>`;
-  return `<nav class="tabbar" aria-label="Menu do painel"><div class="in">${t('lista','#admin','users','Convidados')}${t('adicionar','#admin/adicionar','plus','Adicionar')}${t('evento','#admin/evento','sliders','Evento')}</div></nav>`;
+  const ativo = sub==='adicionar' ? 'convidados' : sub;
+  const t=(k,href,icon,label)=>`<a href="${href}" ${ativo===k?'aria-current="page"':''}>${ic(icon)}<span>${label}</span></a>`;
+  return `<nav class="tabbar" aria-label="Menu dos noivos"><div class="in">${t('resumo','#admin','home','Resumo')}${t('convidados','#admin/convidados','users','Convidados')}${t('enviar','#admin/enviar','wa','Enviar')}${t('ajustes','#admin/ajustes','sliders','Ajustes')}</div></nav>`;
 }
 function viewAdmin(sub){
+  if (!['resumo','convidados','adicionar','enviar','ajustes'].includes(sub)) sub='resumo';
   const c=A.data.config;
-  const titulos={lista:'Convidados',adicionar:'Adicionar',evento:'Evento'};
-  const back = sub==='lista' ? '' : '#admin';
-  app.innerHTML = appbar({title:titulos[sub]||'Painel', sub:temNomes(c)?[c.noivo1,c.noivo2].filter(Boolean).join(' & '):'Painel dos noivos', back, backLabel: sub==='lista'?'Início':'Voltar',
-    right:`<button class="iconbtn" id="sair" aria-label="Sair do painel">${ic('logout')}</button>`}) +
-    `<div class="page wide" id="body"></div>` + tabbar(sub);
+  const titulos={resumo:'Resumo',convidados:'Convidados',adicionar:'Adicionar convidados',enviar:'Enviar convites',ajustes:'Ajustes'};
+  const back = sub==='resumo' ? '' : sub==='adicionar' ? '#admin/convidados' : '#admin';
+  app.innerHTML = appbar({title:titulos[sub], sub:nomesCasal(c), back, backLabel: sub==='resumo'?'Início':'Voltar',
+    right:`<button class="iconbtn" id="sair" aria-label="Sair">${ic('logout')}</button>`}) + `<div class="page wide" id="body"></div>` + tabbar(sub);
   ligaVoltar();
-  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair do painel?', texto:'Será preciso digitar sua senha novamente.', ok:'Sair', icone:'logout'})) sair('admin'); };
-  if (sub==='adicionar') return telaAdicionar();
-  if (sub==='evento') return telaEvento();
-  telaLista();
-  const t=setInterval(async()=>{ if(!document.querySelector('.overlay') && !A.sel && await carregar()) { renderStats(); renderLista(); } }, 10000);
-  limpar.push(()=>clearInterval(t));
+  $('#sair').onclick = async () => { if (await confirmar({titulo:'Sair do perfil dos noivos?', texto:'Será preciso digitar a senha novamente.', ok:'Sair', icone:'logout'})) sair('admin'); };
+  ({resumo:telaResumo, convidados:telaConvidados, adicionar:telaAdicionar, enviar:telaEnviar, ajustes:telaAjustes})[sub]();
+  if (sub==='resumo' || sub==='convidados') {
+    const t=setInterval(async()=>{ if(!document.querySelector('.overlay') && !A.sel && await carregar()) { if(sub==='resumo') renderResumo(); else renderLista(); } }, 8000);
+    limpar.push(()=>clearInterval(t));
+  }
 }
 
-/* --- lista --- */
-function telaLista(){
+/* --- RESUMO --- */
+function telaResumo(){
+  const c=A.data.config;
   $('#body').innerHTML = `
-    <div class="stats" id="stats"></div>
-    <div class="section-title">Lista de convidados</div>
-    <div class="row">
+    ${!c.tem_recup?`<div class="card section" style="border-color:#E9CF9B;background:#FFF9EC;display:flex;gap:12px;align-items:center">${ic('lock')}<div style="flex:1"><b>Proteja seu acesso</b><div class="small muted">Cadastre a pergunta de segurança para recuperar a senha se esquecer.</div></div><a class="btn gold sm" href="#admin/ajustes">Cadastrar</a></div>`:''}
+    <div id="rs"></div>
+    <a class="btn primary full section" href="#portaria" style="margin-top:16px">${ic('qr')} Abrir leitor de QR Code</a>
+    <div class="seg" role="tablist" style="margin-top:20px">
+      <button role="tab" data-r="fora" aria-selected="${A.resumo==='fora'}">Não entraram</button>
+      <button role="tab" data-r="dentro" aria-selected="${A.resumo==='dentro'}">Já entraram</button>
+    </div>
+    <div class="glist" id="rl"></div>`;
+  $$('[data-r]').forEach(b=>b.onclick=()=>{ A.resumo=b.dataset.r; $$('[data-r]').forEach(x=>x.setAttribute('aria-selected',x===b)); renderResumo(); });
+  renderResumo();
+}
+function renderResumo(){
+  const L=A.data.convidados, tot=L.reduce((s,g)=>s+g.pessoas,0);
+  const den=L.filter(g=>g.entrou_em), pDen=den.reduce((s,g)=>s+g.pessoas,0), fora=L.filter(g=>!g.entrou_em);
+  const pct = tot ? Math.round(100*pDen/tot) : 0;
+  const rs=$('#rs'); if(!rs) return;
+  rs.innerHTML = `
+    <div class="stat hl section" style="padding:20px">
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><span style="font-size:14px">Chegaram</span><b style="font-size:46px">${pDen} <small style="font-size:22px;color:#C9CFDA">de ${tot}</small></b></div>
+        <div style="font:700 34px 'Cormorant Garamond',serif;color:var(--gold1)">${pct}%</div></div>
+      <div class="prog" style="height:12px"><i style="width:${pct}%"></i></div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat"><b style="color:var(--ok)">${pDen}</b><span>Entraram</span></div>
+      <div class="stat"><b>${tot-pDen}</b><span>Faltam chegar</span></div>
+      <div class="stat"><b>${L.length}</b><span>Convites</span></div>
+    </div>`;
+  const lista = A.resumo==='dentro' ? den.sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em)) : fora;
+  $('#rl').innerHTML = lista.length ? lista.map(g=>`<div class="gi"><span class="av ${g.entrou_em?'in':''}">${g.entrou_em?ic('check'):esc(iniciais(g.nome))}</span>
+    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas>1?g.pessoas+' pessoas':'1 pessoa'}</div></div>
+    ${g.entrou_em?`<span class="pill ok">${horaCurta(g.entrou_em)}${g.entrada_manual?' • manual':''}</span>`:'<span class="pill wait">Aguardando</span>'}</div>`).join('')
+    : `<div class="empty">${A.resumo==='dentro'?'Ninguém entrou ainda':(L.length?'Todos os convidados já entraram 🎉':'Nenhum convidado cadastrado')}</div>`;
+}
+
+/* --- CONVIDADOS --- */
+function telaConvidados(){
+  $('#body').innerHTML = `
+    <a class="btn gold full section" href="#admin/adicionar">${ic('plus')} Adicionar convidados</a>
+    <div class="row section">
       <div style="position:relative;flex:1"><label class="sr" for="busca">Buscar convidado</label>${campo('busca','Buscar pelo nome…','style="padding-left:46px"')}<span style="position:absolute;left:14px;top:14px;color:var(--muted)">${ic('search')}</span></div>
       <button class="iconbtn" id="selBtn" aria-label="Selecionar vários para excluir" style="height:50px;width:50px">${ic('select')}</button>
       <button class="iconbtn" id="csv" aria-label="Exportar lista para Excel" style="height:50px;width:50px">${ic('download')}</button>
     </div>
     <div class="chips" style="margin-top:10px" role="group" aria-label="Filtro">
-      <button class="chip" data-f="todos" aria-pressed="${A.filtro==='todos'}">Todos</button>
-      <button class="chip" data-f="fora" aria-pressed="${A.filtro==='fora'}">Aguardando</button>
+      <button class="chip" data-f="todos" aria-pressed="${A.filtro==='todos'}">Todos (${A.data.convidados.length})</button>
+      <button class="chip" data-f="fora" aria-pressed="${A.filtro==='fora'}">Não entraram</button>
       <button class="chip" data-f="dentro" aria-pressed="${A.filtro==='dentro'}">Já entraram</button>
     </div>
     <div class="glist" id="lst"></div>`;
@@ -698,15 +804,7 @@ function telaLista(){
   $$('[data-f]').forEach(x=>x.onclick=()=>{ A.filtro=x.dataset.f; $$('[data-f]').forEach(y=>y.setAttribute('aria-pressed',y===x)); renderLista(); });
   $('#csv').onclick=exportar;
   $('#selBtn').onclick=()=> A.sel ? fimSel() : iniciaSel();
-  renderStats(); renderLista();
-}
-function renderStats(){
-  const L=A.data.convidados, pes=L.reduce((s,g)=>s+g.pessoas,0), den=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
-  const el=$('#stats'); if(!el) return;
-  el.innerHTML=`<div class="stat hl"><b>${den}</b><span>pessoas já entraram</span><div class="prog"><i style="width:${pes?100*den/pes:0}%"></i></div></div>
-    <div class="stat"><b>${pes}</b><span>pessoas esperadas</span></div>
-    <div class="stat"><b>${L.length}</b><span>convites enviados</span></div>
-    <div class="stat"><b>${pes-den}</b><span>ainda faltam</span></div>`;
+  renderLista();
 }
 function filtrada(){ let L=A.data.convidados;
   if(A.filtro==='dentro') L=L.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em));
@@ -717,14 +815,13 @@ function renderLista(){
   el.innerHTML = L.length ? L.map(g=>`<div class="gi">
     ${A.sel?`<input type="checkbox" class="chk" data-ck="${g.id}" ${A.sel.has(g.id)?'checked':''} aria-label="Selecionar ${esc(g.nome)}">`:''}
     <span class="av ${g.entrou_em?'in':''}">${g.entrou_em?ic('check'):esc(iniciais(g.nome))}</span>
-    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas>1?g.pessoas+' pessoas':'1 pessoa'}${g.telefone?' • '+esc(g.telefone):''}</div>
-      <div style="margin-top:3px">${g.entrou_em?`<span class="pill ok">Entrou às ${horaCurta(g.entrou_em)}${g.entrada_manual?' (manual)':''}</span>`:'<span class="pill wait">Aguardando</span>'}</div></div>
+    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas==2?'Casal (2 pessoas)':g.pessoas>2?g.pessoas+' pessoas':'1 pessoa'}${g.telefone?' • '+esc(g.telefone):''}</div>
+      <div style="margin-top:3px">${g.entrou_em?`<span class="pill ok">Entrou às ${horaCurta(g.entrou_em)}</span>`:'<span class="pill wait">Não entrou</span>'} ${g.enviado_em?'<span class="pill wait" style="background:#EEF1F6;color:var(--navy2)">Convite enviado</span>':''}</div></div>
     ${A.sel?'':`<div class="acts">
-      <button class="iconbtn wa" data-a="wa" data-id="${g.id}" aria-label="Enviar convite de ${esc(g.nome)} pelo WhatsApp">${ic('wa')}</button>
       <button class="iconbtn" data-a="ed" data-id="${g.id}" aria-label="Editar ${esc(g.nome)}">${ic('edit')}</button>
       <button class="iconbtn danger" data-a="rm" data-id="${g.id}" aria-label="Excluir ${esc(g.nome)}">${ic('trash')}</button></div>`}
-  </div>`).join('') : `<div class="empty">${A.data.convidados.length?'Nenhum convidado neste filtro':`Nenhum convidado cadastrado ainda.<br><br><a class="btn gold" href="#admin/adicionar">${ic('plus')} Adicionar convidados</a>`}</div>`;
-  $$('[data-a]',el).forEach(b=>b.onclick=()=>{ const g=A.data.convidados.find(x=>x.id===b.dataset.id); ({wa:enviarWa,ed:editar,rm:excluir})[b.dataset.a](g); });
+  </div>`).join('') : `<div class="empty">${A.data.convidados.length?'Nenhum convidado neste filtro':'Nenhum convidado cadastrado ainda.'}</div>`;
+  $$('[data-a]',el).forEach(b=>b.onclick=()=>{ const g=A.data.convidados.find(x=>x.id===b.dataset.id); ({ed:editar,rm:excluir})[b.dataset.a](g); });
   $$('[data-ck]',el).forEach(c=>c.onchange=()=>{ c.checked?A.sel.add(c.dataset.ck):A.sel.delete(c.dataset.ck); barraSel(); });
 }
 function iniciaSel(){ A.sel=new Set(); renderLista(); barraSel(); $('.tabbar').classList.add('hidden'); }
@@ -737,48 +834,105 @@ function barraSel(){
   $('[data-t]',b).onclick=()=>{ if(A.sel.size===todos.length) A.sel.clear(); else todos.forEach(g=>A.sel.add(g.id)); renderLista(); barraSel(); };
   $('[data-x]',b).onclick=async()=>{
     if(!await confirmar({titulo:`Excluir ${n} convidado(s)?`, texto:'Os convites selecionados deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir', perigo:true})) return;
-    try { const k=await rpc('cas_admin_remover_varios',{p_pin:A.pin,p_ids:[...A.sel]}); toast(`${k} convidado(s) excluído(s)`); await carregar(); fimSel(); renderStats(); } catch(e){ toast(e.message); }
+    try { const k=await rpc('cas_admin_remover_varios',{p_pin:A.pin,p_ids:[...A.sel]}); toast(`${k} convidado(s) excluído(s)`); await carregar(); fimSel(); } catch(e){ toast(e.message); }
   };
 }
-function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nCom muita alegria, convidamos você para ${tituloEvento(c)}${c.data?'\n📅 '+c.data:''}${c.local?'\n📍 '+c.local:''}\n\nAbra seu convite e apresente o QR Code na recepção:\n${linkConvite(g.token)}\n\n${g.pessoas>1?`Convite válido para ${g.pessoas} pessoas. `:''}O QR Code é pessoal e vale para uma única entrada.`; }
-function enviarWa(g){ const tel=(g.telefone||'').replace(/\D/g,''); const num = tel ? (tel.length<=11?'55'+tel:tel) : ''; window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgConvite(g))}`,'_blank'); }
 async function excluir(g){
   if(!await confirmar({titulo:`Excluir ${g.nome}?`, texto:'O convite e o QR Code deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir', perigo:true})) return;
-  try { await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); toast('Convidado excluído'); await carregar(); renderStats(); renderLista(); } catch(e){ toast(e.message); }
+  try { await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); toast('Convidado excluído'); await carregar(); renderLista(); } catch(e){ toast(e.message); }
 }
 function editar(g){
   const link=linkConvite(g.token), img=qrImg(link,6);
   const s=sheet(g.nome, `
     <div class="card" style="text-align:center;padding:16px">
       <div class="qrplate" style="margin:4px 0 12px;transform:none"><i></i><i></i><i></i><i></i><img src="${img}" alt="QR Code de ${esc(g.nome)}" style="width:170px"></div>
-      <div class="grid2"><button class="btn line sm" data-cp>${ic('link')} Copiar link</button><a class="btn line sm" href="${link}" target="_blank" rel="noopener">${ic('share')} Ver convite</a></div>
-      <button class="btn wa sm full" data-wa style="margin-top:10px">${ic('wa')} Enviar pelo WhatsApp</button>
+      <button class="btn wa full" data-wa>${ic('wa')} Enviar convite pelo WhatsApp</button>
+      <div class="grid2" style="margin-top:10px"><button class="btn line sm" data-cp>${ic('link')} Copiar link</button><a class="btn line sm" href="${link}" target="_blank" rel="noopener">${ic('share')} Ver convite</a></div>
     </div>
     <div class="section-title">Dados do convidado</div>
     <div class="card">
-      <label class="f" for="e_n">Nome</label><input class="in" id="e_n" value="${esc(g.nome)}">
+      <label class="f" for="e_n" style="margin-top:0">Nome</label><input class="in" id="e_n" value="${esc(g.nome)}">
+      <label class="f">Tipo de convite</label><div class="chips" style="padding-top:0" role="group" aria-label="Tipo de convite"><button type="button" class="chip" data-tp="1">Individual</button><button type="button" class="chip" data-tp="2">Casal</button><button type="button" class="chip" data-tp="4">Família</button></div>
       <div class="grid2"><div><label class="f" for="e_p">Pessoas</label><input class="in" id="e_p" type="number" inputmode="numeric" min="1" max="20" value="${g.pessoas}"></div>
       <div><label class="f" for="e_t">WhatsApp</label><input class="in" id="e_t" inputmode="tel" placeholder="82 99999-9999" value="${esc(g.telefone||'')}"></div></div>
       <label class="f" for="e_m">Mensagem só para este convidado</label><textarea class="in" id="e_m" style="min-height:90px" placeholder="Ex.: Sua mesa é a de número 5.">${esc(g.mensagem||'')}</textarea>
-      <p class="hint">Aparece em destaque somente no convite desta pessoa.</p>
-      <button class="btn primary full" data-s style="margin-top:16px">${ic('check')} Salvar alterações</button>
+      <button class="btn primary full" data-s style="margin-top:16px">${ic('check')} Salvar</button>
     </div>
     <div style="display:grid;gap:10px;margin-top:14px">
-      ${g.entrou_em?`<button class="btn line full" data-u>${ic('undo')} Desfazer entrada (${hora(g.entrou_em)})</button>`:''}
+      ${g.entrou_em?`<button class="btn line full" data-u>${ic('undo')} Desfazer entrada (${horaCurta(g.entrou_em)})</button>`:''}
       <button class="btn danger full" data-r>${ic('trash')} Excluir convidado</button>
     </div>`);
   $('[data-cp]',s).onclick=()=>copiar(link);
-  $('[data-wa]',s).onclick=()=>enviarWa(g);
-  $('[data-s]',s).onclick=async e=>{ e.currentTarget.disabled=true; try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:$('#e_n',s).value,p_pessoas:parseInt($('#e_p',s).value)||1,p_telefone:$('#e_t',s).value,p_mensagem:$('#e_m',s).value}); s.fechar(); toast('Alterações salvas'); await carregar(); renderStats(); renderLista(); }catch(er){ toast(er.message); e.currentTarget.disabled=false; } };
-  const u=$('[data-u]',s); if(u) u.onclick=async()=>{ if(!await confirmar({titulo:'Desfazer entrada?', texto:'O QR Code deste convidado volta a valer para entrar.', ok:'Desfazer', icone:'undo'})) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); s.fechar(); toast('Entrada desfeita'); await carregar(); renderStats(); renderLista(); };
+  $('[data-wa]',s).onclick=e=>enviarConvite(g, e.currentTarget);
+  const marcaTp=()=>{ const v=parseInt($('#e_p',s).value)||1; $$('[data-tp]',s).forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.tp==='4'?v>=3:+b.dataset.tp===v))); };
+  $$('[data-tp]',s).forEach(b=>b.onclick=()=>{ $('#e_p',s).value=b.dataset.tp; marcaTp(); }); $('#e_p',s).oninput=marcaTp; marcaTp();
+  if (g.pessoas>1) $('[data-wa]',s).insertAdjacentHTML('afterend', `<button class="btn line full" data-wa2 style="margin-top:10px">${ic('wa')} Enviar o mesmo QR para ${g.pessoas==2?'o(a) parceiro(a)':'outra pessoa do grupo'}</button>`);
+  const w2=$('[data-wa2]',s); if (w2) w2.onclick=e=>enviarConvite(g, e.currentTarget, true);
+  $('[data-s]',s).onclick=async e=>{ e.currentTarget.disabled=true; try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:$('#e_n',s).value,p_pessoas:parseInt($('#e_p',s).value)||1,p_telefone:$('#e_t',s).value,p_mensagem:$('#e_m',s).value}); s.fechar(); toast('Alterações salvas'); await carregar(); renderLista(); }catch(er){ toast(er.message); e.currentTarget.disabled=false; } };
+  const u=$('[data-u]',s); if(u) u.onclick=async()=>{ if(!await confirmar({titulo:'Desfazer entrada?', texto:'O QR Code deste convidado volta a valer para entrar.', ok:'Desfazer', icone:'undo'})) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); s.fechar(); toast('Entrada desfeita'); await carregar(); renderLista(); };
   $('[data-r]',s).onclick=async()=>{ s.fechar(); excluir(g); };
 }
 function exportar(){
-  const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Situação','Horário de entrada','Entrada manual','Link do convite']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Entrou':'Aguardando',hora(g.entrou_em),g.entrada_manual?'Sim':'',linkConvite(g.token)]));
-  const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Situação','Horário de entrada','Convite enviado','Link do convite']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Entrou':'Não entrou',hora(g.entrou_em),g.enviado_em?'Sim':'Não',linkConvite(g.token)]));
+  const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='convidados-casamento.csv'; a.click(); toast('Lista exportada');
 }
 
+/* --- ENVIAR CONVITES --- */
+function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nCom muita alegria, convidamos você para ${tituloEvento(c)}${c.data?'\n📅 '+c.data:''}${c.local?'\n📍 '+c.local:''}\n\nSeu convite com QR Code está na imagem. Apresente na recepção.\nConvite online: ${linkConvite(g.token)}`; }
+async function enviarConvite(g, btn, segundo){
+  if (btn) btn.disabled = true;
+  try {
+    const ev = await evento(true);
+    const blob = await gerarCartao(ev, g, g.token);
+    const nome = `convite-${g.nome.replace(/\s+/g,'-')}.png`;
+    const r = await compartilharOuBaixar(blob, nome, msgConvite(g));
+    if (r === 'download') {
+      const tel=segundo?'':(g.telefone||'').replace(/\D/g,''); const num = tel ? (tel.length<=11?'55'+tel:tel) : '';
+      toast('Imagem baixada. Anexe-a na conversa do WhatsApp.');
+      window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgConvite(g))}`,'_blank');
+    }
+    if (r !== 'cancel') { await rpc('cas_admin_marcar_enviado',{p_pin:A.pin,p_id:g.id}); g.enviado_em = new Date().toISOString(); renderEnvio(); }
+  } catch(e){ toast('Não foi possível gerar o convite'); }
+  if (btn) btn.disabled = false;
+}
+async function telaEnviar(){
+  $('#body').innerHTML = `
+    <div class="card section" style="display:flex;gap:14px;align-items:center">
+      <div id="thumb" style="width:92px;flex:none;border-radius:10px;overflow:hidden;box-shadow:0 6px 16px rgba(40,30,15,.18);background:var(--soft);aspect-ratio:9/16"></div>
+      <div><h2 style="margin:0">Convite por WhatsApp</h2><p class="small muted" style="margin-top:4px">Cada convidado recebe uma imagem com a foto e a sigla do casal, os dados da festa e o QR Code pessoal.</p>
+        <button class="btn line sm" id="verModelo" style="margin-top:8px">Ver modelo</button></div>
+    </div>
+    <div id="envStats"></div>
+    <div class="chips" style="margin-top:6px" role="group" aria-label="Filtro">
+      <button class="chip" data-ef="pend" aria-pressed="${A.envFiltro==='pend'}">Não enviados</button>
+      <button class="chip" data-ef="ok" aria-pressed="${A.envFiltro==='ok'}">Enviados</button>
+      <button class="chip" data-ef="todos" aria-pressed="${A.envFiltro==='todos'}">Todos</button>
+    </div>
+    <div class="glist" id="envL"></div>
+    <p class="hint" style="margin:12px 4px">Ao tocar em <b>Enviar</b>, escolha o WhatsApp e depois o contato. A imagem já vai com o QR Code.</p>`;
+  $$('[data-ef]').forEach(b=>b.onclick=()=>{ A.envFiltro=b.dataset.ef; $$('[data-ef]').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderEnvio(); });
+  renderEnvio();
+  const ev = await evento(true);
+  const exemplo = {nome:'Nome do Convidado', pessoas:2, mensagem:''};
+  try { const blob = await gerarCartao(ev, exemplo, 'exemplo'); const url = URL.createObjectURL(blob);
+    if ($('#thumb')) $('#thumb').innerHTML = `<img src="${url}" alt="Modelo do convite" style="width:100%;height:100%;object-fit:cover;object-position:top">`;
+    $('#verModelo').onclick = () => { const s=sheet('Modelo do convite', `<img src="${url}" alt="Modelo do convite" style="width:100%;border-radius:14px;box-shadow:var(--shadow)"><p class="hint" style="text-align:center;margin-top:10px">O nome e o QR Code mudam para cada convidado.</p>`); };
+  } catch(e){}
+}
+function renderEnvio(){
+  const L=A.data.convidados, env=L.filter(g=>g.enviado_em).length;
+  const st=$('#envStats'); if(!st) return;
+  st.innerHTML = `<div class="stats" style="grid-template-columns:1fr 1fr"><div class="stat"><b style="color:var(--ok)">${env}</b><span>Enviados</span></div><div class="stat"><b>${L.length-env}</b><span>Faltam enviar</span></div></div>`;
+  let F=L; if(A.envFiltro==='pend') F=L.filter(g=>!g.enviado_em); if(A.envFiltro==='ok') F=L.filter(g=>g.enviado_em);
+  $('#envL').innerHTML = F.length ? F.map(g=>`<div class="gi"><span class="av ${g.enviado_em?'in':''}">${g.enviado_em?ic('check'):esc(iniciais(g.nome))}</span>
+    <div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas==2?'Casal • ':g.pessoas>2?g.pessoas+' pessoas • ':''}${g.telefone?esc(g.telefone):'Sem telefone'}${g.enviado_em?' • enviado '+hora(g.enviado_em):''}</div>
+      ${g.pessoas>1&&g.enviado_em?`<button class="btn line sm" data-env2="${g.id}" style="margin-top:6px;min-height:36px">${ic('wa')} Enviar mesmo QR ${g.pessoas==2?'ao parceiro(a)':'a outro do grupo'}</button>`:''}</div>
+    <button class="btn ${g.enviado_em?'line':'wa'} sm" data-env="${g.id}" aria-label="Enviar convite para ${esc(g.nome)}">${ic('wa')} ${g.enviado_em?'Reenviar':'Enviar'}</button></div>`).join('')
+    : `<div class="empty">${L.length?(A.envFiltro==='pend'?'Todos os convites foram enviados 🎉':'Nenhum convite enviado ainda'):`Nenhum convidado cadastrado.<br><br><a class="btn gold" href="#admin/adicionar">${ic('plus')} Adicionar convidados</a>`}</div>`;
+  $$('[data-env]').forEach(b=>b.onclick=()=>enviarConvite(L.find(g=>g.id===b.dataset.env), b));
+  $$('[data-env2]').forEach(b=>b.onclick=()=>enviarConvite(L.find(g=>g.id===b.dataset.env2), b, true));
+}
 /* --- adicionar / importar --- */
 function telaAdicionar(){
   $('#body').innerHTML = `
@@ -792,8 +946,8 @@ function telaAdicionar(){
     <div class="section-title">Digitar ou colar nomes</div>
     <div class="card">
       <label class="f" for="lista" style="margin-top:0">Um convidado por linha</label>
-      <textarea class="in" id="lista" style="min-height:180px" placeholder="Maria Silva ; 2 ; 82 99999-8888&#10;João Souza&#10;Família Santos ; 4"></textarea>
-      <p class="hint">Formato: <b>Nome ; pessoas ; telefone</b> — pessoas e telefone são opcionais.</p>
+      <textarea class="in" id="lista" style="min-height:180px" placeholder="Maria e João Silva ; casal ; 82 99999-8888&#10;Pedro Souza&#10;Família Santos ; 4"></textarea>
+      <p class="hint">Formato: <b>Nome ; pessoas ; telefone</b>. Para casal, escreva <b>casal</b> no lugar do número: <i>Maria e João ; casal</i> — um único QR Code vale para os dois.</p>
       <button class="btn gold full" id="add" style="margin-top:16px">${ic('plus')} Adicionar à lista</button>
     </div>`;
   $('#arq').onchange=importarArquivo; $('#add').onclick=adicionar;
@@ -804,7 +958,9 @@ function interpretaLinha(cels){
   if (/^(n[ºo°.]?|nomes?|convidados?|lista.*)$/i.test(cels[0]) || cels.every(c=>/^(n[ºo°.]?|nomes?|convidados?|pessoas|qtd\.?|quantidade|telefone|whatsapp|celular|contato)$/i.test(c))) return null;
   let nome='', pessoas=1, tel='';
   const resto=[];
-  for (const c of cels) {
+  for (let c of cels) {
+    if (/^casal$/i.test(c)) { pessoas=2; continue; }
+    if (/\(?\bcasal\b\)?/i.test(c)) { pessoas=Math.max(pessoas,2); c=c.replace(/\(?\bcasal\b\)?/i,'').trim(); if(!c) continue; }
     const dig=c.replace(/\D/g,'');
     if (!tel && dig.length>=8 && dig.length<=13 && /^[\d\s()+.-]+$/.test(c)) { tel=c; continue; }
     if (/^\d{1,2}$/.test(c) && resto.length) { pessoas=Math.min(20,Math.max(1,parseInt(c))); continue; }
@@ -813,7 +969,7 @@ function interpretaLinha(cels){
   nome = resto.join(' ');
   const mTel = nome.match(/\(?\d{2}\)?\s?9?\s?\d{4}[-\s.]?\d{4}/); if (!tel && mTel) { tel=mTel[0]; nome=nome.replace(mTel[0],' '); }
   const mQt = nome.match(/(?:\+\s?(\d{1,2})|\((\d{1,2})\s*(?:pessoas?|p)?\)|\s(\d{1,2})\s*(?:pessoas?)?)\s*$/i);
-  if (mQt) { const v=parseInt(mQt[1]||mQt[2]||mQt[3]); pessoas = mQt[1] ? v+1 : v; nome=nome.slice(0,mQt.index); }
+  if (mQt) { const v=parseInt(mQt[1]||mQt[2]||mQt[3]); pessoas = Math.max(pessoas, mQt[1] ? v+1 : v); nome=nome.slice(0,mQt.index); }
   nome = nome.replace(/^\s*\d{1,4}\s*[-.)º°]?\s+/,'').replace(/[;,|\t-]+\s*$/,'').replace(/\s+/g,' ').trim();
   if (!nome || nome.length<2 || /^(nomes?|convidados?|lista( de convidados)?|qtd|quantidade|telefone|pessoas)$/i.test(nome)) return null;
   if (!/[a-zà-ú]/i.test(nome)) return null;
@@ -861,18 +1017,25 @@ async function adicionar(){
   const linhas=$('#lista').value.split('\n').map(l=>l.trim()).filter(Boolean);
   if(!linhas.length) return toast('Digite pelo menos um nome');
   const ja=new Set(A.data.convidados.map(g=>g.nome.toLowerCase().trim()));
-  const todos=linhas.map(l=>{ const [nome,p,tel]=l.split(/[;\t]/).map(x=>(x||'').trim()); return {nome, pessoas:parseInt(p)||1, telefone:tel||''}; });
+  const todos=linhas.map(l=>{ const [nome,p,tel]=l.split(/[;\t]/).map(x=>(x||'').trim()); return {nome, pessoas:/casal/i.test(p||'')?2:/fam/i.test(p||'')?4:(parseInt(p)||1), telefone:tel||''}; });
   const lista=todos.filter(g=>g.nome && !ja.has(g.nome.toLowerCase()) && ja.add(g.nome.toLowerCase()));
   const rep=todos.length-lista.length;
   if(!lista.length) return toast('Esses nomes já estão na lista');
   const b=$('#add'); b.disabled=true;
   try { const n=await rpc('cas_admin_adicionar',{p_pin:A.pin,p_lista:lista}); $('#lista').value=''; $('#arqInfo').innerHTML=''; await carregar();
-    toast(`${n} convidado(s) adicionado(s)${rep?` • ${rep} repetido(s) ignorado(s)`:''}`); location.hash='#admin'; }
+    toast(`${n} convidado(s) adicionado(s)${rep?` • ${rep} repetido(s) ignorado(s)`:''}`); location.hash='#admin/convidados'; }
   catch(e){ toast(e.message); b.disabled=false; }
 }
 
-/* --- evento --- */
-function telaEvento(){
+/* --- AJUSTES --- */
+async function reduzFoto(file){
+  const url = URL.createObjectURL(file); const im = await carregaImg(url); URL.revokeObjectURL(url);
+  if (!im) throw new Error('Imagem inválida');
+  const S=900, s=Math.min(1, S/Math.max(im.width, im.height)); const c=document.createElement('canvas');
+  c.width=Math.round(im.width*s); c.height=Math.round(im.height*s); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg', .82);
+}
+function telaAjustes(){
   const c=A.data.config, portLink=BASE+'#portaria';
   const tg=(id,tit,desc,on)=>`<label class="toggle" for="${id}"><div class="tx"><b>${tit}</b><span>${desc}</span></div><span class="sw"><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></span></label>`;
   $('#body').innerHTML = `
@@ -881,48 +1044,80 @@ function telaEvento(){
       <div class="grid2"><div><label class="f" for="n1" style="margin-top:0">Noivo(a)</label><input class="in" id="n1" value="${esc(c.noivo1||'')}" placeholder="Ana"></div>
       <div><label class="f" for="n2" style="margin-top:0">Noivo(a)</label><input class="in" id="n2" value="${esc(c.noivo2||'')}" placeholder="Pedro"></div></div>
       <div class="preview3d stage3d" aria-label="Pré-visualização do nome"><span class="sway" id="prev"></span></div>
-      ${tg('t3d','Nome em 3D no convite','Nomes em dourado com profundidade e movimento',c.nome3d!==false)}
-      ${tg('tbg','Nome em 3D como plano de fundo','Nomes e alianças ao fundo do convite e do aplicativo',c.fundo3d!==false)}
+      ${tg('t3d','Nome em 3D no convite','Nomes em dourado com profundidade',c.nome3d!==false)}
+      ${tg('tbg','Nome em 3D no plano de fundo','Nomes e alianças ao fundo do convite e do aplicativo',c.fundo3d!==false)}
     </div>
+    <div class="section-title">Foto do casal</div>
+    <div class="card" style="display:flex;gap:16px;align-items:center">
+      <div id="fotoPrev" style="width:96px;height:96px;flex:none;border-radius:50%;overflow:hidden;background:var(--soft);border:3px solid var(--gold2);display:flex;align-items:center;justify-content:center;color:var(--gold3)">${ic('heart')}</div>
+      <div style="flex:1;display:grid;gap:8px">
+        <label class="btn gold sm" for="fotoIn" style="cursor:pointer">${ic('plus')} Escolher foto</label><input type="file" id="fotoIn" accept="image/*" class="sr">
+        <button class="btn danger sm ${c.tem_foto?'':'hidden'}" id="fotoRm">${ic('trash')} Remover foto</button>
+      </div>
+    </div>
+    <p class="hint" style="margin:6px 4px 0">A foto aparece no convite online e na imagem enviada pelo WhatsApp.</p>
     <div class="section-title">Dados do evento</div>
     <div class="card">
       <label class="f" for="ti" style="margin-top:0">Título</label><input class="in" id="ti" value="${esc(c.titulo&&c.titulo!=='Nosso Casamento'?c.titulo:'')}" placeholder="Casamento de Ana & Pedro">
       <p class="hint">Se ficar em branco, usamos "Casamento de" + o nome dos noivos.</p>
       <label class="f" for="dt">Data e horário</label><input class="in" id="dt" value="${esc(c.data||'')}" placeholder="Sábado, 14 de novembro de 2026 • 19h">
       <label class="f" for="lc">Local</label><input class="in" id="lc" value="${esc(c.local||'')}" placeholder="Nome do espaço, endereço">
-      <label class="f" for="mg">Mensagem para todos os convidados</label><textarea class="in" id="mg" placeholder="Ex.: Traje passeio completo. Sua presença tornará este dia ainda mais especial.">${esc(c.mensagem||'')}</textarea>
-      <p class="hint">Aparece abaixo do QR Code em todos os convites.</p>
+      <label class="f" for="mg">Mensagem para os convidados</label><textarea class="in" id="mg" placeholder="Ex.: Traje passeio completo. Sua presença tornará este dia ainda mais especial.">${esc(c.mensagem||'')}</textarea>
     </div>
-    <div class="section-title">Portaria</div>
+    <button class="btn primary full" id="salvar" style="margin-top:18px">${ic('check')} Salvar</button>
+
+    <div class="section-title">Perfis de acesso</div>
     <div class="card">
-      <label class="f" for="pp" style="margin-top:0">Senha do porteiro</label><input class="in" id="pp" autocomplete="off" autocapitalize="none" value="${esc(c.pin_portaria||'')}">
-      <div class="grid2" style="margin-top:12px"><button class="btn line sm" id="cpP">${ic('link')} Copiar link</button><button class="btn wa sm" id="waP">${ic('wa')} Enviar</button></div>
-      <p class="hint">Envie o link e a senha para quem vai cuidar da entrada.</p>
+      <div class="row"><span class="av" style="width:40px;height:40px">${ic('heart')}</span><div style="flex:1"><b>Noivos</b><div class="small muted">Acesso completo</div></div></div>
+      <label class="f" for="na">Nova senha dos noivos</label>${campoSenha('na','Deixe em branco para manter')}
+      <div style="height:1px;background:var(--line);margin:18px 0"></div>
+      <div class="row"><span class="av" style="width:40px;height:40px">${ic('qr')}</span><div style="flex:1"><b>Portaria</b><div class="small muted">Só lê o QR Code e vê a lista</div></div></div>
+      <label class="f" for="pp">Senha da portaria</label>${campoSenha('pp','Mínimo 4 letras ou números',`value="${esc(c.pin_portaria||'')}"`)}
+      <button class="btn line sm full" id="waP" style="margin-top:12px">${ic('wa')} Enviar acesso para o porteiro</button>
+      <button class="btn primary full" id="salvarSenhas" style="margin-top:14px">${ic('lock')} Salvar senhas</button>
     </div>
-    <div class="section-title">Sua senha</div>
-    <div class="card"><label class="f" for="na" style="margin-top:0">Nova senha do painel</label><input class="in" id="na" autocomplete="off" autocapitalize="none" placeholder="Deixe em branco para manter a atual"></div>
-    <button class="btn primary full" id="salvar" style="margin-top:20px">${ic('check')} Salvar configurações</button>
+
+    <div class="section-title">Recuperar senha</div>
+    <div class="card">
+      <p class="small muted" style="margin:0">${c.tem_recup?'✓ Configurada. Você pode trocar a pergunta abaixo.':'Cadastre para poder usar "Esqueci a senha".'}</p>
+      <label class="f" for="rq">Pergunta de segurança</label>${selPergunta('rq', c.recup_pergunta||'')}
+      <label class="f" for="rr">Resposta</label>${campo('rr', c.tem_recup?'Digite a resposta para alterar':'Sua resposta')}
+      <button class="btn line full" id="salvarRec" style="margin-top:14px">${ic('lock')} Salvar pergunta</button>
+    </div>
+
     <div class="section-title" style="color:var(--bad)">Zona de cuidado</div>
     <div class="card" style="display:grid;gap:10px">
       <button class="btn line full" id="zerar">${ic('undo')} Zerar entradas (após testes)</button>
       <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
     </div>`;
+  ligaOlhos();
   const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
   ['n1','n2'].forEach(i=>$('#'+i).oninput=prev); $('#t3d').onchange=prev; prev();
-  $('#cpP').onclick=()=>copiar(portLink);
-  $('#waP').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Portaria — ${tituloEvento(c)}\n\nLink: ${portLink}\nSenha: ${$('#pp').value.trim()}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado.\n🟢 Verde: liberar\n🟡 Amarelo: convite já utilizado\n🔴 Vermelho: não está na lista`),'_blank');
+  if (EV && EV.foto) $('#fotoPrev').innerHTML = `<img src="${EV.foto}" alt="Foto do casal" style="width:100%;height:100%;object-fit:cover">`;
+  $('#fotoIn').onchange = async e => { const f=e.target.files[0]; if(!f) return;
+    try { toast('Enviando foto…'); const d=await reduzFoto(f); await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:d}); await evento(true); await carregar();
+      $('#fotoPrev').innerHTML = `<img src="${d}" alt="Foto do casal" style="width:100%;height:100%;object-fit:cover">`; $('#fotoRm').classList.remove('hidden'); toast('Foto salva'); }
+    catch(er){ toast(er.message); } e.target.value=''; };
+  $('#fotoRm').onclick = async () => { if(!await confirmar({titulo:'Remover a foto?', ok:'Remover', perigo:true})) return;
+    await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:null}); await evento(true); await carregar(); $('#fotoPrev').innerHTML=ic('heart'); $('#fotoRm').classList.add('hidden'); toast('Foto removida'); };
+  const dados = () => ({titulo:$('#ti').value.trim()||'Nosso Casamento',data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
   $('#salvar').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
-    try {
-      await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:{titulo:$('#ti').value.trim()||'Nosso Casamento',data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()}});
+    try { await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:dados()}); await carregar(); await evento(true); pintaFundo(EV); toast('Salvo'); $('.appbar .ttl span').textContent = nomesCasal(A.data.config); }
+    catch(er){ toast(er.message); } b.disabled=false; };
+  $('#salvarSenhas').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
+    try { await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:dados()});
       const na=$('#na').value.trim(); if(na){ await rpc('cas_admin_senha',{p_pin:A.pin,p_nova:na}); A.pin=na; store.set('cas_pin_admin',na); $('#na').value=''; }
-      await carregar(); await evento(true); pintaFundo(EV); toast('Configurações salvas');
-      { const cc=A.data.config; $('.appbar .ttl span').textContent = temNomes(cc)?[cc.noivo1,cc.noivo2].filter(Boolean).join(' & '):'Painel dos noivos'; }
-    } catch(er){ toast(er.message); } b.disabled=false; };
-  $('#zerar').onclick=async()=>{ if(!await confirmar({titulo:'Zerar todas as entradas?', texto:'Todos os convidados voltam para "Aguardando" e os QR Codes voltam a valer. Use após os testes.', ok:'Zerar entradas', icone:'undo'})) return;
+      await carregar(); toast('Senhas salvas'); } catch(er){ toast(er.message); } b.disabled=false; };
+  $('#waP').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(`Acesso da portaria — ${tituloEvento(c)}\n\nLink: ${portLink}\nSenha: ${$('#pp').value.trim()}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado.\n🟢 Verde: liberar\n🟡 Amarelo: convite já usado\n🔴 Vermelho: não está na lista`),'_blank');
+  $('#salvarRec').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
+    try { await rpc('cas_salvar_recuperacao',{p_pin:A.pin,p_pergunta:$('#rq').value,p_resposta:$('#rr').value}); $('#rr').value=''; await carregar(); toast('Pergunta de segurança salva'); }
+    catch(er){ toast(er.message); } b.disabled=false; };
+  $('#zerar').onclick=async()=>{ if(!await confirmar({titulo:'Zerar todas as entradas?', texto:'Todos voltam para "Não entrou" e os QR Codes voltam a valer. Use após os testes.', ok:'Zerar entradas', icone:'undo'})) return;
     try { const n=await rpc('cas_admin_zerar_entradas',{p_pin:A.pin}); await carregar(); toast(`${n} entrada(s) zerada(s)`); } catch(e){ toast(e.message); } };
   $('#apagar').onclick=async()=>{ if(!await confirmar({titulo:'Excluir TODOS os convidados?', texto:'Todos os convites deixarão de funcionar. Esta ação não pode ser desfeita.', ok:'Excluir tudo', perigo:true, digitar:'EXCLUIR'})) return;
     try { const n=await rpc('cas_admin_excluir_todos',{p_pin:A.pin}); await carregar(); toast(`${n} convidado(s) excluído(s)`); } catch(e){ toast(e.message); } };
 }
+
 
 route();
 </script>
