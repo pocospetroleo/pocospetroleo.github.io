@@ -196,6 +196,8 @@ input.in:focus,textarea.in:focus{outline:none;border-color:var(--gold2);box-shad
 .in.mask{-webkit-text-security:disc;text-security:disc}
 .olho{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:10px}
 input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:manipulation}
+.mapa{display:block;position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 6px 16px rgba(40,30,15,.12);background:var(--soft)}
+.mapa iframe{width:100%;height:100%;border:0;pointer-events:none;display:block}
 /* home */
 .hero{text-align:center;padding:40px 10px 10px}
 .hero .names{font-size:clamp(52px,16vw,84px);margin:14px 0 4px}
@@ -268,7 +270,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-12-r5";
+const VERSAO = "2026-11-12-r6";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -330,6 +332,7 @@ const ICONS = {
   heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
   select:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
   eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  nav:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>',
   home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'
 };
@@ -424,6 +427,20 @@ async function viewHome(){
   </div>`;
 }
 
+/* =================== LOCALIZAÇÃO =================== */
+function coordsDe(t){ t=String(t||''); let m=t.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/); if(m) return m[1]+','+m[2];
+  m=t.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/); return m ? m[1]+','+m[2] : null; }
+function local(ev){
+  const mapa=(ev.mapa||'').trim(), txt=(ev.local||'').trim(), ll=coordsDe(mapa);
+  const q = ll || txt; if (!mapa && !txt) return null;
+  return {
+    google: ll ? `https://www.google.com/maps/search/?api=1&query=${ll}` : /^https?:/i.test(mapa) ? mapa : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(txt)}`,
+    waze: ll ? `https://waze.com/ul?ll=${ll}&navigate=yes` : txt ? `https://waze.com/ul?q=${encodeURIComponent(txt)}&navigate=yes` : null,
+    embed: q ? `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed` : null
+  };
+}
+const blocoMapa = (L, h=190) => L && L.embed ? `<a href="${L.google}" target="_blank" rel="noopener" class="mapa" aria-label="Abrir localização no mapa" style="height:${h}px"><iframe src="${L.embed}" loading="lazy" tabindex="-1" title="Mapa do local"></iframe></a>` : '';
+
 /* =================== CONVITE =================== */
 const sigla = ev => { const a=(ev.noivo1||'').trim()[0]||'', b=(ev.noivo2||'').trim()[0]||''; return a&&b ? `${a}&${b}` : (a||b); };
 async function viewConvite(token){
@@ -433,7 +450,7 @@ async function viewConvite(token){
   pintaFundo(ev);
   if (!cv) { app.innerHTML = `<div class="inv-wrap"><div class="inv"><div class="paper">${rings()}<h1 style="margin-top:16px">Convite não encontrado</h1><p class="muted" style="margin-top:10px">Confira o link recebido ou fale com os noivos.</p></div></div></div>`; return; }
   const img = qrImg(linkConvite(token), 8);
-  const mapa = ev.local ? `https://maps.google.com/?q=${encodeURIComponent(ev.local)}` : '';
+  const L = local(ev);
   app.innerHTML = `<div class="inv-wrap"><article class="inv" id="inv" aria-label="Convite de ${esc(cv.nome)}">
     <div class="paper">
       ${sigla(ev)?`<div class="mono" aria-hidden="true">${esc(sigla(ev))}</div>`:''}
@@ -456,8 +473,9 @@ async function viewConvite(token){
       <p class="muted small" style="margin:16px 4px 18px">QR Code pessoal e intransferível, válido para uma única entrada. Salve a imagem para apresentar mesmo sem internet.</p>
       <div style="display:grid;gap:10px">
         <button class="btn gold full" id="salvar">${ic('download')} Salvar convite</button>
-        ${mapa?`<a class="btn line full" href="${mapa}" target="_blank" rel="noopener">${ic('pin')} Como chegar</a>`:''}
       </div>
+      ${L?`<div class="orn">✦</div><div class="eyebrow" style="margin-bottom:10px">Localização</div>${ev.local?`<p style="margin:-2px 0 10px;color:var(--navy2)">${esc(ev.local)}</p>`:''}${blocoMapa(L)}
+        <div class="grid2" style="margin-top:10px"><a class="btn line" href="${L.google}" target="_blank" rel="noopener">${ic('pin')} Maps</a>${L.waze?`<a class="btn line" href="${L.waze}" target="_blank" rel="noopener">${ic('nav')} Waze</a>`:''}</div>`:''}
     </div></article></div>`;
   $('#salvar').onclick = async e => { const b=e.currentTarget; b.disabled=true;
     try { const blob = await gerarCartao(ev, cv, token); await compartilharOuBaixar(blob, `convite-${cv.nome.replace(/\s+/g,'-')}.png`); }
@@ -896,7 +914,7 @@ function exportar(){
 }
 
 /* --- ENVIAR CONVITES --- */
-function msgConvite(g){ const c=A.data.config; return `Olá, ${g.nome}! 💍\n\nCom muita alegria, convidamos você para ${tituloEvento(c)}${c.data?'\n📅 '+c.data:''}${c.local?'\n📍 '+c.local:''}\n\nSeu convite com QR Code está na imagem. Apresente na recepção.\nConvite online: ${linkConvite(g.token)}`; }
+function msgConvite(g){ const c=A.data.config; const Lc = local({...(EV||{}), local:c.local, mapa:c.mapa}); return `Olá, ${g.nome}! 💍\n\nCom muita alegria, convidamos você para ${tituloEvento(c)}${c.data?'\n📅 '+c.data:''}${c.local?'\n📍 '+c.local:''}${Lc?'\nComo chegar: '+Lc.google:''}\n\nSeu convite com QR Code está na imagem. Apresente na recepção.\nConvite online: ${linkConvite(g.token)}`; }
 async function enviarConvite(g, btn, segundo){
   if (btn) btn.disabled = true;
   try {
@@ -1083,6 +1101,19 @@ function telaAjustes(){
     </div>
     <button class="btn primary full" id="salvar" style="margin-top:18px">${ic('check')} Salvar</button>
 
+    <div class="section-title">Localização do evento</div>
+    <div class="card">
+      <div id="mapPrev"></div>
+      <button class="btn gold full" id="geo" style="margin-top:12px">${ic('nav')} Usar minha localização atual</button>
+      <p class="hint" style="text-align:center">Use quando estiver no local da festa.</p>
+      <div class="orn" style="margin:10px 0">ou</div>
+      <label class="f" for="mp" style="margin-top:0">Link do Google Maps</label>
+      <input class="in" id="mp" inputmode="url" autocapitalize="none" placeholder="Cole aqui o link do local" value="${esc(c.mapa||'')}">
+      <p class="hint">No Google Maps, toque no local → <b>Compartilhar</b> → <b>Copiar link</b> e cole aqui.</p>
+      <button class="btn line sm full" id="buscaMapa" style="margin-top:8px">${ic('search')} Procurar o endereço no Google Maps</button>
+      <div class="grid2" style="margin-top:14px"><button class="btn danger" id="mpRm">${ic('trash')} Limpar</button><button class="btn primary" id="mpSalvar">${ic('check')} Salvar local</button></div>
+    </div>
+
     <div class="section-title">Perfis de acesso</div>
     <div class="card">
       <div class="row"><span class="av" style="width:40px;height:40px">${ic('heart')}</span><div style="flex:1"><b>Noivos</b><div class="small muted">Acesso completo</div></div></div>
@@ -1108,6 +1139,16 @@ function telaAjustes(){
       <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
     </div>`;
   ligaOlhos();
+  const mapPrev=()=>{ const L=local({local:$('#lc').value, mapa:$('#mp').value}); $('#mapPrev').innerHTML = L&&L.embed ? blocoMapa(L,200) : `<div class="empty" style="padding:20px;border:2px dashed var(--line);border-radius:16px">${ic('pin')}<br>Nenhum local definido</div>`; };
+  mapPrev(); $('#mp').onchange=mapPrev; $('#lc').onchange=mapPrev;
+  $('#geo').onclick=()=>{ if(!navigator.geolocation) return toast('Seu navegador não permite localização');
+    const b=$('#geo'); b.disabled=true; toast('Buscando sua localização…');
+    navigator.geolocation.getCurrentPosition(p=>{ $('#mp').value=`${p.coords.latitude.toFixed(6)},${p.coords.longitude.toFixed(6)}`; mapPrev(); b.disabled=false; toast('Localização encontrada. Toque em "Salvar local".'); },
+      e=>{ b.disabled=false; toast(e.code===1?'Permita o acesso à localização nas configurações do navegador':'Não foi possível obter a localização'); }, {enableHighAccuracy:true, timeout:15000}); };
+  $('#buscaMapa').onclick=()=>{ const t=$('#lc').value.trim(); window.open(t?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t)}`:'https://www.google.com/maps','_blank'); };
+  const salvaMapa=async v=>{ try { await rpc('cas_salvar_mapa',{p_pin:A.pin,p_mapa:v}); await carregar(); await evento(true); mapPrev(); toast(v?'Localização salva':'Localização removida'); } catch(er){ toast(er.message); } };
+  $('#mpSalvar').onclick=()=>salvaMapa($('#mp').value.trim());
+  $('#mpRm').onclick=async()=>{ if(!await confirmar({titulo:'Limpar a localização?', texto:'O mapa deixará de aparecer no convite.', ok:'Limpar', perigo:true})) return; $('#mp').value=''; salvaMapa(''); };
   const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
   ['n1','n2'].forEach(i=>$('#'+i).oninput=prev); $('#t3d').onchange=prev; prev();
   if (EV && EV.foto) $('#fotoPrev').innerHTML = `<img src="${EV.foto}" alt="Foto do casal" style="width:100%;height:100%;object-fit:cover">`;
