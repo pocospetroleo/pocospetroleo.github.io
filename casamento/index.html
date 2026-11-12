@@ -146,11 +146,48 @@ async function viewConvite(token){
     <div class="muted">Convidado(a)</div>
     <div style="font-size:22px;font-weight:600;margin-top:2px">${esc(cv.nome)}</div>
     <div class="muted">${cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Válido para 1 pessoa'}</div>
+    ${cv.mensagem?`<div style="background:#f6efe3;border-radius:12px;padding:14px;margin-top:16px;white-space:pre-line;font-size:15px">💌 ${esc(cv.mensagem)}</div>`:''}
     <div class="qr"><img id="qrimg" src="${img}" alt="QR Code"></div>
+    ${ev.mensagem?`<div class="serif" style="font-size:19px;font-style:italic;color:var(--ink);white-space:pre-line;margin:6px 0 14px;line-height:1.35">${esc(ev.mensagem)}</div>`:''}
     <div>${cv.entrou_em?`<span class="badge ok">✓ Entrada registrada às ${horaCurta(cv.entrou_em)}</span>`:`<span class="badge pend">Apresente este QR Code na entrada</span>`}</div>
     <p class="muted" style="margin:16px 0 14px;font-size:13px">O QR Code é pessoal e só pode ser usado uma vez. Dica: tire um print ou salve a imagem para não depender de internet na portaria.</p>
-    <a class="btn gold full" download="convite-${esc(cv.nome).replace(/\s+/g,'-')}.png" href="${img}">⬇️ Salvar QR Code</a>
+    <button class="btn gold full" id="salvar">⬇️ Salvar convite com QR Code</button>
   </div></div>`;
+  $('#salvar').onclick = () => salvarCartao(ev, cv, img);
+}
+function quebra(ctx, txt, max){ const out=[]; for (const par of String(txt||'').split('\n')) { let l=''; for (const w of par.split(' ')) { const t=l?l+' '+w:w; if (ctx.measureText(t).width>max && l) { out.push(l); l=w; } else l=t; } out.push(l); } return out; }
+async function salvarCartao(ev, cv, img){
+  const W=900, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
+  const q=new Image(); q.src=img; await q.decode().catch(()=>{});
+  const linhas=[];
+  const add=(t,font,color,gap=12)=>{ x.font=font; for (const l of quebra(x,t,W-120)) linhas.push({l,font,color,h:parseInt(font.match(/(\d+)px/)[1])+gap}); };
+  add('VOCÊ ESTÁ CONVIDADO(A)','600 22px Inter, sans-serif','#8a8178',20);
+  add(ev.titulo,'600 56px Georgia, serif','#2b2622');
+  if (ev.data) add(ev.data,'italic 32px Georgia, serif','#8c6d3d');
+  if (ev.local) add('📍 '+ev.local,'26px Inter, sans-serif','#8a8178');
+  linhas.push({gap:30});
+  add(cv.nome,'700 40px Inter, sans-serif','#2b2622',8);
+  add(cv.pessoas>1?`Válido para ${cv.pessoas} pessoas`:'Válido para 1 pessoa','26px Inter, sans-serif','#8a8178');
+  if (cv.mensagem) { linhas.push({gap:16}); add(cv.mensagem,'28px Inter, sans-serif','#2b2622'); }
+  const QR=480, depois=[];
+  if (ev.mensagem) { x.font='italic 32px Georgia, serif'; for (const l of quebra(x,ev.mensagem,W-120)) depois.push({l,font:'italic 32px Georgia, serif',color:'#2b2622',h:44}); }
+  depois.push({gap:20}); x.font='22px Inter, sans-serif';
+  for (const l of quebra(x,'Apresente este QR Code na entrada. Uso único e pessoal.',W-120)) depois.push({l,font:'22px Inter, sans-serif',color:'#8a8178',h:32});
+  const alt = l => l.gap || l.h;
+  c.height = 80 + linhas.reduce((s,l)=>s+alt(l),0) + 40 + QR + 40 + depois.reduce((s,l)=>s+alt(l),0) + 60;
+  x.fillStyle='#f7f2ea'; x.fillRect(0,0,W,c.height);
+  x.strokeStyle='#b08d57'; x.lineWidth=3; x.strokeRect(24,24,W-48,c.height-48);
+  x.textAlign='center'; let y=80;
+  const desenha = arr => { for (const l of arr) { if (l.gap){ y+=l.gap; continue; } x.font=l.font; x.fillStyle=l.color; y+=l.h; x.fillText(l.l, W/2, y-10); } };
+  desenha(linhas); y+=40;
+  x.fillStyle='#fff'; x.fillRect((W-QR)/2-16,y-16,QR+32,QR+32);
+  x.imageSmoothingEnabled=false; x.drawImage(q,(W-QR)/2,y,QR,QR); y+=QR+40;
+  desenha(depois);
+  const url=c.toDataURL('image/png');
+  const nome=`convite-${cv.nome.replace(/\s+/g,'-')}.png`;
+  try { const blob=await (await fetch(url)).blob(); const f=new File([blob],nome,{type:'image/png'});
+    if (navigator.canShare && navigator.canShare({files:[f]})) { await navigator.share({files:[f], title:'Meu convite'}); return; } } catch(e){ if (e.name==='AbortError') return; }
+  const a=document.createElement('a'); a.href=url; a.download=nome; document.body.appendChild(a); a.click(); a.remove();
 }
 
 /* ---------------- LOGIN ---------------- */
@@ -432,12 +469,13 @@ function modalConvidado(g){
     <div class="divider">editar</div>
     <label>Nome</label><input data-n value="${esc(g.nome)}">
     <div class="row"><div style="flex:1"><label>Pessoas</label><input data-p type="number" min="1" max="20" value="${g.pessoas}"></div><div style="flex:2"><label>Telefone (WhatsApp)</label><input data-t inputmode="tel" value="${esc(g.telefone||'')}"></div></div>
+    <label>Mensagem só para este convidado (opcional)</label><textarea data-msg style="min-height:80px" placeholder="Ex.: Você está na mesa 5. Que alegria ter você!">${esc(g.mensagem||'')}</textarea>
     <button class="btn full" data-s style="margin-top:12px">Salvar</button>
     ${g.entrou_em?`<button class="btn ghost full" data-u style="margin-top:8px">↩️ Desfazer entrada (${hora(g.entrou_em)})</button>`:''}
     <button class="btn red full" data-r style="margin-top:8px">Remover convidado</button>`);
   m.querySelector('[data-x]').onclick=()=>m.remove();
   m.querySelector('[data-cp]').onclick=()=>copiar(link);
-  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:m.querySelector('[data-n]').value,p_pessoas:parseInt(m.querySelector('[data-p]').value)||1,p_telefone:m.querySelector('[data-t]').value}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
+  m.querySelector('[data-s]').onclick=async()=>{ try{ await rpc('cas_admin_editar',{p_pin:A.pin,p_id:g.id,p_nome:m.querySelector('[data-n]').value,p_pessoas:parseInt(m.querySelector('[data-p]').value)||1,p_telefone:m.querySelector('[data-t]').value,p_mensagem:m.querySelector('[data-msg]').value}); m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
   const u=m.querySelector('[data-u]'); if(u) u.onclick=async()=>{ if(!confirm('Desfazer a entrada? O QR volta a valer.')) return; await rpc('cas_admin_desfazer',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
   m.querySelector('[data-r]').onclick=async()=>{ if(!confirm(`Remover ${g.nome}? O QR deixa de funcionar.`)) return; await rpc('cas_admin_remover',{p_pin:A.pin,p_id:g.id}); m.remove(); carregar(); };
 }
@@ -447,12 +485,13 @@ function modalConfig(){
     <label>Título (aparece no convite)</label><input data-ti value="${esc(c.titulo)}" placeholder="Casamento de Ana & Pedro">
     <label>Data / horário</label><input data-d value="${esc(c.data||'')}" placeholder="14 de novembro de 2026 • 19h">
     <label>Local</label><input data-l value="${esc(c.local||'')}" placeholder="Nome do salão, endereço">
+    <label>Mensagem para todos os convidados (aparece junto do QR Code)</label><textarea data-m style="min-height:90px" placeholder="Ex.: Traje esporte fino. Contamos com sua presença! Cerimônia às 19h.">${esc(c.mensagem||'')}</textarea>
     <label>Senha do porteiro</label><input data-pp autocomplete="off" autocapitalize="none" value="${esc(c.pin_portaria)}">
     <label>Nova senha do painel (deixe vazio para manter)</label><input data-na autocomplete="off" autocapitalize="none" placeholder="Opcional">
     <button class="btn full" data-s style="margin-top:14px">Salvar</button>`);
   m.querySelector('[data-x]').onclick=()=>m.remove();
   m.querySelector('[data-s]').onclick=async()=>{ try{
-    await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim()});
+    await rpc('cas_admin_config',{p_pin:A.pin,p_titulo:m.querySelector('[data-ti]').value,p_data:m.querySelector('[data-d]').value,p_local:m.querySelector('[data-l]').value,p_pin_portaria:m.querySelector('[data-pp]').value.trim(),p_mensagem:m.querySelector('[data-m]').value});
     const na=m.querySelector('[data-na]').value.trim();
     if(na){ await rpc('cas_admin_senha',{p_pin:A.pin,p_nova:na}); A.pin=na; store.set('cas_pin_admin',na); }
     m.remove(); toast('Salvo'); carregar(); }catch(e){toast(e.message)} };
