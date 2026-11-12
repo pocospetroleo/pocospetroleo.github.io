@@ -377,7 +377,7 @@ function digestEvents(rt) {
 function demoTick() {
   const names = [["gestao-pocos-operacional","Gestão de Poços"],["bdo-operacional","BDO Operacional"],["sondabm","BM Sonda"],["sonolog","Sonolog"],
     ["calculos-petroleo","Cálculos de Petróleo"],["mapa","Mapa dos Poços"],["conferencia","Gestão de Tempos Operacionais"],["portal","Aplicativos realizados"],
-    ["treino","Treino em 3D"],["modo-criador","Modo Criador"],["central","Central de Aplicativos"],["casamento","Convites de Casamento"]];
+    ["treino","Treino em 3D"],["modo-criador","Modo Criador"],["central","Central de Aplicativos"],["casamento","Meu Convite"]];
   const now = Date.now();
   const prev = S.gp ? Object.fromEntries(S.gp.apps.map(a => [a.id, a])) : {};
   const apps = names.map(([id, name], i) => {
