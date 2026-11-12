@@ -8,7 +8,9 @@
 <script>
 /* O app mudou para /meuconvite. Mantém convite (?c=), código do evento e a área (#portaria, #admin). */
 const VERSAO = "mudou-para-meuconvite";
-location.replace('/meuconvite/' + location.search + location.hash);
+const q = new URLSearchParams(location.search);
+if (!q.get('c') && !q.get('e')) q.set('e', 'wanessa-maycon'); /* este endereço era só do casamento Wanessa & Maycon */
+location.replace('/meuconvite/?' + q.toString() + location.hash);
 </script>
 <noscript><meta http-equiv="refresh" content="0; url=/meuconvite/"></noscript>
 </head>
