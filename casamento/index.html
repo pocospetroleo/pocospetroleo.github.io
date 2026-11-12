@@ -204,22 +204,54 @@ async function viewPortaria(pin){
     <div class="top"><div><h1 style="font-size:28px">Portaria</h1></div>
       <button class="btn ghost sm" id="sair">Sair</button></div>
     <div class="stat"><div class="row" style="justify-content:space-between"><div><b id="pIn">–</b><span>pessoas entraram</span></div><div style="text-align:right"><b id="pTot" style="color:var(--muted)">–</b><span>esperadas</span></div></div><div class="bar"><i id="pBar" style="width:0"></i></div></div>
-    <div class="tabs"><button class="tab on" data-t="scan">📷 Ler QR</button><button class="tab" data-t="busca">🔎 Buscar nome</button></div>
-    <div id="tScan"><div id="reader"></div><p class="muted" style="text-align:center;margin-top:10px">Aponte a câmera para o QR Code do convidado</p></div>
-    <div id="tBusca" class="hidden"><input id="q" placeholder="Digite o nome do convidado…"><div id="res" class="card" style="margin-top:10px;padding:8px 14px"></div></div>
+    <div class="tabs"><button class="tab on" data-t="scan">📷 Ler QR</button><button class="tab" data-t="lista">📋 Lista de convidados</button></div>
+    <div id="tScan"><div id="reader"></div><p class="muted" style="text-align:center;margin-top:10px">Aponte a câmera para o QR Code do convidado</p>
+      <div id="ultimos" class="card" style="margin-top:12px;padding:8px 14px"></div></div>
+    <div id="tLista" class="hidden"><input id="q" placeholder="Buscar nome…">
+      <div class="tabs"><button class="tab on" data-pf="todos">Todos</button><button class="tab" data-pf="fora">Faltam</button><button class="tab" data-pf="dentro">Entraram</button></div>
+      <div id="res" class="card" style="padding:8px 14px"></div></div>
   </div>`;
+  P.pin = pin;
   $('#sair').onclick = () => sair('portaria');
-  document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
-    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+    document.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));
     const scan = b.dataset.t==='scan';
-    $('#tScan').classList.toggle('hidden',!scan); $('#tBusca').classList.toggle('hidden',scan);
-    if (scan) startScan(pin); else { stopCam(); $('#q').focus(); }
+    $('#tScan').classList.toggle('hidden',!scan); $('#tLista').classList.toggle('hidden',scan);
+    if (scan) startScan(pin); else { stopCam(); renderPLista(); }
   });
-  let qt; $('#q').oninput = () => { clearTimeout(qt); qt=setTimeout(()=>buscar(pin),300); };
-  const atualiza = async () => { try { const r = await rpc('cas_resumo',{p_pin:pin}); if(!r){ sair('portaria'); return; }
-    $('#pIn').textContent=r.pessoas_entraram; $('#pTot').textContent=r.pessoas; $('#pBar').style.width=(r.pessoas?100*r.pessoas_entraram/r.pessoas:0)+'%'; } catch(e){} };
-  atualiza(); resumoTimer = setInterval(atualiza, 8000);
+  document.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-pf]').forEach(x=>x.classList.toggle('on',x===b)); P.filtro=b.dataset.pf; renderPLista(); });
+  $('#q').oninput = () => renderPLista();
+  atualizaPortaria(); resumoTimer = setInterval(atualizaPortaria, 8000);
   startScan(pin);
+}
+const P = { pin:null, lista:[], filtro:'todos', ultimo:null };
+async function atualizaPortaria(){
+  try {
+    const L = await rpc('cas_portaria_lista',{p_pin:P.pin});
+    if (L === null) { sair('portaria'); return; }
+    P.lista = L;
+    const tot=L.reduce((s,g)=>s+g.pessoas,0), dentro=L.filter(g=>g.entrou_em).reduce((s,g)=>s+g.pessoas,0);
+    $('#pIn').textContent=dentro; $('#pTot').textContent=tot; $('#pBar').style.width=(tot?100*dentro/tot:0)+'%';
+    renderPLista();
+  } catch(e){}
+}
+const linhaP = g => `<div class="guest" ${P.ultimo===g.nome?'style="background:#eef8f1;border-radius:10px"':''}><span class="dot ${g.entrou_em?'in':''}"></span><div class="info"><div class="nm">${esc(g.nome)}</div><div class="meta">${g.pessoas} pessoa(s) ${g.entrou_em?'• entrou às '+horaCurta(g.entrou_em):''}</div></div>
+    ${g.entrou_em?'<span class="badge ok">✓ Entrou</span>':`<button class="btn sm" data-id="${g.id}">Liberar</button>`}</div>`;
+function renderPLista(){
+  if (!$('#res')) return;
+  const ult = P.lista.filter(g=>g.entrou_em).sort((a,b)=>b.entrou_em.localeCompare(a.entrou_em)).slice(0,5);
+  $('#ultimos').innerHTML = `<h2 style="margin:8px 0 4px">Últimas entradas</h2>` + (ult.length ? ult.map(linhaP).join('') : '<p class="muted" style="padding:8px 0">Ninguém entrou ainda</p>');
+  const q = ($('#q').value||'').toLowerCase().trim();
+  let L = P.lista;
+  if (P.filtro==='fora') L=L.filter(g=>!g.entrou_em);
+  if (P.filtro==='dentro') L=L.filter(g=>g.entrou_em);
+  if (q) L=L.filter(g=>g.nome.toLowerCase().includes(q));
+  $('#res').innerHTML = L.length ? L.map(linhaP).join('') : '<p class="muted" style="padding:10px 0">Nenhum convidado aqui</p>';
+  document.querySelectorAll('#res button[data-id], #ultimos button[data-id]').forEach(b=>b.onclick=async()=>{
+    const g = P.lista.find(x=>x.id===b.dataset.id);
+    if(!confirm(`Liberar a entrada de ${g?.nome} sem QR Code?`)) return;
+    const r = await rpc('cas_entrada_manual',{p_pin:P.pin,p_id:b.dataset.id}); P.ultimo=r.nome; mostraResultado(r, atualizaPortaria);
+  });
 }
 function stopCam(){ if(scanner){ try{scanner.stop().catch(()=>{})}catch(e){} scanner=null; } }
 async function startScan(pin){
@@ -238,7 +270,8 @@ async function onScan(pin, txt){
   let r;
   try { r = token ? await rpc('cas_validar',{p_pin:pin,p_token:token}) : {status:'invalido'}; }
   catch(e){ r = {status:'erro', msg:e.message}; }
-  mostraResultado(r);
+  if (r.nome) P.ultimo = r.nome;
+  mostraResultado(r, atualizaPortaria);
 }
 function beep(ok){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(); const g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=ok?880:220; g.gain.value=.2; o.start(); o.stop(c.currentTime+(ok?.18:.5)); }catch(e){} try{navigator.vibrate&&navigator.vibrate(ok?120:[200,100,200])}catch(e){} }
 function mostraResultado(r, cb){
@@ -278,6 +311,11 @@ async function viewAdmin(pin){
     <div class="stats" id="stats"></div>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start">
       <div class="card">
+        <h2>📥 Importar lista pronta</h2>
+        <p class="muted" style="font-size:13px">Planilha Excel (.xlsx), CSV ou arquivo de texto. Coluna 1 = nome, coluna 2 = nº de pessoas, coluna 3 = telefone.</p>
+        <label class="btn gold full" style="margin:10px 0 0;color:#fff;font-size:15px">📂 Escolher arquivo da lista<input type="file" id="arq" accept=".xlsx,.xls,.csv,.txt,.ods" class="hidden"></label>
+        <p id="arqInfo" class="muted" style="font-size:13px;margin-top:6px"></p>
+        <div class="divider">ou digite</div>
         <h2>➕ Adicionar convidados</h2>
         <p class="muted" style="font-size:13px">Um por linha. Formato: <b>Nome ; pessoas ; telefone</b> (pessoas e telefone são opcionais)</p>
         <textarea id="lista" placeholder="Maria Silva ; 2 ; 82999998888&#10;João Souza ; 1&#10;Família Santos ; 4"></textarea>
@@ -297,6 +335,7 @@ async function viewAdmin(pin){
   $('#sair').onclick=()=>{ clearInterval(adminTimer); sair('admin'); };
   $('#cfg').onclick=modalConfig;
   $('#add').onclick=adicionar;
+  $('#arq').onchange=importarArquivo;
   $('#csv').onclick=exportar;
   $('#busca').oninput=e=>{ A.busca=e.target.value.toLowerCase(); renderLista(); };
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b)); A.filtro=b.dataset.f; renderLista(); });
@@ -338,11 +377,51 @@ async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast('Co
 async function adicionar(){
   const linhas=$('#lista').value.split('\n').map(l=>l.trim()).filter(Boolean);
   if(!linhas.length) return toast('Digite pelo menos um nome');
-  const lista=linhas.map(l=>{ const [nome,p,tel]=l.split(/[;\t]/).map(x=>(x||'').trim()); return {nome, pessoas:parseInt(p)||1, telefone:tel||''}; });
+  const ja=new Set(A.data.convidados.map(g=>g.nome.toLowerCase().trim()));
+  const todos=linhas.map(l=>{ const [nome,p,tel]=l.split(/[;\t]/).map(x=>(x||'').trim()); return {nome, pessoas:parseInt(p)||1, telefone:tel||''}; });
+  const lista=todos.filter(g=>g.nome && !ja.has(g.nome.toLowerCase()) && ja.add(g.nome.toLowerCase()));
+  const rep=todos.length-lista.length;
+  if(!lista.length) return toast('Esses nomes já estão na lista');
+  if(rep) toast(`${rep} nome(s) repetido(s) ignorado(s)`);
   $('#add').disabled=true;
   try { const n=await rpc('cas_admin_adicionar',{p_pin:A.pin,p_lista:lista}); $('#lista').value=''; toast(`${n} convidado(s) adicionado(s)`); await carregar(); }
   catch(e){ toast(e.message); }
   $('#add').disabled=false;
+}
+async function importarArquivo(ev){
+  const f = ev.target.files[0]; if(!f) return;
+  const info = $('#arqInfo'); info.textContent = 'Lendo arquivo…';
+  try {
+    let rows;
+    if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
+      await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
+    } else {
+      const txt = await f.text();
+      rows = txt.split(/\r?\n/).map(l => l.split(/[;\t,]/));
+    }
+    const lista = [];
+    for (const r of rows) {
+      const cel = r.map(c => String(c ?? '').trim());
+      const nome = cel[0];
+      if (!nome || /^nomes?$|^convidados?$/i.test(nome)) continue;
+      let pessoas = 1, tel = '';
+      for (const c of cel.slice(1)) {
+        const dig = c.replace(/\D/g,'');
+        if (!c) continue;
+        if (dig.length >= 8) tel = tel || c;
+        else if (/^\d{1,2}$/.test(c)) pessoas = parseInt(c);
+      }
+      lista.push(`${nome} ; ${pessoas}${tel?' ; '+tel:''}`);
+    }
+    if (!lista.length) { info.textContent = 'Não encontrei nomes nesse arquivo.'; return; }
+    const atual = $('#lista').value.trim();
+    $('#lista').value = (atual ? atual+'\n' : '') + lista.join('\n');
+    info.innerHTML = `<b style="color:var(--ok)">${lista.length} convidado(s) encontrados.</b> Confira abaixo e toque em <b>Adicionar à lista</b>.`;
+    $('#lista').scrollIntoView({behavior:'smooth', block:'center'});
+  } catch(e) { info.textContent = 'Não consegui ler o arquivo: ' + e.message; }
+  ev.target.value = '';
 }
 function modal(html){ const m=document.createElement('div'); m.className='modal'; m.innerHTML=`<div class="card">${html}</div>`; m.onclick=e=>{ if(e.target===m) m.remove(); }; document.body.appendChild(m); return m; }
 function modalConvidado(g){
