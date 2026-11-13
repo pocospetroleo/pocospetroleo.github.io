@@ -64,6 +64,9 @@ button,input,textarea,select{font:inherit;color:inherit}
 @keyframes sway{0%,100%{transform:rotateY(-10deg) rotateX(6deg)}50%{transform:rotateY(10deg) rotateX(-2deg)}}
 @keyframes foil{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
 
+.n3d[style*="--nome-cor"] .w{background:var(--nome-cor);-webkit-background-clip:text;background-clip:text}
+.n3d[style*="--nome-cor"] .w::before{color:var(--nome-cor);text-shadow:1px 1px 0 var(--nome-cor),2px 2px 0 var(--nome-cor),3px 4px 3px rgba(0,0,0,.4)}
+.n3d[style*="--nome-cor"] .amp{color:var(--nome-cor)}
 /* ---------- alianças 3D ---------- */
 .rings{position:relative;width:96px;height:64px;perspective:500px;margin:0 auto}
 .rings .rot{position:absolute;inset:0;transform-style:preserve-3d;animation:spin 9s linear infinite}
@@ -378,11 +381,15 @@ const ICONS = {
 const ic = (n, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 
 /* nomes 3D */
+const FONTES_NOME={cursiva:"'Great Vibes',cursive",classica:"'Cormorant Garamond',serif",moderna:'Inter,sans-serif',serif:'Georgia,serif'};
+function estiloNome(ev){ const e=ev.nome_estilo||{}; return {cor:/^#[0-9a-f]{6}$/i.test(e.cor)?e.cor:'',fonte:FONTES_NOME[e.fonte]?e.fonte:'cursiva',tamanho:Math.min(140,Math.max(60,Number(e.tamanho)||100)),negrito:e.negrito===true,italico:e.italico===true}; }
+
 function nomes3D(ev, flat=false){
   const a=(ev.noivo1||'').trim(), b=(ev.noivo2||'').trim();
   if(!a && !b) return '';
   const w = t => `<span class="w" data-t="${esc(t)}">${esc(t)}</span>`;
-  return `<span class="n3d ${flat?'flat':''}">${a?w(a):''}${a&&b?'<span class="amp">&amp;</span>':''}${b?w(b):''}</span>`;
+  const e=estiloNome(ev), st=`font-family:${FONTES_NOME[e.fonte]};font-size:${e.tamanho}%;font-weight:${e.negrito?700:400};font-style:${e.italico?'italic':'normal'};${e.cor?'--nome-cor:'+e.cor+';':''}`;
+  return `<span style="${esc(st)}" class="n3d ${flat?'flat':''}">${a?w(a):''}${a&&b?'<span class="amp">&amp;</span>':''}${b?w(b):''}</span>`;
 }
 const temNomes = ev => !!((ev.noivo1||'').trim() || (ev.noivo2||'').trim());
 
@@ -924,12 +931,13 @@ async function gerarCartaoM(ev, cv, token){
   const W=1080, M=110, c=document.createElement('canvas'), x=c.getContext('2d'); c.width=W;
   const [q, foto] = await Promise.all([carregaImg(qrImg(linkConvite(token), 10)), carregaImg(ev.foto)]);
   const nomes = temNomes(ev) ? [ev.noivo1,ev.noivo2].filter(Boolean).join(' & ') : '';
+  const en=estiloNome(ev), nomeFont=`${en.italico?'italic ':''}${en.negrito?'700':'400'} ${120*en.tamanho/100}px ${FONTES_NOME[en.fonte]}`;
   const B=[]; const T=(t,font,color,lh)=>{ x.font=font; quebra(x,t,W-2*M).forEach(l=>B.push({l,font,color:C(color),lh})); }; const G=h=>B.push({gap:h});
   const enfeite = ['floral','deco','folhas'].includes(mid);
   G(mid==='floral'?210:enfeite?170:70);
   const FD=360; if (foto) { B.push({foto:true,lh:FD+40}); } else G(10);
   T(chamadaEvento(ev).toUpperCase(),'600 22px Inter, sans-serif','#8F6B34',40);
-  if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>B.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
+  if (nomes) { x.font=nomeFont; quebra(x,nomes,W-2*M).forEach(l=>B.push({l,font:nomeFont,lh:150*en.tamanho/100,nome:true})); }
   else T(tituloEvento(ev),'600 64px "Cormorant Garamond", serif','#1C2536',76);
   if (ev.data) T(ev.data,'italic 500 38px "Cormorant Garamond", serif','#2E3B54',52);
   if (ev.local) T(ev.local,'26px Inter, sans-serif','#625B53',38);
@@ -971,7 +979,7 @@ async function gerarCartaoM(ev, cv, token){
     if (b.nome){ x.font=b.font; const by=y+b.lh-34;
       if (ev.nome3d!==false){ for(let i=7;i>=1;i--){ x.fillStyle=`rgb(${96+i*3},${70+i*2},${30+i})`; x.fillText(b.l,W/2+i,by+i); } x.shadowColor='rgba(40,25,5,.3)'; x.shadowBlur=18; x.shadowOffsetY=10; }
       const g2=x.createLinearGradient(W/2-350,0,W/2+350,0); g2.addColorStop(0,'#8F6B34'); g2.addColorStop(.3,'#D9B877'); g2.addColorStop(.5,'#FBEFCB'); g2.addColorStop(.7,'#C9A464'); g2.addColorStop(1,'#8F6B34');
-      x.fillStyle=g2; x.fillText(b.l,W/2,by); x.shadowColor='transparent'; x.shadowBlur=0; x.shadowOffsetY=0; y+=b.lh; continue; }
+      x.fillStyle=en.cor||g2; x.fillText(b.l,W/2,by); x.shadowColor='transparent'; x.shadowBlur=0; x.shadowOffsetY=0; y+=b.lh; continue; }
     x.font=b.font; x.fillStyle=b.color; y+=b.lh; x.fillText(b.l,W/2,y-12);
   }
   return await new Promise(r=>c.toBlob(r,'image/png'));
@@ -1547,6 +1555,7 @@ function telaAjustes(){
   const c=A.data.config, portLink=linkEvento('#portaria', c.slug||EVC);
   const tg=(id,tit,desc,on)=>`<label class="toggle" for="${id}"><div class="tx"><b>${tit}</b><span>${desc}</span></div><span class="sw"><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></span></label>`;
   $('#body').innerHTML = `
+    <div class="card"><button class="btn line full" id="atualizarApp">${ic('undo')} Atualizar aplicativo</button><p class="hint">Carrega a versão mais recente. Salve suas alterações antes de atualizar.</p></div>
     <div class="section-title">Seu evento</div>
     <div class="card">
       <div class="row" style="justify-content:space-between"><div><div class="small muted">Código do evento</div><b style="font:600 22px 'Cormorant Garamond',serif">${esc(c.slug||EVC)}</b></div>${c.status==='pendente'?'<span class="pill wait">Aguardando liberação</span>':'<span class="pill ok">Liberado</span>'}</div>
@@ -1556,8 +1565,12 @@ function telaAjustes(){
     <div class="card">
       <div class="grid2"><div><label class="f" for="n1" style="margin-top:0">Nome em destaque</label><input class="in" id="n1" value="${esc(c.noivo1||'')}" placeholder="Ana"></div>
       <div><label class="f" for="n2" style="margin-top:0">Nome em destaque</label><input class="in" id="n2" value="${esc(c.noivo2||'')}" placeholder="Pedro"></div></div>
+      <label class="f" for="nomeFonte">Tipo de letra</label><select class="in" id="nomeFonte">${Object.entries({cursiva:'Cursiva',classica:'Clássica',moderna:'Moderna',serif:'Tradicional'}).map(([k,v])=>`<option value="${k}" ${estiloNome(c).fonte===k?'selected':''}>${v}</option>`).join('')}</select>
+      <div class="grid2"><div><label class="f" for="nomeCor">Cor das letras</label><input class="in" type="color" id="nomeCor" value="${estiloNome(c).cor||'#C9A464'}" style="height:52px;padding:6px"></div><div><label class="f" for="nomeTam">Tamanho das letras</label><select class="in" id="nomeTam">${[60,80,100,120,140].map(n=>`<option value="${n}" ${estiloNome(c).tamanho===n?'selected':''}>${n}%</option>`).join('')}</select></div></div>
+      <label class="f"><input type="checkbox" id="nomeDourado" ${estiloNome(c).cor?'':'checked'}> Dourado com brilho</label>
+      <div class="grid2"><label class="f"><input type="checkbox" id="nomeBold" ${estiloNome(c).negrito?'checked':''}> Negrito</label><label class="f"><input type="checkbox" id="nomeItalic" ${estiloNome(c).italico?'checked':''}> Itálico</label></div>
       <div class="preview3d stage3d" aria-label="Pré-visualização do nome"><span class="sway" id="prev"></span></div>
-      ${tg('t3d','Nome em 3D no convite','Nomes em dourado com profundidade',c.nome3d!==false)}
+      ${tg('t3d','Nome em 3D no convite','Letras com profundidade na cor escolhida',c.nome3d!==false)}
       ${tg('tbg','Nome em 3D no plano de fundo','Nomes ao fundo; alianças apenas em casamentos',c.fundo3d!==false)}
     </div>
     <div class="section-title">Foto do evento</div>
@@ -1621,6 +1634,7 @@ function telaAjustes(){
       <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
     </div>`;
   ligaOlhos();
+  $('#atualizarApp').onclick=async()=>{if(!await confirmar({titulo:'Atualizar aplicativo?',texto:'Alterações não salvas serão descartadas.',ok:'Atualizar'}))return; const u=new URL(location.href);u.searchParams.set('v',Date.now().toString());location.replace(u.href);};
   const modeloAjustes=ligaModelos(app,'tipo_evento','modelos_evento',c.moldura);
   if ($('#verConv')) $('#verConv').onclick=()=>window.open(linkConvite(A.data.convidados[0].token),'_blank');
   $('#cpEv').onclick=()=>copiar(linkEvento('#admin', c.slug||EVC)); $('#cpPort').onclick=()=>copiar(portLink);
@@ -1634,8 +1648,9 @@ function telaAjustes(){
   const salvaMapa=async v=>{ try { await rpc('cas_salvar_mapa',{p_pin:A.pin,p_mapa:v}); await carregar(); await evento(true); mapPrev(); toast(v?'Localização salva':'Localização removida'); } catch(er){ toast(er.message); } };
   $('#mpSalvar').onclick=()=>salvaMapa($('#mp').value.trim());
   $('#mpRm').onclick=async()=>{ if(!await confirmar({titulo:'Limpar a localização?', texto:'O mapa deixará de aparecer no convite.', ok:'Limpar', perigo:true})) return; $('#mp').value=''; salvaMapa(''); };
-  const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
-  ['n1','n2'].forEach(i=>$('#'+i).oninput=prev); $('#t3d').onchange=prev; prev();
+  const lerEstilo=()=>({cor:$('#nomeDourado').checked?'':$('#nomeCor').value,fonte:$('#nomeFonte').value,tamanho:Number($('#nomeTam').value),negrito:$('#nomeBold').checked,italico:$('#nomeItalic').checked});
+  const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value,nome_estilo:lerEstilo()}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
+  ['n1','n2','nomeFonte','nomeTam','nomeDourado','nomeBold','nomeItalic'].forEach(i=>$('#'+i).oninput=prev); $('#nomeCor').oninput=()=>{$('#nomeDourado').checked=false;prev();}; $('#t3d').onchange=prev; prev();
   if (EV && EV.foto) $('#fotoPrev').innerHTML = `<img src="${EV.foto}" alt="Foto do evento" style="width:100%;height:100%;object-fit:cover">`;
   $('#fotoIn').onchange = async e => { const f=e.target.files[0]; if(!f) return;
     try { toast('Enviando foto…'); const d=await reduzFoto(f); await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:d}); await evento(true); await carregar();
@@ -1643,7 +1658,7 @@ function telaAjustes(){
     catch(er){ toast(er.message); } e.target.value=''; };
   $('#fotoRm').onclick = async () => { if(!await confirmar({titulo:'Remover a foto?', ok:'Remover', perigo:true})) return;
     await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:null}); await evento(true); await carregar(); $('#fotoPrev').innerHTML=ic('heart'); $('#fotoRm').classList.add('hidden'); toast('Foto removida'); };
-  const dados = () => ({moldura:modeloAjustes(),tipo_evento:$('#tipo_evento').value,titulo:$('#ti').value.trim()||tituloEvento({...c,titulo:'',tipo_evento:$('#tipo_evento').value,noivo1:$('#n1').value,noivo2:$('#n2').value}),data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
+  const dados = () => ({nome_estilo:lerEstilo(),moldura:modeloAjustes(),tipo_evento:$('#tipo_evento').value,titulo:$('#ti').value.trim()||tituloEvento({...c,titulo:'',tipo_evento:$('#tipo_evento').value,noivo1:$('#n1').value,noivo2:$('#n2').value}),data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
   $('#salvar').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
     try { await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:dados()}); await carregar(); await evento(true); pintaFundo(EV); toast('Salvo'); $('.appbar .ttl span').textContent = nomesCasal(A.data.config); }
     catch(er){ toast(er.message); } b.disabled=false; };
