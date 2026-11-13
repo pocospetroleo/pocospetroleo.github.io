@@ -416,7 +416,7 @@ const ESTILOS_CONVITE = ['Essencial','Arco elegante','Jardim','Celebração','Ge
 for(const [tipo,p] of Object.entries(PALETAS_EVENTO)) ESTILOS_CONVITE.forEach((nome,j)=>{
  MOLDURAS[tipo+'_'+j]={nome,evento:tipo,estilo:j,paleta:p};
 });
-const modelosEvento = tipo => Object.entries(MOLDURAS).filter(([k,m])=>!m.evento || m.evento===tipo);
+const modelosEvento = tipo => Object.entries(MOLDURAS).filter(([k,m])=>!m.evento || m.evento===tipo).sort((a,b)=>Number(!!b[1].evento)-Number(!!a[1].evento));
 const modeloPadrao = tipo => tipo+'_0';
 const modeloCompativel = (id,tipo) => MOLDURAS[id] && (!MOLDURAS[id].evento || MOLDURAS[id].evento===tipo);
 function modeloSVG(id,W,H){
@@ -450,11 +450,11 @@ function modeloSVG(id,W,H){
  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${b}"/>${deco}</svg>`;
 }
 function galeriaModelos(tipo,atual){
- return `<div class="molds" role="group" aria-label="Modelos para ${esc(TIPOS_EVENTO[tipo])}">${modelosEvento(tipo).map(([k,m])=>`<button type="button" class="mold" data-mold="${k}" aria-pressed="${idMoldura(atual)===k}"><i style="background-image:url('${miniMoldura(k)}');height:180px;display:flex;flex-direction:column;justify-content:center;font-style:normal;text-align:center;color:#1C2536;padding:24px 12px"><small style="font-size:9px">${esc(TIPOS_EVENTO[tipo])}</small><strong style="font:600 17px Georgia;margin:8px 0">Seu evento</strong><small style="font-size:8px">Data · Horário<br>Você está convidado</small></i>${esc(m.nome)}${m.evento?'':' · versátil'}</button>`).join('')}</div>`;
+ return `<div class="molds" role="group" aria-label="Modelos para ${esc(TIPOS_EVENTO[tipo])}">${modelosEvento(tipo).map(([k,m])=>`<button type="button" class="mold" data-mold="${k}" aria-pressed="${idMoldura(atual)===k}"><i style="background-image:url('${miniMoldura(k)}');height:180px;display:flex;flex-direction:column;justify-content:center;font-style:normal;text-align:center;color:${m.escura?'#F6E7BE':'#1C2536'};padding:24px 12px"><small style="font-size:9px">${esc(TIPOS_EVENTO[tipo])}</small><strong style="font:600 17px Georgia;margin:8px 0">Seu evento</strong><small style="font-size:8px">Data · Horário<br>Você está convidado</small></i>${esc(m.nome)}${m.evento?'':' · versátil'}</button>`).join('')}</div>`;
 }
 function verModelos(){
  telaDono(`<h2>Escolha seu convite</h2><p class="muted small">Explore os modelos por ocasião. Para aplicar ao seu evento, entre na conta e abra Ajustes ou Editar evento.</p>${selectTipo('demo_tipo',{})}<div id="demo_modelos" style="margin-top:18px"></div><a class="btn primary full" href="#dono" style="margin-top:18px">Voltar para entrar</a>`);
- const render=()=>{const t=$('#demo_tipo').value;$('#demo_modelos').innerHTML=galeriaModelos(t,modeloPadrao(t));$$('[data-mold]').forEach(b=>b.onclick=()=>{$$('[data-mold]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));toast('Modelo selecionado para pré-visualização');});};
+ const render=()=>{const t=$('#demo_tipo').value;pintaFundo({tipo_evento:t,fundo3d:true});$('#demo_modelos').innerHTML=galeriaModelos(t,modeloPadrao(t));$$('[data-mold]').forEach(b=>b.onclick=()=>{$$('[data-mold]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));toast('Modelo selecionado para pré-visualização');});};
  $('#demo_tipo').onchange=render;render();
 }
 
