@@ -383,7 +383,14 @@ function nomes3D(ev, flat=false){
   return `<span class="n3d ${flat?'flat':''}">${a?w(a):''}${a&&b?'<span class="amp">&amp;</span>':''}${b?w(b):''}</span>`;
 }
 const temNomes = ev => !!((ev.noivo1||'').trim() || (ev.noivo2||'').trim());
-function tituloEvento(ev){ return ev.titulo && ev.titulo!=='Nosso Casamento' ? ev.titulo : (temNomes(ev) ? `Casamento de ${[ev.noivo1,ev.noivo2].filter(Boolean).join(' & ')}` : (ev.titulo||'Nosso Casamento')); }
+
+const TIPOS_EVENTO = {casamento:'Casamento',aniversario:'Aniversário','15anos':'Festa de 15 anos',formatura:'Formatura',empresarial:'Evento empresarial',cha_bebe:'Chá de bebê',batizado:'Batizado',outro:'Outro evento'};
+const tipoEvento = ev => TIPOS_EVENTO[ev?.tipo_evento] ? ev.tipo_evento : 'casamento';
+const selectTipo = (id,ev) => `<label class="f" for="${id}">Tipo de evento</label><select class="in" id="${id}" style="appearance:auto">${Object.entries(TIPOS_EVENTO).map(([k,v])=>`<option value="${k}" ${tipoEvento(ev)===k?'selected':''}>${v}</option>`).join('')}</select>`;
+const simboloEvento = ev => tipoEvento(ev)==='casamento' ? rings() : `<div aria-hidden="true" style="font-size:64px;line-height:1.4;text-align:center">${({aniversario:'🎂','15anos':'✨',formatura:'🎓',empresarial:'🏢',cha_bebe:'🍼',batizado:'🕊️',outro:'🎉'})[tipoEvento(ev)]}</div>`;
+const chamadaEvento = ev => tipoEvento(ev)==='casamento' ? 'Temos a honra de convidar para o casamento de' : 'Você está convidado para este evento';
+
+function tituloEvento(ev){ const nomes=[ev.noivo1,ev.noivo2].filter(Boolean).join(' & '); return ev.titulo && ev.titulo!=='Nosso Casamento' ? ev.titulo : (tipoEvento(ev)==='casamento' ? (nomes?'Casamento de '+nomes:'Nosso Casamento') : TIPOS_EVENTO[tipoEvento(ev)]+(nomes?' de '+nomes:'')); }
 
 /* =================== MOLDURAS DO CONVITE =================== */
 const MOLDURAS = { classica:{nome:'Clássica dourada'}, floral:{nome:'Floral rosé'}, deco:{nome:'Art déco'}, minimal:{nome:'Minimalista'},
@@ -458,8 +465,8 @@ function pintaFundo(ev){
   const bg=$('#bg');
   bg.innerHTML = '<div class="pattern"></div>' + (ev && ev.fundo3d !== false ? `
     ${temNomes(ev)?`<div class="floor">${nomes3D(ev)}</div>`:''}
-    <div class="ringfloat r1"><div class="rings"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div></div>
-    <div class="ringfloat r2"><div class="rings"><div class="rot" style="animation-duration:13s"><span class="ring a"></span><span class="ring b"></span></div></div></div>` : '');
+    ${tipoEvento(ev)==='casamento'?`<div class="ringfloat r1"><div class="rings"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div></div>
+    <div class="ringfloat r2"><div class="rings"><div class="rot" style="animation-duration:13s"><span class="ring a"></span><span class="ring b"></span></div></div></div>` : ''} ` : '');
 }
 const rings = () => `<div class="rings" aria-hidden="true"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div>`;
 
@@ -523,14 +530,14 @@ async function viewHome(){
     if (chk === null) { trocaEvento(''); return viewSemAcesso('Este evento não está disponível.'); } }
   app.innerHTML = `<div class="page">
     <section class="hero">
-      ${rings()}
+      ${simboloEvento(ev)}
       <div class="eyebrow" style="margin-top:14px">Escolha seu perfil para entrar</div>
       ${temNomes(ev) ? `<div class="names stage3d"><span class="sway">${nomes3D(ev, ev.nome3d===false)}</span></div>` : `<h1 style="margin:14px 0 6px">${esc(tituloEvento(ev))}</h1>`}
       ${ev.data?`<div class="serif" style="font-size:21px;font-style:italic;color:var(--gold3)">${esc(ev.data)}</div>`:''}
     </section>
     <nav class="section" style="display:grid;gap:12px;margin-top:28px" aria-label="Áreas do aplicativo">
       <a class="tile" href="#portaria"><span class="ti">${ic('qr')}</span><div><b>Portaria</b><span>Ler o QR Code e liberar a entrada</span></div></a>
-      <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Noivos</b><span>Acesso completo: convidados, envio e resumo</span></div></a>
+      <a class="tile" href="#admin"><span class="ti">${ic('heart')}</span><div><b>Organizador</b><span>Acesso completo: convidados, envio e resumo</span></div></a>
     </nav>
     <p class="muted small" style="text-align:center;margin-top:28px">Acesso restrito por senha</p>
   </div>`;
@@ -545,13 +552,13 @@ function viewSemAcesso(msg){
     <p class="muted" style="max-width:320px;margin:0 auto">${esc(msg||'Para entrar, use o link de acesso que você recebeu do organizador do evento.')}</p>
   </section></div>`;
 }
-function msgNoivos(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n${ev.titulo||''}\n\nAcesso dos noivos (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}`; }
+function msgNoivos(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n${ev.titulo||''}\n\nAcesso do organizador (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}`; }
 function msgPortaria(ev){ return `Acesso da portaria — ${ev.titulo||''}\n\nLink: ${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}\n\nAbra no celular, permita a câmera e leia o QR Code de cada convidado.\n🟢 Verde: liberar\n🟡 Amarelo: convite já usado\n🔴 Vermelho: não está na lista`; }
 function blocoAcessos(ev){ const L=(t,icon,link,senha,k)=>`<div class="card" style="margin-top:12px;text-align:left">
     <div class="row"><span class="av" style="width:40px;height:40px">${ic(icon)}</span><div style="flex:1"><b>${t}</b><div class="small muted">Senha: <b>${esc(senha||'')}</b></div></div></div>
     <div style="font-size:13px;word-break:break-all;background:var(--soft);border-radius:10px;padding:8px 10px;margin-top:10px">${esc(link)}</div>
     <div class="grid2" style="margin-top:10px"><button class="btn line sm" data-cp-${k}>${ic('link')} Copiar</button><button class="btn gold sm" data-wa-${k}>${ic('wa')} WhatsApp</button></div></div>`;
-  return L('Acesso dos noivos','heart',linkEvento('#admin',ev.slug),ev.pin_admin,'n') + L('Acesso da portaria','qr',linkEvento('#portaria',ev.slug),ev.pin_portaria,'p'); }
+  return L('Acesso do organizador','heart',linkEvento('#admin',ev.slug),ev.pin_admin,'n') + L('Acesso da portaria','qr',linkEvento('#portaria',ev.slug),ev.pin_portaria,'p'); }
 function ligaAcessos(root, ev){
   $('[data-cp-n]',root).onclick=()=>copiar(linkEvento('#admin',ev.slug)); $('[data-cp-p]',root).onclick=()=>copiar(linkEvento('#portaria',ev.slug));
   $('[data-wa-n]',root).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgNoivos(ev)),'_blank');
@@ -560,7 +567,7 @@ function msgCliente(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n\
 function formEvento(senha, ev){
   const novo = !ev; ev = ev || {status:'aprovado'};
   const v = k => esc(ev[k]||'');
-  const s = sheet(novo?'Cadastrar evento':'Editar evento', `<div class="card">
+  const s = sheet(novo?'Cadastrar evento':'Editar evento', `<div class="card">${selectTipo('e_tipo',ev)}
     <label class="f" for="e_ti" style="margin-top:0">Nome do evento</label><input class="in" id="e_ti" value="${v('titulo')}" placeholder="Casamento de Ana e Pedro · Aniversário de 15 anos da Júlia">
     <div class="grid2"><div><label class="f" for="e_n1">Nome em destaque</label><input class="in" id="e_n1" value="${v('noivo1')}" placeholder="Ana"></div>
       <div><label class="f" for="e_n2">2º nome (opcional)</label><input class="in" id="e_n2" value="${v('noivo2')}" placeholder="Pedro"></div></div>
@@ -577,7 +584,7 @@ function formEvento(senha, ev){
     <button class="btn gold full" data-ok style="margin-top:18px">${ic('check')} ${novo?'Cadastrar evento':'Salvar alterações'}</button>
     <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
   ligaOlhos(s);
-  const dados = () => ({titulo:$('#e_ti',s).value, noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
+  const dados = () => ({tipo_evento:$('#e_tipo',s).value,titulo:$('#e_ti',s).value.trim() || tituloEvento({...ev,tipo_evento:$('#e_tipo',s).value,titulo:'',noivo1:$('#e_n1',s).value,noivo2:$('#e_n2',s).value}), noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
     contato:$('#e_ct',s).value, pin_admin:$('#e_pa',s).value.trim(), pin_portaria:$('#e_pp',s).value.trim(), status:$('#e_st',s).value});
   if (!novo) ligaAcessos(s, ev);
   $('[data-ok]',s).onclick = async e => { const b=e.currentTarget, er=$('[data-e]',s); b.disabled=true; er.textContent='';
@@ -621,12 +628,12 @@ function loginDono(){
 function criarConta(){
   telaDono(`<h2 style="text-align:center">Criar uma conta</h2>
     <p class="muted small">Cadastre seu acesso de organizador. O administrador libera seu evento após o cadastro.</p>
-    <form id="contaForm">
+    <form id="contaForm">${selectTipo('ctipo',{})}
       <label class="f" for="ce">E-mail</label><input class="in" id="ce" type="email" autocomplete="email" required maxlength="254">
       <label class="f" for="cs">Senha</label>${campoSenha('cs','De 8 a 72 caracteres','minlength="8" maxlength="72" required')}
       <label class="f" for="ccs">Confirmar senha</label>${campoSenha('ccs','Repita a senha','required')}
-      <label class="f" for="cno1">Nome do primeiro noivo ou organizador</label><input class="in" id="cno1" required maxlength="60">
-      <label class="f" for="cno2">Nome do segundo noivo ou evento</label><input class="in" id="cno2" required maxlength="60">
+      <label class="f" for="cno1">Nome em destaque ou organizador</label><input class="in" id="cno1" required maxlength="60">
+      <label class="f" for="cno2">Segundo nome ou nome do evento</label><input class="in" id="cno2" maxlength="60">
       <label class="f" for="cwh">WhatsApp com DDD</label><input class="in" id="cwh" type="tel" required maxlength="40">
       <label class="f" for="cpq">Pergunta de recuperação do evento</label>${selPergunta('cpq','')}
       <label class="f" for="cra">Resposta</label><input class="in" id="cra" required minlength="2">
@@ -634,6 +641,8 @@ function criarConta(){
       <button class="btn primary full" id="contaSalvar" type="submit" style="margin-top:18px">Criar conta</button>
     </form>
     <a class="btn line full" href="#dono" style="margin-top:12px">Voltar para o login</a>`);
+  const ajustarNomes=()=>{ $('#cno2').required=$('#ctipo').value==='casamento'; };
+  $('#ctipo').onchange=ajustarNomes; ajustarNomes();
   $('#contaForm').onsubmit=async e=>{
     e.preventDefault(); const b=$('#contaSalvar'),er=$('#contaErro'),senha=$('#cs').value;
     er.textContent='';
@@ -641,7 +650,7 @@ function criarConta(){
     b.disabled=true;
     try{
       const r=await rpc('cas_conta_criar',{p_email:$('#ce').value.trim().toLowerCase(),p_senha:senha,p_dados:{
-        noivo1:$('#cno1').value.trim(),noivo2:$('#cno2').value.trim(),contato:$('#cwh').value.replace(/\D/g,''),
+        tipo_evento:$('#ctipo').value,titulo:tituloEvento({tipo_evento:$('#ctipo').value,noivo1:$('#cno1').value,noivo2:$('#cno2').value}),noivo1:$('#cno1').value.trim(),noivo2:$('#cno2').value.trim(),contato:$('#cwh').value.replace(/\D/g,''),
         pergunta:$('#cpq').value,resposta:$('#cra').value
       }});
       if(r.erro){er.textContent=r.erro;return;}
@@ -728,7 +737,7 @@ async function viewDono(){
   </div>`;
   $('#dSair').onclick=async()=>{ if(await confirmar({titulo:'Sair da administração?', texto:'Será preciso entrar com usuário e senha novamente.', ok:'Sair', icone:'logout'})) { DONO.sair(); loginDono(); } };
   $$('[data-st]').forEach(b=>b.onclick=async()=>{ const st=b.dataset.st;
-    if (st==='bloqueado' && !await confirmar({titulo:'Bloquear este evento?', texto:'Os noivos, a portaria e os convites param de funcionar até você liberar de novo.', ok:'Bloquear', perigo:true, icone:'lock'})) return;
+    if (st==='bloqueado' && !await confirmar({titulo:'Bloquear este evento?', texto:'O organizador, a portaria e os convites param de funcionar até você liberar de novo.', ok:'Bloquear', perigo:true, icone:'lock'})) return;
     const x=await rpc('cas_dono_status',{p_senha:senha,p_id:+b.dataset.id,p_status:st}); if(x.erro) return toast(x.erro); toast(st==='aprovado'?'Evento liberado':'Evento bloqueado'); viewDono(); });
   $$('[data-del]').forEach(b=>b.onclick=async()=>{
     if (!await confirmar({titulo:'Excluir o evento?', texto:`O evento "${b.dataset.nm}" e todos os convidados dele serão apagados. Não dá para desfazer.`, ok:'Excluir', perigo:true, digitar:'EXCLUIR'})) return;
@@ -759,7 +768,7 @@ async function viewConvite(token){
   let ev={}, cv=null;
   try { [ev, cv] = await Promise.all([rpc('cas_evento',{p_token:token}).then(x=>EV=x||{}), rpc('cas_convite',{p_token:token})]); ev=ev||{}; } catch(e){}
   pintaFundo(ev);
-  if (!cv) { app.innerHTML = `<div class="inv-wrap"><div class="inv"><div class="paper">${rings()}<h1 style="margin-top:16px">Convite não encontrado</h1><p class="muted" style="margin-top:10px">Confira o link recebido ou fale com os noivos.</p></div></div></div>`; return; }
+  if (!cv) { app.innerHTML = `<div class="inv-wrap"><div class="inv"><div class="paper">${rings()}<h1 style="margin-top:16px">Convite não encontrado</h1><p class="muted" style="margin-top:10px">Confira o link recebido ou fale com o organizador.</p></div></div></div>`; return; }
   if (cv.pendente) { app.innerHTML = `<div class="inv-wrap"><div class="inv"><div class="paper">${rings()}<h1 style="margin-top:16px">Convite em preparação</h1><p class="muted" style="margin-top:10px">Olá, ${esc(cv.nome)}! Este convite ainda está sendo preparado. Abra o link novamente mais perto do evento.</p></div></div></div>`; return; }
   const img = qrImg(linkConvite(token), 8);
   const L = local(ev);
@@ -767,8 +776,8 @@ async function viewConvite(token){
     <div class="paper">
       ${sigla(ev)?`<div class="mono" aria-hidden="true">${esc(sigla(ev))}</div>`:''}
       <div class="shine"></div>
-      ${ev.foto?`<div class="foto"><img src="${ev.foto}" alt="Foto dos noivos"></div>`:rings()}
-      <div class="eyebrow" style="margin-top:12px">Temos a honra de convidar para o casamento de</div>
+      ${ev.foto?`<div class="foto"><img src="${ev.foto}" alt="Foto do evento"></div>`:simboloEvento(ev)}
+      <div class="eyebrow" style="margin-top:12px">${chamadaEvento(ev)}</div>
       ${temNomes(ev) ? `<div class="names stage3d" role="heading" aria-level="1" aria-label="${esc([ev.noivo1,ev.noivo2].filter(Boolean).join(' e '))}">${nomes3D(ev, ev.nome3d===false)}</div>` : `<h1 class="ttl-flat">${esc(tituloEvento(ev))}</h1>`}
       <div class="info">
         ${ev.data?`<div>${ic('cal')}<span>${esc(ev.data)}</span></div>`:''}
@@ -905,12 +914,12 @@ function ligaOlhos(root=document){
 }
 
 function viewSetup(){
-  app.innerHTML = appbar({title:'Primeiro acesso', sub:'Perfil dos noivos', back:''}) + `<div class="page"><div class="card section">
+  app.innerHTML = appbar({title:'Primeiro acesso', sub:'Perfil do organizador', back:''}) + `<div class="page"><div class="card section">
     ${rings()}
     <h1 style="text-align:center;margin-top:12px">Bem-vindos</h1>
     <p class="muted" style="text-align:center;margin-top:6px">Crie as senhas dos dois perfis do aplicativo.</p>
-    <label class="f" for="sa">Senha dos noivos</label>${campoSenha('sa','Mínimo 4 letras ou números')}
-    <label class="f" for="sp">Senha da portaria</label>${campoSenha('sp','Diferente da senha dos noivos')}
+    <label class="f" for="sa">Senha do organizador</label>${campoSenha('sa','Mínimo 4 letras ou números')}
+    <label class="f" for="sp">Senha da portaria</label>${campoSenha('sp','Diferente da senha do organizador')}
     <div class="section-title" style="font-size:19px;margin:22px 0 4px">Se esquecer a senha</div>
     <p class="hint" style="margin-top:0">Escolha uma pergunta que só vocês sabem responder.</p>
     <label class="f" for="rq">Pergunta de segurança</label>${selPergunta('rq')}
@@ -926,9 +935,9 @@ function viewSetup(){
 }
 function viewLogin(papel, onOk){
   const adm = papel==='admin';
-  app.innerHTML = appbar({title: adm?'Noivos':'Portaria', sub:'Entrar', back:(!adm&&store.get('cas_pin_admin'))?'#admin':'', backLabel:(!adm&&store.get('cas_pin_admin'))?'Painel':'Voltar'}) + `<div class="page"><div class="card section" style="margin-top:30px">
+  app.innerHTML = appbar({title: adm?'Organizador':'Portaria', sub:'Entrar', back:(!adm&&store.get('cas_pin_admin'))?'#admin':'', backLabel:(!adm&&store.get('cas_pin_admin'))?'Painel':'Voltar'}) + `<div class="page"><div class="card section" style="margin-top:30px">
     <div style="width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2E3B54,#1C2536);color:var(--gold1);box-shadow:0 4px 0 #0F1522">${ic(adm?'heart':'qr')}</div>
-    <h1 style="text-align:center">${adm?'Perfil dos Noivos':'Perfil da Portaria'}</h1>
+    <h1 style="text-align:center">${adm?'Perfil do organizador':'Perfil da Portaria'}</h1>
     <p class="muted" style="text-align:center;margin-top:4px">Digite a senha para entrar</p>
     <label class="f" for="pin">Senha</label>${campoSenha('pin','Sua senha','enterkeyhint="go" style="font-size:18px"')}
     <button class="btn primary full" id="entrar" style="margin-top:16px">Entrar</button>
@@ -951,7 +960,7 @@ function viewLogin(papel, onOk){
 function esqueciPortaria(){
   const s = sheet('Esqueci a senha', `<div class="card" style="text-align:center">
     <div class="dialog" style="box-shadow:none;padding:0;width:100%;animation:none"><div class="dic info">${ic('lock')}</div></div>
-    <h2>Fale com os noivos</h2><p class="muted" style="margin-top:6px">A senha da portaria é definida pelos noivos. Eles podem ver ou trocar a senha em <b>Ajustes → Perfis de acesso</b> e enviar para você pelo WhatsApp.</p>
+    <h2>Fale com o organizador</h2><p class="muted" style="margin-top:6px">A senha da portaria é definida pelo organizador. O organizador pode ver ou trocar a senha em <b>Ajustes → Perfis de acesso</b> e enviar para você pelo WhatsApp.</p>
     <button class="btn primary full" data-ok style="margin-top:18px">Entendi</button></div>`);
   $('[data-ok]',s).onclick = s.fechar;
 }
@@ -986,7 +995,7 @@ function ligaPerfil(atual){
     const op=(k,icon,tit,desc)=>`<button class="tile" data-p="${k}" style="width:100%;text-align:left;cursor:pointer;margin-bottom:10px;${atual===k?'border:2px solid var(--gold2)':''}">
       <span class="ti">${ic(icon)}</span><div style="flex:1"><b>${tit}</b><span>${desc}</span></div>${atual===k?'<span class="pill ok">Atual</span>':''}</button>`;
     const s=sheet('Trocar perfil', `<div style="padding-top:4px">
-      ${op('admin','heart','Noivos','Resumo, convidados, envio e ajustes')}
+      ${op('admin','heart','Organizador','Resumo, convidados, envio e ajustes')}
       ${op('portaria','qr','Portaria','Ler QR Code e liberar entrada')}
       <button class="btn line full" data-senha style="margin-top:8px">${ic('lock')} Alterar senha</button>
       <button class="btn danger full" data-sair style="margin-top:10px">${ic('logout')} Sair do aplicativo</button></div>`);
@@ -1007,7 +1016,7 @@ function alterarSenha(atual){
     <button class="btn gold full" data-ok style="margin-top:18px">${ic('lock')} Salvar nova senha</button>
     <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
   let perfil = atual==='admin' ? 'admin' : 'portaria';
-  const rot=()=>{ $('#s_al',s).textContent = perfil==='admin' ? 'Senha atual dos noivos' : 'Senha atual da portaria (ou a senha dos noivos)'; };
+  const rot=()=>{ $('#s_al',s).textContent = perfil==='admin' ? 'Senha atual do organizador' : 'Senha atual da portaria (ou a senha do organizador)'; };
   $$('[data-q]',s).forEach(b=>b.onclick=()=>{ perfil=b.dataset.q; $$('[data-q]',s).forEach(x=>x.setAttribute('aria-selected',x===b)); rot(); }); rot(); ligaOlhos(s);
   $('[data-ok]',s).onclick=async e=>{ const b=e.currentTarget, er=$('[data-e]',s); er.textContent='';
     const n=$('#s_n',s).value.trim(); if(n!==$('#s_c',s).value.trim()) { er.textContent='As novas senhas não são iguais'; return; }
@@ -1136,11 +1145,11 @@ async function carregar(){
   try { A.data = await rpc('cas_admin_listar',{p_pin:A.pin}); return true; }
   catch(e){ if (/Senha inv/.test(e.message)) { toast('Sessão expirada. Entre novamente.'); sair('admin'); } else toast(e.message); return false; }
 }
-const nomesCasal = c => temNomes(c) ? [c.noivo1,c.noivo2].filter(Boolean).join(' & ') : 'Perfil dos noivos';
+const nomesCasal = c => temNomes(c) ? [c.noivo1,c.noivo2].filter(Boolean).join(' & ') : 'Perfil do organizador';
 function tabbar(sub){
   const ativo = sub==='adicionar' ? 'convidados' : sub;
   const t=(k,href,icon,label)=>`<a href="${href}" ${ativo===k?'aria-current="page"':''}>${ic(icon)}<span>${label}</span></a>`;
-  return `<nav class="tabbar" aria-label="Menu dos noivos"><div class="in">${t('resumo','#admin','home','Resumo')}${t('convidados','#admin/convidados','users','Convidados')}${t('enviar','#admin/enviar','wa','Enviar')}${t('ajustes','#admin/ajustes','sliders','Ajustes')}</div></nav>`;
+  return `<nav class="tabbar" aria-label="Menu do organizador"><div class="in">${t('resumo','#admin','home','Resumo')}${t('convidados','#admin/convidados','users','Convidados')}${t('enviar','#admin/enviar','wa','Enviar')}${t('ajustes','#admin/ajustes','sliders','Ajustes')}</div></nav>`;
 }
 function viewAdmin(sub){
   if (!['resumo','convidados','adicionar','enviar','ajustes'].includes(sub)) sub='resumo';
@@ -1287,7 +1296,7 @@ function editar(g){
 function exportar(){
   const L=A.data.convidados; const rows=[['Nome','Pessoas','Telefone','Situação','Horário de entrada','Convite enviado','Link do convite']].concat(L.map(g=>[g.nome,g.pessoas,g.telefone||'',g.entrou_em?'Entrou':'Não entrou',hora(g.entrou_em),g.enviado_em?'Sim':'Não',linkConvite(g.token)]));
   const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='convidados-casamento.csv'; a.click(); toast('Lista exportada');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='convidados-evento.csv'; a.click(); toast('Lista exportada');
 }
 
 /* --- ENVIAR CONVITES --- */
@@ -1454,17 +1463,17 @@ function telaAjustes(){
     <div class="section-title">Seu evento</div>
     <div class="card">
       <div class="row" style="justify-content:space-between"><div><div class="small muted">Código do evento</div><b style="font:600 22px 'Cormorant Garamond',serif">${esc(c.slug||EVC)}</b></div>${c.status==='pendente'?'<span class="pill wait">Aguardando liberação</span>':'<span class="pill ok">Liberado</span>'}</div>
-      <div class="grid2" style="margin-top:12px"><button class="btn line sm" id="cpEv">${ic('link')} Link dos noivos</button><button class="btn line sm" id="cpPort">${ic('qr')} Link da portaria</button></div>
+      <div class="grid2" style="margin-top:12px"><button class="btn line sm" id="cpEv">${ic('link')} Link do organizador</button><button class="btn line sm" id="cpPort">${ic('qr')} Link da portaria</button></div>
     </div>
-    <div class="section-title">Os noivos</div>
+    <div class="section-title">Nomes em destaque</div>
     <div class="card">
-      <div class="grid2"><div><label class="f" for="n1" style="margin-top:0">Noivo(a)</label><input class="in" id="n1" value="${esc(c.noivo1||'')}" placeholder="Ana"></div>
-      <div><label class="f" for="n2" style="margin-top:0">Noivo(a)</label><input class="in" id="n2" value="${esc(c.noivo2||'')}" placeholder="Pedro"></div></div>
+      <div class="grid2"><div><label class="f" for="n1" style="margin-top:0">Nome em destaque</label><input class="in" id="n1" value="${esc(c.noivo1||'')}" placeholder="Ana"></div>
+      <div><label class="f" for="n2" style="margin-top:0">Nome em destaque</label><input class="in" id="n2" value="${esc(c.noivo2||'')}" placeholder="Pedro"></div></div>
       <div class="preview3d stage3d" aria-label="Pré-visualização do nome"><span class="sway" id="prev"></span></div>
       ${tg('t3d','Nome em 3D no convite','Nomes em dourado com profundidade',c.nome3d!==false)}
-      ${tg('tbg','Nome em 3D no plano de fundo','Nomes e alianças ao fundo do convite e do aplicativo',c.fundo3d!==false)}
+      ${tg('tbg','Nome em 3D no plano de fundo','Nomes ao fundo; alianças apenas em casamentos',c.fundo3d!==false)}
     </div>
-    <div class="section-title">Foto do casal</div>
+    <div class="section-title">Foto do evento</div>
     <div class="card" style="display:flex;gap:16px;align-items:center">
       <div id="fotoPrev" style="width:96px;height:96px;flex:none;border-radius:50%;overflow:hidden;background:var(--soft);border:3px solid var(--gold2);display:flex;align-items:center;justify-content:center;color:var(--gold3)">${ic('heart')}</div>
       <div style="flex:1;display:grid;gap:8px">
@@ -1478,9 +1487,9 @@ function telaAjustes(){
       ${A.data.convidados.length?`<button class="btn line sm full" id="verConv" style="margin-top:14px">${ic('eye')} Ver como fica o convite</button>`:''}
       <p class="hint">Vale para o convite online e para a imagem enviada pelo WhatsApp.</p></div>
     <div class="section-title">Dados do evento</div>
-    <div class="card">
+    <div class="card">${selectTipo('tipo_evento',c)}
       <label class="f" for="ti" style="margin-top:0">Título</label><input class="in" id="ti" value="${esc(c.titulo&&c.titulo!=='Nosso Casamento'?c.titulo:'')}" placeholder="Casamento de Ana & Pedro">
-      <p class="hint">Se ficar em branco, usamos "Casamento de" + o nome dos noivos.</p>
+      <p class="hint">Se ficar em branco, usamos o tipo de evento e os nomes em destaque.</p>
       <label class="f" for="dt">Data e horário</label><input class="in" id="dt" value="${esc(c.data||'')}" placeholder="Sábado, 14 de novembro de 2026 • 19h">
       <label class="f" for="lc">Local</label><input class="in" id="lc" value="${esc(c.local||'')}" placeholder="Nome do espaço, endereço">
       <label class="f" for="mg">Mensagem para os convidados</label><textarea class="in" id="mg" placeholder="Ex.: Traje passeio completo. Sua presença tornará este dia ainda mais especial.">${esc(c.mensagem||'')}</textarea>
@@ -1502,8 +1511,8 @@ function telaAjustes(){
 
     <div class="section-title">Perfis de acesso</div>
     <div class="card">
-      <div class="row"><span class="av" style="width:40px;height:40px">${ic('heart')}</span><div style="flex:1"><b>Noivos</b><div class="small muted">Acesso completo</div></div></div>
-      <label class="f" for="na">Nova senha dos noivos</label>${campoSenha('na','Deixe em branco para manter')}
+      <div class="row"><span class="av" style="width:40px;height:40px">${ic('heart')}</span><div style="flex:1"><b>Organizador</b><div class="small muted">Acesso completo</div></div></div>
+      <label class="f" for="na">Nova senha do organizador</label>${campoSenha('na','Deixe em branco para manter')}
       <div style="height:1px;background:var(--line);margin:18px 0"></div>
       <div class="row"><span class="av" style="width:40px;height:40px">${ic('qr')}</span><div style="flex:1"><b>Portaria</b><div class="small muted">Só lê o QR Code e vê a lista</div></div></div>
       <label class="f" for="pp">Senha da portaria</label>${campoSenha('pp','Mínimo 4 letras ou números',`value="${esc(c.pin_portaria||'')}"`)}
@@ -1542,14 +1551,14 @@ function telaAjustes(){
   $('#mpRm').onclick=async()=>{ if(!await confirmar({titulo:'Limpar a localização?', texto:'O mapa deixará de aparecer no convite.', ok:'Limpar', perigo:true})) return; $('#mp').value=''; salvaMapa(''); };
   const prev=()=>{ const ev={noivo1:$('#n1').value,noivo2:$('#n2').value}; $('#prev').innerHTML = temNomes(ev) ? nomes3D(ev, !$('#t3d').checked) : '<span class="muted">Digite os nomes para ver a prévia</span>'; };
   ['n1','n2'].forEach(i=>$('#'+i).oninput=prev); $('#t3d').onchange=prev; prev();
-  if (EV && EV.foto) $('#fotoPrev').innerHTML = `<img src="${EV.foto}" alt="Foto do casal" style="width:100%;height:100%;object-fit:cover">`;
+  if (EV && EV.foto) $('#fotoPrev').innerHTML = `<img src="${EV.foto}" alt="Foto do evento" style="width:100%;height:100%;object-fit:cover">`;
   $('#fotoIn').onchange = async e => { const f=e.target.files[0]; if(!f) return;
     try { toast('Enviando foto…'); const d=await reduzFoto(f); await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:d}); await evento(true); await carregar();
-      $('#fotoPrev').innerHTML = `<img src="${d}" alt="Foto do casal" style="width:100%;height:100%;object-fit:cover">`; $('#fotoRm').classList.remove('hidden'); toast('Foto salva'); }
+      $('#fotoPrev').innerHTML = `<img src="${d}" alt="Foto do evento" style="width:100%;height:100%;object-fit:cover">`; $('#fotoRm').classList.remove('hidden'); toast('Foto salva'); }
     catch(er){ toast(er.message); } e.target.value=''; };
   $('#fotoRm').onclick = async () => { if(!await confirmar({titulo:'Remover a foto?', ok:'Remover', perigo:true})) return;
     await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:null}); await evento(true); await carregar(); $('#fotoPrev').innerHTML=ic('heart'); $('#fotoRm').classList.add('hidden'); toast('Foto removida'); };
-  const dados = () => ({titulo:$('#ti').value.trim()||'Nosso Casamento',data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
+  const dados = () => ({tipo_evento:$('#tipo_evento').value,titulo:$('#ti').value.trim()||tituloEvento({...c,titulo:'',tipo_evento:$('#tipo_evento').value,noivo1:$('#n1').value,noivo2:$('#n2').value}),data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
   $('#salvar').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
     try { await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:dados()}); await carregar(); await evento(true); pintaFundo(EV); toast('Salvo'); $('.appbar .ttl span').textContent = nomesCasal(A.data.config); }
     catch(er){ toast(er.message); } b.disabled=false; };
