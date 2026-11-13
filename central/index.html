@@ -662,7 +662,7 @@ function initScene() {
   addNode("core", core, coreWire, new THREE.Vector3(0, 1, 0), "core", 3.2);
 
   // DB nodes
-  [["db-gp", "Supabase · Gestão", 0]].forEach(([id, , side]) => {
+  [["db-gp", "Supabase · Gestão", -1], ["db-sbm", "Supabase · SondaBM", 1]].forEach(([id, , side]) => {
     const g = new THREE.Group();
     for (let k = 0; k < 3; k++) {
       const disk = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, .38, 32), new THREE.MeshBasicMaterial({color:0x4c1d95, transparent:true, opacity:.9}));
@@ -670,7 +670,7 @@ function initScene() {
       disk.position.y = edge.position.y = k * .48 - .48; g.add(disk, edge);
     }
     g.add(sprite("rgba(167,139,250,.8)", 4.5, .7));
-    const pos = new THREE.Vector3(0, -1.6, 6.8);
+    const pos = new THREE.Vector3(side * 4.2, -1.6, 6.8);
     g.position.copy(pos); scene.add(g);
     addNode(id, g, g.children[1], pos, "db", 1.6);
   });
@@ -707,8 +707,9 @@ function makeApp(a, i, n) {
   addNode(a.id, g, coreM, pos, "app", 1.6);
   Object.assign(NODES[a.id], {body, shell, halo, glow, phase:Math.random() * 6});
   // link to parent
-  const parent = NODES[PARENT[a.id] || "core"];
-  addLink(a.id, PARENT[a.id] || "core", pos, parent.pos);
+  const parentId = NODES[PARENT[a.id]] ? PARENT[a.id] : "core";
+  const parent = NODES[parentId];
+  if (parent) addLink(a.id, parentId, pos, parent.pos);
 }
 function addLink(from, to, a, b) {
   const mid = a.clone().add(b).multiplyScalar(.5); mid.y += a.distanceTo(b) * .18;
@@ -725,8 +726,10 @@ function updateScene() {
   if (!scene || !S.gp) return;
   const apps = S.gp.apps;
   if (!built) {
-    addLink("db-gp", "core", NODES["db-gp"].pos, NODES.core.pos);
-    apps.forEach((a, i) => makeApp(a, i, apps.length)); built = true;
+    ["db-gp", "db-sbm"].forEach(id => {
+      if (NODES[id] && NODES.core) addLink(id, "core", NODES[id].pos, NODES.core.pos);
+    });
+    apps.forEach((a, i) => { if (!NODES[a.id]) makeApp(a, i, apps.length); }); built = true;
   }
   apps.forEach(a => {
     const N = NODES[a.id]; if (!N) return;
