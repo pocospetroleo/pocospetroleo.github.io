@@ -707,7 +707,7 @@ function loginDono(){
     <label class="row" style="gap:10px;margin-top:14px;cursor:pointer"><input type="checkbox" id="dm" checked style="width:20px;height:20px"><span>Manter conectado neste aparelho</span></label>
     <button class="btn primary full" id="dsOk" style="margin-top:16px">Entrar</button>
     <button class="btn line full" id="dEsq" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
-    <a class="btn line full" href="#criar-conta" style="margin-top:10px">Criar uma conta</a><a class="btn line full" href="#modelos" style="margin-top:10px">Explorar modelos de convite</a>
+    <a class="btn line full" href="#criar-conta" style="margin-top:10px">Criar uma conta</a>
     <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p>`);
   const go=async()=>{ const u=$('#du').value.trim(), v=$('#ds').value; if(!u || !v){ $('#err').textContent='Informe seu usuário e sua senha.'; return; } $('#dsOk').disabled=true; $('#err').textContent='';
     try { const r=await rpc('cas_conta_entrar',{p_usuario:u,p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; }
