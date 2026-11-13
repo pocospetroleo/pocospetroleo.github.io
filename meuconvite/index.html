@@ -283,6 +283,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 .loading{display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 .molds{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px}.mold{min-width:0;white-space:normal}.mold[aria-pressed="true"]{outline:2px solid var(--gold3);outline-offset:2px}details summary{padding:12px 0;cursor:pointer}
+.exit-event{max-width:940px;margin:8px auto 0;padding:0 16px;display:flex;justify-content:flex-start}.exit-event .btn{font-size:13px;min-height:42px;gap:8px}
 </style>
 </head>
 <body>
@@ -291,7 +292,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-13-r17-modelos";
+const VERSAO = "2026-11-13-r18-sair-evento";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -541,11 +542,24 @@ function pintaFundo(ev){
 const rings = () => `<div class="rings" aria-hidden="true"><div class="rot"><span class="ring a"></span><span class="ring b"></span></div></div>`;
 
 /* appbar */
+
+function botaoSairEvento(){
+ return `<nav class="exit-event" aria-label="Navegação do evento"><a class="btn line sm" href="${esc(BASE)}#dono" data-exit-event>${ic('logout')} Sair do evento · Painel principal</a></nav>`;
+}
+document.addEventListener('click', e=>{
+ const alvo=e.target.closest?.('[data-exit-event]');
+ if(!alvo)return;
+ e.preventDefault();
+ if(typeof pararCam==='function')pararCam();
+ limparTudo();trocaEvento('');
+ location.assign(BASE+'#dono');
+});
+
 function appbar({ title, sub='', back=null, backLabel='Voltar', right='' }){
   return `<header class="appbar">
     <div class="side">${back!==null?`<button class="back" data-back="${esc(back)}" aria-label="${esc(backLabel)}">${ic('back')}<span>${esc(backLabel)}</span></button>`:''}</div>
     <div class="ttl">${sub?`<span>${esc(sub)}</span>`:''}<b>${esc(title)}</b></div>
-    <div class="side r">${right}</div></header>`;
+    <div class="side r">${right}</div></header>${EVC && /^#(admin|portaria)(\/|$)/.test(location.hash)?botaoSairEvento():''}`;
 }
 function ligaVoltar(root=app){ $$('[data-back]', root).forEach(b => b.onclick = () => { location.hash = b.dataset.back; }); }
 
@@ -599,7 +613,7 @@ async function viewHome(){
   const ev = await evento(true); pintaFundo(ev);
   if (!ev.slug) { let chk; try { chk = await rpc('cas_evento'); } catch(e){ chk = undefined; }
     if (chk === null) { trocaEvento(''); return viewSemAcesso('Este evento não está disponível.'); } }
-  app.innerHTML = `<div class="page">
+  app.innerHTML = `${botaoSairEvento()}<div class="page">
     <section class="hero">
       ${simboloEvento(ev)}
       <div class="eyebrow" style="margin-top:14px">Escolha seu perfil para entrar</div>
