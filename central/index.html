@@ -172,6 +172,7 @@ footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-he
     <div class="scan"></div>
     <div class="hud" id="hud"></div>
     <div class="stagebtns">
+      <button class="btn" id="updateAppBtn" title="Carregar a versão mais recente">↻ Atualizar aplicativo</button>
       <button class="btn" id="rotBtn" title="Girar">⟳ Girar</button>
       <button class="btn solid" id="scanBtn">⚡ Verificar agora</button>
     </div>
@@ -864,6 +865,11 @@ $("#gForm").addEventListener("submit", async e => {
   $("#gPass").value = "";
   enter();
 });
+$("#updateAppBtn").onclick = () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set("v", Date.now().toString());
+  window.location.replace(url.href);
+};
 $("#outBtn").onclick = () => signOut("Você saiu da Central.");
 
 /* ============ BOOT ============ */
