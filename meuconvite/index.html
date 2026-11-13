@@ -282,6 +282,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 @keyframes rot{to{transform:rotate(360deg)}}
 .loading{display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.molds{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px}.mold{min-width:0;white-space:normal}.mold[aria-pressed="true"]{outline:2px solid var(--gold3);outline-offset:2px}details summary{padding:12px 0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -290,7 +291,7 @@ input.in,textarea.in{-webkit-user-select:text;user-select:text;touch-action:mani
 
 <script>
 /* =================== CONFIG =================== */
-const VERSAO = "2026-11-13-r16-entrar";
+const VERSAO = "2026-11-13-r17-modelos";
 (async function autoAtualiza(){
   try {
     const r = await fetch(location.pathname + '?nocache=' + Date.now(), {cache:'no-store'});
@@ -384,10 +385,10 @@ function nomes3D(ev, flat=false){
 }
 const temNomes = ev => !!((ev.noivo1||'').trim() || (ev.noivo2||'').trim());
 
-const TIPOS_EVENTO = {casamento:'Casamento',aniversario:'Aniversário','15anos':'Festa de 15 anos',formatura:'Formatura',empresarial:'Evento empresarial',cha_bebe:'Chá de bebê',batizado:'Batizado',outro:'Outro evento'};
+const TIPOS_EVENTO = {"casamento":"Casamento","aniversario":"Aniversário","15anos":"Festa de 15 anos","formatura":"Formatura","empresarial":"Evento empresarial","cha_bebe":"Chá de bebê","batizado":"Batizado","aniversario_infantil":"Aniversário infantil","noivado":"Noivado","bodas":"Bodas","cha_revelacao":"Chá revelação","cha_panela":"Chá de casa nova / panela","comunhao":"Primeira comunhão","crisma":"Crisma","religioso":"Encontro religioso","confraternizacao":"Confraternização","natal":"Natal","reveillon":"Réveillon","churrasco":"Churrasco","festa_tematica":"Festa temática","show":"Show / festival","palestra":"Palestra / curso / workshop","inauguracao":"Inauguração","beneficente":"Evento beneficente","esportivo":"Evento esportivo","outro":"Outro evento"};
 const tipoEvento = ev => TIPOS_EVENTO[ev?.tipo_evento] ? ev.tipo_evento : 'casamento';
 const selectTipo = (id,ev) => `<label class="f" for="${id}">Tipo de evento</label><select class="in" id="${id}" style="appearance:auto">${Object.entries(TIPOS_EVENTO).map(([k,v])=>`<option value="${k}" ${tipoEvento(ev)===k?'selected':''}>${v}</option>`).join('')}</select>`;
-const simboloEvento = ev => tipoEvento(ev)==='casamento' ? rings() : `<div aria-hidden="true" style="font-size:64px;line-height:1.4;text-align:center">${({aniversario:'🎂','15anos':'✨',formatura:'🎓',empresarial:'🏢',cha_bebe:'🍼',batizado:'🕊️',outro:'🎉'})[tipoEvento(ev)]}</div>`;
+const simboloEvento = ev => tipoEvento(ev)==='casamento' ? rings() : `<div aria-hidden="true" style="font-size:64px;line-height:1.4;text-align:center">${({aniversario:'🎂','15anos':'✨',formatura:'🎓',empresarial:'🏢',cha_bebe:'🍼',batizado:'🕊️',outro:'🎉'})[tipoEvento(ev)] || '🎉'}</div>`;
 const chamadaEvento = ev => tipoEvento(ev)==='casamento' ? 'Temos a honra de convidar para o casamento de' : 'Você está convidado para este evento';
 
 function tituloEvento(ev){ const nomes=[ev.noivo1,ev.noivo2].filter(Boolean).join(' & '); return ev.titulo && ev.titulo!=='Nosso Casamento' ? ev.titulo : (tipoEvento(ev)==='casamento' ? (nomes?'Casamento de '+nomes:'Nosso Casamento') : TIPOS_EVENTO[tipoEvento(ev)]+(nomes?' de '+nomes:'')); }
@@ -395,8 +396,77 @@ function tituloEvento(ev){ const nomes=[ev.noivo1,ev.noivo2].filter(Boolean).joi
 /* =================== MOLDURAS DO CONVITE =================== */
 const MOLDURAS = { classica:{nome:'Clássica dourada'}, floral:{nome:'Floral rosé'}, deco:{nome:'Art déco'}, minimal:{nome:'Minimalista'},
   folhas:{nome:'Folhagens'}, aquarela:{nome:'Aquarela'}, noite:{nome:'Noite estrelada', escura:true} };
+
+const PALETAS_EVENTO = {
+ casamento:['#9C7243','#FCF7ED','#EBD8B9','alianças'], aniversario:['#B54E74','#FFF8FC','#F4C9DD','balões'],
+ '15anos':['#8559A5','#FCF6FF','#E8D3F4','estrelas'], formatura:['#2A5E68','#F4FAFA','#C1DCDC','capelo'],
+ empresarial:['#245B89','#F5F8FC','#C6DAEF','geométrico'], cha_bebe:['#A06A46','#FFFBF3','#F1DEC3','nuvens'],
+ batizado:['#8E7D46','#FFFEF7','#EDE6BF','cruz'], aniversario_infantil:['#C36C21','#FFFCF2','#F7DEA0','balões'],
+ noivado:['#AA6275','#FFFAFC','#F1CED8','alianças'], bodas:['#967239','#FFFCF1','#EAD9AD','alianças'],
+ cha_revelacao:['#8F688C','#FFFAFE','#F2D8E9','nuvens'], cha_panela:['#AD634D','#FFF9F5','#F1D4C5','flores'],
+ comunhao:['#78834D','#FDFFF6','#E3E9BF','cruz'], crisma:['#A34D4D','#FFF8F7','#EECBC8','cruz'],
+ religioso:['#6C6998','#FAF9FF','#DBD9EF','cruz'], confraternizacao:['#377E70','#F7FFFC','#C9E9DE','estrelas'],
+ natal:['#A13D42','#FFFAF5','#EDD2BE','pinheiro'], reveillon:['#98702D','#FFFEF6','#F1DFAD','estrelas'],
+ churrasco:['#AB572F','#FFFAF1','#EED8B5','geométrico'], festa_tematica:['#9262AA','#FFFAFF','#EAD3F0','estrelas'],
+ show:['#A24B89','#FFF7FD','#EECBE6','notas'], palestra:['#2A737F','#F5FDFF','#CAE7EC','geométrico'],
+ inauguracao:['#2D688A','#F5FBFF','#CCE3F0','geométrico'], beneficente:['#A94F6B','#FFF9FC','#F0D1DD','coração'],
+ esportivo:['#378154','#F7FFF8','#CFEBD2','bola'], outro:['#726298','#FCFAFF','#DED5F1','estrelas']
+};
+const ESTILOS_CONVITE = ['Essencial','Arco elegante','Jardim','Celebração','Geometria','Medalhão'];
+for(const [tipo,p] of Object.entries(PALETAS_EVENTO)) ESTILOS_CONVITE.forEach((nome,j)=>{
+ MOLDURAS[tipo+'_'+j]={nome,evento:tipo,estilo:j,paleta:p};
+});
+const modelosEvento = tipo => Object.entries(MOLDURAS).filter(([k,m])=>!m.evento || m.evento===tipo);
+const modeloPadrao = tipo => tipo+'_0';
+const modeloCompativel = (id,tipo) => MOLDURAS[id] && (!MOLDURAS[id].evento || MOLDURAS[id].evento===tipo);
+function modeloSVG(id,W,H){
+ const m=MOLDURAS[id], [a,b,c,motivo]=m.paleta, j=m.estilo, u=W/440, n=x=>x*u;
+ const rect=(x,y,w,h,stroke,r=0)=>`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" fill="none" stroke="${stroke}" stroke-width="${n(1.6)}"/>`;
+ let deco='';
+ const line=(x1,y1,x2,y2)=>`<path d="M${n(x1)} ${n(y1)}L${n(x2)} ${n(y2)}" stroke="${a}" fill="none" stroke-width="${n(1.5)}"/>`;
+ const dot=(x,y,r,col=c)=>`<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${col}"/>`;
+ const motif=(x,y,scale=1)=>{
+  let art='';
+  if(motivo==='balões') art='<ellipse cx="-13" cy="-5" rx="10" ry="14"/><ellipse cx="11" cy="-10" rx="11" ry="15"/><path d="M-13 9Q-20 28 0 40M11 5Q22 26 0 40" fill="none"/>';
+  else if(motivo==='alianças') art='<circle cx="-10" cy="0" r="17" fill="none" stroke-width="4"/><circle cx="12" cy="0" r="17" fill="none" stroke-width="4"/>';
+  else if(motivo==='cruz') art='<path d="M-4-25H4V-5H20V3H4V25H-4V3H-20V-5H-4Z"/>';
+  else if(motivo==='capelo') art='<path d="M-30-8L0-22L30-8L0 6ZM-18 3V16Q0 28 18 16V3M29-8V22" fill="none" stroke-width="3"/>';
+  else if(motivo==='nuvens') art='<path d="M-25 12Q-40-4-20-12Q-16-34 6-23Q25-28 29-9Q45 13 22 15Z" fill="none" stroke-width="2"/><circle cx="-12" cy="28" r="3"/><circle cx="8" cy="29" r="3"/>';
+  else if(motivo==='pinheiro') art='<path d="M0-30L-14-12H-8L-23 8H-14L-30 27H30L14 8H23L8-12H14Z"/><path d="M0 27V38" stroke-width="5"/>';
+  else if(motivo==='notas') art='<path d="M-15 15V-20L20-27V8M-15-12L20-19" fill="none" stroke-width="4"/><ellipse cx="-23" cy="18" rx="9" ry="6"/><ellipse cx="12" cy="12" rx="9" ry="6"/>';
+  else if(motivo==='coração') art='<path d="M0 25C-60-10-17-45 0-20C17-45 60-10 0 25Z" fill="none" stroke-width="3"/>';
+  else if(motivo==='bola') art='<circle r="27" fill="none" stroke-width="2"/><path d="M0-13L13-4L8 12H-8L-13-4ZM0-13V-27M13-4L26-8M8 12L16 22M-8 12L-16 22M-13-4L-26-8" fill="none" stroke-width="2"/>';
+  else if(motivo==='flores') art='<circle r="9"/>'+Array.from({length:6},(_,i)=>`<ellipse cx="0" cy="-18" rx="8" ry="13" fill="none" transform="rotate(${i*60})"/>`).join('');
+  else art='<path d="M0-26L6-6L26 0L6 6L0 26L-6 6L-26 0L-6-6Z" fill="none" stroke-width="2"/>';
+  return `<g transform="translate(${n(x)},${n(y)}) scale(${u*scale})" fill="${a}" stroke="${a}" stroke-width="1.4">${art}</g>`;
+ };
+ const hh=H/u;
+ if(j===0) deco=rect(16,16,408,hh-32,a,8)+rect(23,23,394,hh-46,c,4)+motif(220,48,.55);
+ if(j===1) deco=`<path d="M${n(20)} ${H-n(20)}V${n(150)}Q${n(20)} ${n(20)} ${n(220)} ${n(20)}Q${n(420)} ${n(20)} ${n(420)} ${n(150)}V${H-n(20)}Z" fill="none" stroke="${a}" stroke-width="${n(2)}"/>`+motif(220,60,.6);
+ if(j===2){deco=rect(18,18,404,hh-36,a,12);for(let i=0;i<6;i++)deco+=`<ellipse cx="${n(30+i*9)}" cy="${n(35+i*12)}" rx="${n(8)}" ry="${n(18)}" fill="${c}" transform="rotate(-40 ${n(30+i*9)} ${n(35+i*12)})"/>`;deco+=motif(390,hh-48,.6)+motif(48,48,.55);}
+ if(j===3){deco=rect(15,15,410,hh-30,c,16);for(let i=0;i<42;i++){let x=12+(i*79)%415,y=i%2?hh-15-(i%6)*9:12+(i%6)*9;deco+=dot(x,y,1.5+i%3,i%2?a:c);}deco+=motif(56,50,.6)+motif(385,hh-50,.6);}
+ if(j===4){deco=rect(18,18,404,hh-36,a)+rect(26,26,388,hh-52,c);for(let i=0;i<4;i++)deco+=line(18+i*9,65,65,18+i*9)+line(375,hh-18-i*9,422-i*9,hh-65);deco+=motif(220,48,.48);}
+ if(j===5){deco=rect(16,16,408,hh-32,a,24)+dot(220,53,30,c)+motif(220,53,.62)+line(100,hh-30,340,hh-30);}
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${b}"/>${deco}</svg>`;
+}
+function galeriaModelos(tipo,atual){
+ return `<div class="molds" role="group" aria-label="Modelos para ${esc(TIPOS_EVENTO[tipo])}">${modelosEvento(tipo).map(([k,m])=>`<button type="button" class="mold" data-mold="${k}" aria-pressed="${idMoldura(atual)===k}"><i style="background-image:url('${miniMoldura(k)}');height:180px;display:flex;flex-direction:column;justify-content:center;font-style:normal;text-align:center;color:#1C2536;padding:24px 12px"><small style="font-size:9px">${esc(TIPOS_EVENTO[tipo])}</small><strong style="font:600 17px Georgia;margin:8px 0">Seu evento</strong><small style="font-size:8px">Data · Horário<br>Você está convidado</small></i>${esc(m.nome)}${m.evento?'':' · versátil'}</button>`).join('')}</div>`;
+}
+function verModelos(){
+ telaDono(`<h2>Escolha seu convite</h2><p class="muted small">Explore os modelos por ocasião. Para aplicar ao seu evento, entre na conta e abra Ajustes ou Editar evento.</p>${selectTipo('demo_tipo',{})}<div id="demo_modelos" style="margin-top:18px"></div><a class="btn primary full" href="#dono" style="margin-top:18px">Voltar para entrar</a>`);
+ const render=()=>{const t=$('#demo_tipo').value;$('#demo_modelos').innerHTML=galeriaModelos(t,modeloPadrao(t));$$('[data-mold]').forEach(b=>b.onclick=()=>{$$('[data-mold]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));toast('Modelo selecionado para pré-visualização');});};
+ $('#demo_tipo').onchange=render;render();
+}
+
+function ligaModelos(root,tipoId,galId,initial){
+ let escolhido=modeloCompativel(initial,$('#'+tipoId,root).value)?initial:modeloPadrao($('#'+tipoId,root).value);
+ const render=()=>{const tipo=$('#'+tipoId,root).value;$('#'+galId,root).innerHTML=galeriaModelos(tipo,escolhido);
+ $$('[data-mold]', $('#'+galId,root)).forEach(b=>b.onclick=()=>{escolhido=b.dataset.mold;$$('[data-mold]',$('#'+galId,root)).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));toast('Modelo escolhido. Salve para aplicar.');});};
+ $('#'+tipoId,root).addEventListener('change',()=>{escolhido=modeloPadrao($('#'+tipoId,root).value);render();});render();return ()=>escolhido;
+}
 const idMoldura = id => MOLDURAS[id] ? id : 'classica';
 function molduraSVG(id, W, H){
+  if(MOLDURAS[id]?.evento) return modeloSVG(id,W,H);
   const u = Math.min(W, H) / 440, n = v => +(v*u).toFixed(2);
   let defs = `<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8F6B34"/><stop offset=".35" stop-color="#D9B877"/><stop offset=".55" stop-color="#FBEFCB"/><stop offset=".8" stop-color="#C9A464"/><stop offset="1" stop-color="#7E5D2B"/></linearGradient>`;
   let bg = '', body = '';
@@ -512,6 +582,7 @@ async function route(){
   const p = new URLSearchParams(location.search);
   if (p.get('c')) return viewConvite(p.get('c'));
   const [r, sub] = location.hash.replace('#','').split('/');
+  if (r === 'modelos') return verModelos();
   if (r === 'criar-conta') return criarConta();
   if (r === 'dono') return viewDono();
   const veioPorLink = new URLSearchParams(location.search).get('e') !== null;
@@ -563,11 +634,11 @@ function ligaAcessos(root, ev){
   $('[data-cp-n]',root).onclick=()=>copiar(linkEvento('#admin',ev.slug)); $('[data-cp-p]',root).onclick=()=>copiar(linkEvento('#portaria',ev.slug));
   $('[data-wa-n]',root).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgNoivos(ev)),'_blank');
   $('[data-wa-p]',root).onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msgPortaria(ev)),'_blank'); }
-function msgCliente(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n\n${ev.titulo||''}\n\n👰 Organizador (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}\n\n🚪 Portaria (leitura do QR Code na entrada):\n${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}`; }
+function msgCliente(ev){ return `Seu evento no Meu Convite está pronto! 🎉\n\n${ev.titulo||''}\n\n👤 Organizador (lista de convidados, envio dos convites e ajustes):\n${linkEvento('#admin',ev.slug)}\nSenha: ${ev.pin_admin}\n\n🚪 Portaria (leitura do QR Code na entrada):\n${linkEvento('#portaria',ev.slug)}\nSenha: ${ev.pin_portaria}`; }
 function formEvento(senha, ev){
   const novo = !ev; ev = ev || {status:'aprovado'};
   const v = k => esc(ev[k]||'');
-  const s = sheet(novo?'Cadastrar evento':'Editar evento', `<div class="card">${selectTipo('e_tipo',ev)}
+  const s = sheet(novo?'Cadastrar evento':'Editar evento', `<div class="card">${selectTipo('e_tipo',ev)}<details style="margin:16px 0"><summary style="cursor:pointer;font-weight:600">Escolher modelo do convite</summary><div id="e_modelos" style="margin-top:12px"></div></details>
     <label class="f" for="e_ti" style="margin-top:0">Nome do evento</label><input class="in" id="e_ti" value="${v('titulo')}" placeholder="Casamento de Ana e Pedro · Aniversário de 15 anos da Júlia">
     <div class="grid2"><div><label class="f" for="e_n1">Nome em destaque</label><input class="in" id="e_n1" value="${v('noivo1')}" placeholder="Ana"></div>
       <div><label class="f" for="e_n2">2º nome (opcional)</label><input class="in" id="e_n2" value="${v('noivo2')}" placeholder="Pedro"></div></div>
@@ -584,7 +655,8 @@ function formEvento(senha, ev){
     <button class="btn gold full" data-ok style="margin-top:18px">${ic('check')} ${novo?'Cadastrar evento':'Salvar alterações'}</button>
     <p data-e role="alert" style="color:var(--bad);margin-top:10px;text-align:center"></p></div>`);
   ligaOlhos(s);
-  const dados = () => ({tipo_evento:$('#e_tipo',s).value,titulo:$('#e_ti',s).value.trim() || tituloEvento({...ev,tipo_evento:$('#e_tipo',s).value,titulo:'',noivo1:$('#e_n1',s).value,noivo2:$('#e_n2',s).value}), noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
+  const modeloEscolhido=ligaModelos(s,'e_tipo','e_modelos',ev.moldura);
+  const dados = () => ({moldura:modeloEscolhido(),tipo_evento:$('#e_tipo',s).value,titulo:$('#e_ti',s).value.trim() || tituloEvento({...ev,tipo_evento:$('#e_tipo',s).value,titulo:'',noivo1:$('#e_n1',s).value,noivo2:$('#e_n2',s).value}), noivo1:$('#e_n1',s).value, noivo2:$('#e_n2',s).value, data:$('#e_dt',s).value, local:$('#e_lc',s).value,
     contato:$('#e_ct',s).value, pin_admin:$('#e_pa',s).value.trim(), pin_portaria:$('#e_pp',s).value.trim(), status:$('#e_st',s).value});
   if (!novo) ligaAcessos(s, ev);
   $('[data-ok]',s).onclick = async e => { const b=e.currentTarget, er=$('[data-e]',s); b.disabled=true; er.textContent='';
@@ -614,7 +686,7 @@ function loginDono(){
     <label class="row" style="gap:10px;margin-top:14px;cursor:pointer"><input type="checkbox" id="dm" checked style="width:20px;height:20px"><span>Manter conectado neste aparelho</span></label>
     <button class="btn primary full" id="dsOk" style="margin-top:16px">Entrar</button>
     <button class="btn line full" id="dEsq" style="margin-top:10px;border:0;box-shadow:none;background:none;color:var(--gold3)">Esqueci a senha</button>
-    <a class="btn line full" href="#criar-conta" style="margin-top:10px">Criar uma conta</a>
+    <a class="btn line full" href="#criar-conta" style="margin-top:10px">Criar uma conta</a><a class="btn line full" href="#modelos" style="margin-top:10px">Explorar modelos de convite</a>
     <p id="err" role="alert" style="color:var(--bad);margin-top:8px;text-align:center"></p>`);
   const go=async()=>{ const u=$('#du').value.trim(), v=$('#ds').value; if(!u || !v){ $('#err').textContent='Informe seu usuário e sua senha.'; return; } $('#dsOk').disabled=true; $('#err').textContent='';
     try { const r=await rpc('cas_conta_entrar',{p_usuario:u,p_senha:v}); if(r.erro){ $('#err').textContent=r.erro; return; }
@@ -628,7 +700,7 @@ function loginDono(){
 function criarConta(){
   telaDono(`<h2 style="text-align:center">Criar uma conta</h2>
     <p class="muted small">Cadastre seu acesso de organizador. O administrador libera seu evento após o cadastro.</p>
-    <form id="contaForm">${selectTipo('ctipo',{})}
+    <form id="contaForm">${selectTipo('ctipo',{})}<details style="margin:16px 0"><summary>Escolher convite</summary><div id="cmodelos"></div></details>
       <label class="f" for="ce">E-mail</label><input class="in" id="ce" type="email" autocomplete="email" required maxlength="254">
       <label class="f" for="cs">Senha</label>${campoSenha('cs','De 8 a 72 caracteres','minlength="8" maxlength="72" required')}
       <label class="f" for="ccs">Confirmar senha</label>${campoSenha('ccs','Repita a senha','required')}
@@ -641,6 +713,7 @@ function criarConta(){
       <button class="btn primary full" id="contaSalvar" type="submit" style="margin-top:18px">Criar conta</button>
     </form>
     <a class="btn line full" href="#dono" style="margin-top:12px">Voltar para o login</a>`);
+  const modeloConta=ligaModelos(app,'ctipo','cmodelos',null);
   const ajustarNomes=()=>{ $('#cno2').required=$('#ctipo').value==='casamento'; };
   $('#ctipo').onchange=ajustarNomes; ajustarNomes();
   $('#contaForm').onsubmit=async e=>{
@@ -650,7 +723,7 @@ function criarConta(){
     b.disabled=true;
     try{
       const r=await rpc('cas_conta_criar',{p_email:$('#ce').value.trim().toLowerCase(),p_senha:senha,p_dados:{
-        tipo_evento:$('#ctipo').value,titulo:tituloEvento({tipo_evento:$('#ctipo').value,noivo1:$('#cno1').value,noivo2:$('#cno2').value}),noivo1:$('#cno1').value.trim(),noivo2:$('#cno2').value.trim(),contato:$('#cwh').value.replace(/\D/g,''),
+        moldura:modeloConta(),tipo_evento:$('#ctipo').value,titulo:tituloEvento({tipo_evento:$('#ctipo').value,noivo1:$('#cno1').value,noivo2:$('#cno2').value}),noivo1:$('#cno1').value.trim(),noivo2:$('#cno2').value.trim(),contato:$('#cwh').value.replace(/\D/g,''),
         pergunta:$('#cpq').value,resposta:$('#cra').value
       }});
       if(r.erro){er.textContent=r.erro;return;}
@@ -841,7 +914,7 @@ async function gerarCartaoM(ev, cv, token){
   const enfeite = ['floral','deco','folhas'].includes(mid);
   G(mid==='floral'?210:enfeite?170:70);
   const FD=360; if (foto) { B.push({foto:true,lh:FD+40}); } else G(10);
-  T('TEMOS A HONRA DE CONVIDAR PARA O CASAMENTO DE','600 22px Inter, sans-serif','#8F6B34',40);
+  T(chamadaEvento(ev).toUpperCase(),'600 22px Inter, sans-serif','#8F6B34',40);
   if (nomes) { x.font='120px "Great Vibes"'; quebra(x,nomes,W-2*M).forEach(l=>B.push({l,font:'120px "Great Vibes"',lh:150,nome:true})); }
   else T(tituloEvento(ev),'600 64px "Cormorant Garamond", serif','#1C2536',76);
   if (ev.data) T(ev.data,'italic 500 38px "Cormorant Garamond", serif','#2E3B54',52);
@@ -1483,9 +1556,9 @@ function telaAjustes(){
     </div>
     <p class="hint" style="margin:6px 4px 0">A foto aparece no convite online e na imagem enviada pelo WhatsApp.</p>
     <div class="section-title">Moldura do convite</div>
-    <div class="card"><div class="molds" role="group" aria-label="Escolha a moldura">${Object.entries(MOLDURAS).map(([k,m])=>`<button class="mold" data-mold="${k}" aria-pressed="${idMoldura(c.moldura)===k}"><i style="background-image:url('${miniMoldura(k)}')"></i>${esc(m.nome)}</button>`).join('')}</div>
+    <div class="card"><div id="modelos_evento"></div>
       ${A.data.convidados.length?`<button class="btn line sm full" id="verConv" style="margin-top:14px">${ic('eye')} Ver como fica o convite</button>`:''}
-      <p class="hint">Vale para o convite online e para a imagem enviada pelo WhatsApp.</p></div>
+      <p class="hint">Escolha um modelo e clique em Salvar. Vale para o convite online e para a imagem enviada pelo WhatsApp.</p></div>
     <div class="section-title">Dados do evento</div>
     <div class="card">${selectTipo('tipo_evento',c)}
       <label class="f" for="ti" style="margin-top:0">Título</label><input class="in" id="ti" value="${esc(c.titulo&&c.titulo!=='Nosso Casamento'?c.titulo:'')}" placeholder="Casamento de Ana & Pedro">
@@ -1534,9 +1607,7 @@ function telaAjustes(){
       <button class="btn danger full" id="apagar">${ic('trash')} Excluir todos os convidados</button>
     </div>`;
   ligaOlhos();
-  $$('[data-mold]').forEach(b=>b.onclick=async()=>{ const k=b.dataset.mold;
-    try { await rpc('cas_salvar_moldura',{p_pin:A.pin,p_moldura:k}); A.data.config.moldura=k; if(EV) EV.moldura=k;
-      $$('[data-mold]').forEach(x=>x.setAttribute('aria-pressed', x===b)); toast('Moldura "'+MOLDURAS[k].nome+'" escolhida'); } catch(er){ toast(er.message); } });
+  const modeloAjustes=ligaModelos(app,'tipo_evento','modelos_evento',c.moldura);
   if ($('#verConv')) $('#verConv').onclick=()=>window.open(linkConvite(A.data.convidados[0].token),'_blank');
   $('#cpEv').onclick=()=>copiar(linkEvento('#admin', c.slug||EVC)); $('#cpPort').onclick=()=>copiar(portLink);
   const mapPrev=()=>{ const L=local({local:$('#lc').value, mapa:$('#mp').value}); $('#mapPrev').innerHTML = L&&L.embed ? blocoMapa(L,200) : `<div class="empty" style="padding:20px;border:2px dashed var(--line);border-radius:16px">${ic('pin')}<br>Nenhum local definido</div>`; };
@@ -1558,7 +1629,7 @@ function telaAjustes(){
     catch(er){ toast(er.message); } e.target.value=''; };
   $('#fotoRm').onclick = async () => { if(!await confirmar({titulo:'Remover a foto?', ok:'Remover', perigo:true})) return;
     await rpc('cas_salvar_foto',{p_pin:A.pin,p_foto:null}); await evento(true); await carregar(); $('#fotoPrev').innerHTML=ic('heart'); $('#fotoRm').classList.add('hidden'); toast('Foto removida'); };
-  const dados = () => ({tipo_evento:$('#tipo_evento').value,titulo:$('#ti').value.trim()||tituloEvento({...c,titulo:'',tipo_evento:$('#tipo_evento').value,noivo1:$('#n1').value,noivo2:$('#n2').value}),data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
+  const dados = () => ({moldura:modeloAjustes(),tipo_evento:$('#tipo_evento').value,titulo:$('#ti').value.trim()||tituloEvento({...c,titulo:'',tipo_evento:$('#tipo_evento').value,noivo1:$('#n1').value,noivo2:$('#n2').value}),data:$('#dt').value,local:$('#lc').value,mensagem:$('#mg').value,noivo1:$('#n1').value,noivo2:$('#n2').value,nome3d:$('#t3d').checked,fundo3d:$('#tbg').checked,pin_portaria:$('#pp').value.trim()});
   $('#salvar').onclick=async e=>{ const b=e.currentTarget; b.disabled=true;
     try { await rpc('cas_salvar_evento',{p_pin:A.pin,p_dados:dados()}); await carregar(); await evento(true); pintaFundo(EV); toast('Salvo'); $('.appbar .ttl span').textContent = nomesCasal(A.data.config); }
     catch(er){ toast(er.message); } b.disabled=false; };
