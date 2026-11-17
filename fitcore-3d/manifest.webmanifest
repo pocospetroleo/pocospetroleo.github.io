@@ -3,8 +3,8 @@
   "short_name": "FitCore 3D",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#050607",
-  "theme_color": "#050607",
+  "background_color": "#0b0d0e",
+  "theme_color": "#0b0d0e",
   "icons": [
     {
       "src": "fitcore-icone-192.png",
