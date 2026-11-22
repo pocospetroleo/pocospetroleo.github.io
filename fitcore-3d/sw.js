@@ -1,4 +1,4 @@
-// FitCore 3D — service worker só para o lembrete diário (não guarda cópia do app).
+// FitCore 3D — service worker só para o lembrete diário (não guarda cópia do app). Revisão calc1.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('push', e => {
