@@ -1,5 +1,5 @@
 // BabaOn: sempre busca a versão nova na rede; se estiver sem internet, abre a última versão guardada.
-const C = "babaon-v2";
+const C = "babaon-v3";
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch", e => {
